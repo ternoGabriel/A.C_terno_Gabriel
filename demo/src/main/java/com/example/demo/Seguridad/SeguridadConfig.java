@@ -20,64 +20,58 @@ import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfException;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+import org.springframework.security.web.header.writers.ClearSiteDataHeaderWriter;
+import org.springframework.security.web.authentication.logout.HeaderWriterLogoutHandler;
+import com.example.demo.Dao.EmpleadoDao;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-/**
- * Configuración de Spring Security.
- * <ul>
- *   <li>{@link PasswordEncoder}: las contraseñas se guardan cifradas con BCrypt, nunca en texto plano.</li>
- *   <li>{@link SecurityFilterChain}: reglas de acceso por rol. El administrador entra a /admin/**,
- *       el empleado a /empleado/**, y el login y los archivos estáticos son públicos.</li>
- *   <li>El inicio de sesión sigue siendo la misma pantalla (POST /api/login); ahora crea una sesión
- *       autenticada en el servidor y el cierre de sesión es POST /logout.</li>
- * </ul>
- */
+/* configuracion de spring security */
 @Configuration
 @EnableWebSecurity
-/* Permite @PreAuthorize("hasAuthority('ADMIN')") en controladores y servicios */
+/* permite preauthorize en controladores y servicios */
 @EnableMethodSecurity
 public class SeguridadConfig {
 
-    /** BCrypt con factor de costo 10: genera una sal distinta por cada contraseña. */
+    /* bcrypt con factor de costo 10 */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(10);
     }
 
-    /** Autentica contra la tabla empleado mediante {@link ProveedorAutenticacion}. */
+    /* autentica contra la tabla empleado mediante proveedorautenticacion */
     @Bean
     public AuthenticationManager authenticationManager(ProveedorAutenticacion proveedor) {
         return new ProviderManager(proveedor);
     }
 
-    /** Guarda el contexto de seguridad en la sesión HTTP (lo usan el login y la cadena de filtros). */
+    /* guarda el contexto de seguridad en la sesion http */
     @Bean
     public SecurityContextRepository securityContextRepository() {
         return new HttpSessionSecurityContextRepository();
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, SecurityContextRepository repositorio) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, SecurityContextRepository repositorio, EmpleadoDao empleados,
+            RegistroSesiones registro) throws Exception {
         CsrfTokenRequestAttributeHandler manejadorCsrf = new CsrfTokenRequestAttributeHandler();
 
         http
             .authorizeHttpRequests(auth -> auth
-                /* Público: pantalla de login, página de acceso denegado, estáticos y el inicio de sesión */
+                /* publico pantalla de login pagina de acceso denegado estaticos */
                 .requestMatchers("/", "/login", "/acceso-denegado", "/error", "/favicon.ico",
                     "/css/**", "/js/**", "/img/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/login").permitAll()
-                /* Rutas de ejemplo de la sesión 14: /public/** abierto; /privado/home exige sesión y /privado/admin la autoridad ADMIN */
+                /* rutas de ejemplo de la sesion 14 */
                 .requestMatchers("/public/**").permitAll()
                 .requestMatchers("/privado/admin").hasAuthority("ADMIN")
                 .requestMatchers("/privado/**").authenticated()
 
-                /* Pantallas por rol */
+                /* pantallas por rol */
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/empleado/**").hasRole("EMPLEADO")
 
-                /* API: solo el administrador gestiona empleados, reportes, configuración, métodos de pago,
-                   y crea, edita o elimina prendas, clientes, penalidades y boletas ya emitidas */
+                /* api solo el administrador gestiona empleados reportes configuracion metodos */
                 .requestMatchers("/api/empleados/**", "/api/reportes/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/configuracion/**", "/api/metodos-pago/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/prendas/nuevo").hasRole("ADMIN")
@@ -88,26 +82,31 @@ public class SeguridadConfig {
                 .requestMatchers(HttpMethod.DELETE, "/api/prendas/**", "/api/clientes/**", "/api/penalidades/**",
                     "/api/boletas/**").hasRole("ADMIN")
 
-                /* El resto de la API (ventas, alquileres, devoluciones, confecciones...) exige haber iniciado sesión */
+                /* el resto de la api */
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().authenticated())
 
-            /* CSRF: el token viaja en la cookie XSRF-TOKEN y el JavaScript lo reenvía en X-XSRF-TOKEN */
+            /* csrf el token viaja en la cookie xsrf token */
             .csrf(csrf -> csrf
                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                 .csrfTokenRequestHandler(manejadorCsrf))
             .addFilterAfter(new CookieCsrfFilter(), BasicAuthenticationFilter.class)
+            /* cierra la sesion si el empleado fue suspendido cerro la ventana o esta inactivo */
+            .addFilterAfter(new SesionActivaFilter(empleados, registro), BasicAuthenticationFilter.class)
 
             .securityContext(contexto -> contexto.securityContextRepository(repositorio))
 
-            /* Cierre de sesión: invalida la sesión del servidor y vuelve al login */
+            /* cierre de sesion invalida la sesion del servidor limpia las cookies y el cache del navegador */
             .logout(logout -> logout
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/login?logout")
                 .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID"))
+                .clearAuthentication(true)
+                .deleteCookies("JSESSIONID", "XSRF-TOKEN")
+                .addLogoutHandler(new HeaderWriterLogoutHandler(new ClearSiteDataHeaderWriter(
+                    ClearSiteDataHeaderWriter.Directive.CACHE, ClearSiteDataHeaderWriter.Directive.COOKIES))))
 
-            /* Mismas cabeceras que ya enviaba CabecerasSeguridadFilter */
+            /* mismas cabeceras que ya enviaba cabecerasseguridadfilter */
             .headers(cabeceras -> cabeceras.frameOptions(marcos -> marcos.sameOrigin()))
 
             .exceptionHandling(errores -> errores
@@ -117,7 +116,7 @@ public class SeguridadConfig {
         return http.build();
     }
 
-    /** Sin sesión: la API responde 401 (el JavaScript vuelve al login); una pantalla redirige a /login. */
+    /* sin sesion la api responde 401 */
     private AuthenticationEntryPoint sinSesion() {
         return (peticion, respuesta, error) -> {
             if (esApi(peticion)) responderJson(respuesta, 401, "Tu sesión venció. Inicia sesión de nuevo.");
@@ -125,7 +124,7 @@ public class SeguridadConfig {
         };
     }
 
-    /** Sin permiso: la API responde 403; una pantalla redirige a /acceso-denegado. */
+    /* sin permiso la api responde 403 */
     private AccessDeniedHandler sinPermiso() {
         return (peticion, respuesta, error) -> {
             if (esApi(peticion)) {

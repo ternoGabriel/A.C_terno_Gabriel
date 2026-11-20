@@ -11,6 +11,7 @@
     <link rel="stylesheet" th:href="@{/css/global.css}" />
     <link rel="stylesheet" th:href="@{/css/empleado/prendas.css}" />
     <link rel="stylesheet" th:href="@{/css/responsive.css}" />
+    <link rel="stylesheet" th:href="@{/css/fluido.css}" />
   </head>
 
   <body class="page-empleado-prendas">
@@ -50,41 +51,46 @@
 
         <div class="content">
           <section class="card inventory-card">
-            <div class="card-head">
-              <div class="head-title">
-                <h2>Inventario de prendas</h2>
+            <div class="pr-head">
+              <div class="pr-title">
+                <h2 data-pr-titulo>Inventario de prendas</h2>
                 <p class="subtitle-stats">
                   0 prendas registradas · 0 disponibles
                 </p>
               </div>
-              <div class="filter-row">
-                <div class="search-box-wrapper">
+              <div class="pr-filtros">
+                <select class="pr-select" data-state-filter aria-label="Estado">
+                  <option value="Todos">Todos los estados</option>
+                  <option value="Disponible">Disponible</option>
+                  <option value="Alquilado">Alquilado</option>
+                  <option value="En confección">En confección</option>
+                  <option value="Confecciones">Confecciones realizadas</option>
+                  <option value="En lavandería">Lavandería</option>
+                  <option value="En restauración">Restauración</option>
+                </select>
+                <div class="pr-buscar">
                   <svg
-                    class="search-icon"
+                    class="pr-lupa"
                     viewBox="0 0 24 24"
-                    width="16"
-                    height="16"
                     stroke="currentColor"
                     stroke-width="2"
                     fill="none"
+                    aria-hidden="true"
                   >
                     <circle cx="11" cy="11" r="8"></circle>
                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                   </svg>
                   <input
-                    class="searchbox"
+                    class="pr-input"
                     data-table-search
                     placeholder="Código o nombre"
+                    aria-label="Buscar"
                   />
                 </div>
-                <select class="select-filter" data-state-filter>
-                  <option value="Todos">Todos los estados</option>
-                  <option value="Disponible">Disponible</option>
-                  <option value="Alquilado">Alquilado</option>
-                  <option value="En lavandería">Lavandería</option>
-                  <option value="En restauración">Restauración</option>
-                </select>
               </div>
+              <button type="button" class="pr-vendidos" data-vendidos>
+                Vendidos
+              </button>
             </div>
 
             <div class="table-wrap">
@@ -94,8 +100,6 @@
                     <th class="col-codigo">CÓDIGO</th>
                     <th class="col-nombre">NOMBRE</th>
                     <th class="col-talla">TALLA</th>
-                    <th class="col-costo">COSTO DE ALQUILER</th>
-                    <th class="col-precio">PRECIO DE VENTA</th>
                     <th class="col-estado">ESTADO</th>
                     <th class="col-responsable">CLIENTE / ORDEN</th>
                     <th class="col-accion">ACCIÓN</th>
@@ -111,6 +115,7 @@
 
     <div th:replace="~{fragments/toast :: toast('Cambios guardados')}"></div>
     <script th:src="@{/js/api.js}" defer></script>
+    <script th:src="@{/js/historial.js}" defer></script>
     <script th:src="@{/js/app.js}" defer></script>
     <script th:src="@{/js/empleado/prendas.js}" defer></script>
   </body>

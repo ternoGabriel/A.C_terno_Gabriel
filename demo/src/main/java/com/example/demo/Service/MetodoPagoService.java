@@ -4,11 +4,11 @@ import java.util.List;
 import java.util.Map;
 import com.example.demo.Model.MetodoPago;
 
-/** Casos de uso de los métodos de pago (Yape y transferencia) que configura el administrador. */
+/* casos de uso de los metodos de pago */
 public interface MetodoPagoService {
 
     List<MetodoPago> listar();
 
-    /** Actualiza (o crea si aún no existe) el método de pago de ese tipo con los datos recibidos. */
+    /* actualiza el metodo de pago de ese tipo */
     MetodoPago guardar(String tipo, Map<String, Object> datos);
 }

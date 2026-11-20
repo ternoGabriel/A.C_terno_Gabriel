@@ -47,7 +47,7 @@ public class ClienteServiceImpl implements ClienteService {
     public Cliente actualizar(Long id, Cliente datos) {
         Cliente actual = dao.buscarPorId(id).orElseThrow();
         datos.setId(id);
-        /* La calificación no se edita a mano: se conserva lo calculado */
+        /* la calificacion no se edita a mano */
         datos.setCalificacion(actual.getCalificacion());
         datos.setComentario(actual.getComentario());
         datos.setFechaCalificacion(actual.getFechaCalificacion());
@@ -65,7 +65,7 @@ public class ClienteServiceImpl implements ClienteService {
         String comentario = comentarioRecibido == null ? ""
             : StringUtils.abbreviate(StringUtils.trimToEmpty(String.valueOf(comentarioRecibido)), MAX_COMENTARIO);
 
-        /* Se guarda cada calificación y el cliente queda con el promedio aritmético de todas */
+        /* se guarda cada calificacion y el cliente queda */
         Calificacion nueva = new Calificacion();
         nueva.setCliente(cliente);
         nueva.setEstrellas(estrellas);
@@ -77,7 +77,7 @@ public class ClienteServiceImpl implements ClienteService {
         double promedio = todas.stream().mapToInt(Calificacion::getEstrellas).average().orElse(estrellas);
         cliente.setPromedio(Math.round(promedio * 100.0) / 100.0);
         cliente.setCantidadCalificaciones(todas.size());
-        /* Redondeo al entero más cercano para dibujar las estrellas (3.67 → 4); siempre entre 1 y 5 */
+        /* redondeo al entero mas cercano */
         cliente.setCalificacion((int) Math.min(5, Math.max(1, Math.round(promedio))));
         cliente.setComentario(comentario);
         cliente.setFechaCalificacion(LocalDate.now());

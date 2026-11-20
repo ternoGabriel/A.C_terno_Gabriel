@@ -11,6 +11,8 @@
     <link rel="stylesheet" th:href="@{/css/global.css}" />
     <link rel="stylesheet" th:href="@{/css/empleado/catalogo.css}" />
     <link rel="stylesheet" th:href="@{/css/responsive.css}" />
+    <link rel="stylesheet" th:href="@{/css/fluido.css}" />
+    <link rel="stylesheet" th:href="@{/css/catalogo-comun.css}" />
   </head>
 
   <body class="page-empleado-catalogo">
@@ -46,18 +48,16 @@
           </div>
         </div>
         <div class="content">
-          <div class="catalog-toolbar">
-            <input
-              class="searchbox"
-              data-product-search
-              placeholder="Buscar en el catálogo"
-            />
-          </div>
 
-          <!-- FILTROS AVANZADOS: aquí están todos los filtros del catálogo -->
+          <!-- filtros avanzados arriba los filtros visibles -->
           <div class="advanced-filters-container">
             <div class="filters-header-row">
               <span class="filters-title">Filtros avanzados</span>
+              <div class="filters-tools"><input
+              class="searchbox"
+              data-product-search
+              placeholder="Buscar en el catálogo"
+            /></div>
               <button
                 class="btn-reset-filters"
                 id="resetFiltersBtn"
@@ -66,84 +66,163 @@
                 Restablecer filtros
               </button>
             </div>
-            <div class="filter-tabs-row">
+            <div class="filters-row filters-visibles">
               <div class="filter-group">
-                <label>PRENDA</label>
-                <div class="category-scroll">
-                  <button class="active" type="button" data-category="Todos">
-                    Todos
-                  </button>
-                  <button type="button" data-category="Ternos">Ternos</button>
-                  <button type="button" data-category="Smoking">Smoking</button>
-                  <button type="button" data-category="Accesorios">
-                    Accesorios
-                  </button>
-                </div>
+                <label for="fPrenda">PRENDA</label>
+                <select class="filter-select" id="fPrenda">
+                  <option value="">Todos</option>
+                  <option value="Ternos">Ternos</option>
+                  <option value="Smoking">Smoking</option>
+                  <option value="Accesorios">Accesorios</option>
+                </select>
               </div>
               <div class="filter-group">
-                <label>ESTADO DE LA PRENDA</label>
-                <div class="category-scroll">
-                  <button class="active" type="button" data-tipo-tab="">
-                    Todos
-                  </button>
-                  <button type="button" data-tipo-tab="Nuevo">Nuevo</button>
-                  <button type="button" data-tipo-tab="Seminuevo">
-                    Seminuevo
-                  </button>
+                <label for="fCategoria">CATEGORÍA</label>
+                <select class="filter-select" id="fCategoria">
+                  <option value="">Todos</option>
+                  <option value="Niños">Niño</option>
+                  <option value="Jóvenes">Joven</option>
+                  <option value="Adultos">Adulto</option>
+                </select>
+              </div>
+              <div class="filter-group filtro-talla">
+                <label for="fTallaGrupo">TALLA</label>
+                <select class="filter-select" id="fTallaGrupo">
+                  <option value="">Todos</option>
+                  <option value="nino">Niño</option>
+                  <option value="estandar">Estándar</option>
+                  <option value="saco">Saco (numérica)</option>
+                  <option value="unica">Talla única</option>
+                </select>
+                <select class="filter-select" id="fTalla" aria-label="Talla" hidden></select>
+              </div>
+              <div class="filter-group tiene-panel filtro-precio">
+                <label for="precioToggle">PRECIO</label>
+                <button
+                  class="filter-select precio-toggle"
+                  id="precioToggle"
+                  type="button"
+                  aria-expanded="false"
+                  aria-controls="precioPanel"
+                >
+                  <span id="precioResumen">Todos</span>
+                  <span class="flecha" aria-hidden="true">▾</span>
+                </button>
+                <div
+                  class="filter-panel"
+                  id="precioPanel"
+                  role="group"
+                  aria-label="Rango de precio"
+                  hidden
+                >
+                  <div class="precio-sobre" role="radiogroup" aria-label="Precio sobre">
+                    <label class="chip-radio"
+                      ><input
+                        type="radio"
+                        name="precioSobre"
+                        value="precioAlquiler"
+                        checked
+                      />
+                      Alquiler</label
+                    >
+                    <label class="chip-radio"
+                      ><input type="radio" name="precioSobre" value="precioVenta" />
+                      Venta</label
+                    >
+                  </div>
+                  <div class="precio-campos">
+                    <label class="precio-campo"
+                      >Mín.<span class="input-sol"
+                        ><span>S/</span
+                        ><input
+                          id="precioMin"
+                          type="text"
+                          inputmode="numeric"
+                          maxlength="4"
+                          autocomplete="off"
+                          placeholder="0" /></span
+                    ></label>
+                    <label class="precio-campo"
+                      >Máx.<span class="input-sol"
+                        ><span>S/</span
+                        ><input
+                          id="precioMax"
+                          type="text"
+                          inputmode="numeric"
+                          maxlength="4"
+                          autocomplete="off"
+                          placeholder="0" /></span
+                    ></label>
+                  </div>
+                  <span class="precio-error" id="precioError" role="alert" hidden></span>
                 </div>
               </div>
             </div>
-            <div class="filters-row">
-              <div class="filter-group">
-                <label>COLOR</label>
-                <select class="filter-select" data-filter="color"></select>
-              </div>
-              <div class="filter-group">
-                <label>CATEGORÍA</label>
-                <select class="filter-select" data-filter="categoria"></select>
-              </div>
-              <div class="filter-group">
-                <label>ESTILO</label>
-                <select class="filter-select" data-filter="estilo"></select>
-              </div>
-              <div class="filter-group">
-                <label>TALLA</label>
-                <select class="filter-select" data-filter="talla"></select>
-              </div>
-            </div>
-            <div class="components-section">
-              <span class="components-label"
-                >Componentes individuales (Selección múltiple):</span
+            <div class="extra-filters-bar">
+              <button
+                class="btn-extra-filters"
+                id="btnFiltrosAdicionales"
+                type="button"
+                aria-expanded="false"
+                aria-controls="extraPanel"
               >
-              <div class="checkbox-chips">
-                <label class="chip-checkbox"
-                  ><input type="checkbox" name="componente" value="Saco" />
-                  Saco</label
+                <span>Filtros adicionales</span>
+                <b class="badge-count" id="extraCount" hidden>0</b>
+                <span class="flecha" aria-hidden="true">▾</span>
+              </button>
+            </div>
+            <div class="extra-panel" id="extraPanel" hidden>
+              <div class="filter-group">
+                <label for="fTipo">ESTADO DE LA PRENDA</label>
+                <select class="filter-select" id="fTipo">
+                  <option value="">Todos</option>
+                  <option value="Nuevo">Nuevo</option>
+                  <option value="Seminuevo">Seminuevo</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label for="fEstilo">ESTILO</label>
+                <select class="filter-select" id="fEstilo"></select>
+              </div>
+              <div class="filter-group tiene-panel">
+                <label for="colorToggle">COLOR</label>
+                <button
+                  class="filter-select desplegable-toggle"
+                  id="colorToggle"
+                  type="button"
+                  aria-expanded="false"
+                  aria-controls="colorPanel"
                 >
-                <label class="chip-checkbox"
-                  ><input type="checkbox" name="componente" value="Pantalón" />
-                  Pantalón</label
+                  <span id="colorResumen">Todos</span>
+                  <span class="flecha" aria-hidden="true">▾</span>
+                </button>
+                <div class="filter-panel panel-lista" id="colorPanel" role="group" aria-label="Colores" hidden>
+                  <div id="colorGrid"></div>
+                </div>
+              </div>
+              <div class="filter-group tiene-panel">
+                <label for="compToggle">COMPONENTES INDIVIDUALES</label>
+                <button
+                  class="filter-select desplegable-toggle"
+                  id="compToggle"
+                  type="button"
+                  aria-expanded="false"
+                  aria-controls="compPanel"
                 >
-                <label class="chip-checkbox"
-                  ><input type="checkbox" name="componente" value="Chaleco" />
-                  Chaleco</label
-                >
-                <label class="chip-checkbox"
-                  ><input
-                    type="checkbox"
-                    name="componente"
-                    value="Corbata / Michi"
-                  />
-                  Corbata / Michi</label
-                >
-                <label class="chip-checkbox"
-                  ><input type="checkbox" name="componente" value="Camisa" />
-                  Camisa</label
-                >
+                  <span id="compResumen">Todos</span>
+                  <span class="flecha" aria-hidden="true">▾</span>
+                </button>
+                <div class="filter-panel panel-lista" id="compPanel" role="group" aria-label="Componentes individuales" hidden>
+                  <label class="opcion-lista"><input type="checkbox" name="componente" value="Saco" /><span>Saco</span></label>
+                  <label class="opcion-lista"><input type="checkbox" name="componente" value="Pantalón" /><span>Pantalón</span></label>
+                  <label class="opcion-lista"><input type="checkbox" name="componente" value="Chaleco" /><span>Chaleco</span></label>
+                  <label class="opcion-lista"><input type="checkbox" name="componente" value="Corbata / Michi" /><span>Corbata / Michi</span></label>
+                  <label class="opcion-lista"><input type="checkbox" name="componente" value="Camisa" /><span>Camisa</span></label>
+                </div>
               </div>
             </div>
           </div>
-          <!-- FIN DE FILTROS -->
+          <!-- fin de filtros -->
 
           <div class="product-grid"></div>
         </div>
@@ -151,7 +230,9 @@
     </div>
     <div th:replace="~{fragments/toast :: toast('Cambios guardados')}"></div>
     <script th:src="@{/js/api.js}" defer></script>
+    <script th:src="@{/js/historial.js}" defer></script>
     <script th:src="@{/js/app.js}" defer></script>
+    <script th:src="@{/js/catalogo-comun.js}" defer></script>
     <script th:src="@{/js/empleado/catalogo.js}" defer></script>
   </body>
 </html>

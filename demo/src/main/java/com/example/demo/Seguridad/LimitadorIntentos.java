@@ -8,10 +8,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
-/**
- * Protección contra fuerza bruta: cuenta los intentos fallidos por usuario en una caché de
- * Guava que olvida cada registro pasado el tiempo de bloqueo configurado.
- */
+/* proteccion contra fuerza bruta */
 @Component
 public class LimitadorIntentos {
 
@@ -27,7 +24,7 @@ public class LimitadorIntentos {
             .build();
     }
 
-    /** @return {@code true} si el usuario ya alcanzó el máximo de intentos fallidos */
+    /* true si el usuario ya alcanzo el maximo de intentos */
     public boolean bloqueado(String usuario) {
         AtomicInteger cuenta = fallos.getIfPresent(clave(usuario));
         return cuenta != null && cuenta.get() >= maximo;

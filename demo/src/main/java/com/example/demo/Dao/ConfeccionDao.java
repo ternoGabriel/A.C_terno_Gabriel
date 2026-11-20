@@ -3,6 +3,6 @@ package com.example.demo.Dao;
 
 import com.example.demo.Model.Confeccion;
 
-/** DAO de {@link Confeccion}. */
+/* dao de confeccion */
 public interface ConfeccionDao extends GenericDao<Confeccion> {
 }

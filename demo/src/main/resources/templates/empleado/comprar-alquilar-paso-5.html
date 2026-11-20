@@ -12,6 +12,7 @@
     <link rel="stylesheet" th:href="@{/css/empleado/comprar-alquilar.css}" />
     <link rel="stylesheet" th:href="@{/css/comprobante.css}" />
     <link rel="stylesheet" th:href="@{/css/responsive.css}" />
+    <link rel="stylesheet" th:href="@{/css/fluido.css}" />
   </head>
 
   <body class="page-empleado-comprar-alquilar">
@@ -53,7 +54,7 @@
         </div>
 
         <div class="content">
-          <!-- Pestañas de Tipo de Operación -->
+          <!-- pestanas de tipo de operacion -->
           <div
             aria-label="Tipo de operación"
             class="operation-tabs"
@@ -99,7 +100,7 @@
             </button>
           </div>
 
-          <!-- Stepper Circular -->
+          <!-- stepper circular -->
           <div aria-label="Paso 5 de 5" class="flow-stepper full-width-stepper">
             <div class="step-item active">
               <div class="step-circle step-completed">✓</div>
@@ -127,7 +128,7 @@
             </div>
           </div>
 
-          <!-- Boleta de venta (formato comprobante) -->
+          <!-- boleta de venta -->
           <section class="flow-card cp-wrap">
             <article class="cp cp-boleta">
               <div class="cp-cab">
@@ -209,7 +210,7 @@
                   <div class="cp-aviso" id="cajaPenalizaciones">
                     <strong>Penalizaciones</strong>
                     <p style="margin: 0">
-                      Demora: S/ 10.00 por día de retraso · Mal estado: S/ 50.00
+                      Demora: S/ 0.00 por día de retraso · Mal estado: S/ 0.00
                       por manchas, roturas o daños.
                     </p>
                   </div>
@@ -252,6 +253,7 @@
 
     <div th:replace="~{fragments/toast :: toast('Cambios guardados')}"></div>
     <script th:src="@{/js/api.js}" defer></script>
+    <script th:src="@{/js/historial.js}" defer></script>
     <script defer="" th:src="@{/js/app.js}"></script>
     <script defer="" th:src="@{/js/empleado/comprar-alquilar.js}"></script>
     <script defer="" th:src="@{/js/empleado/comprar-alquilar-p5.js}"></script>

@@ -12,7 +12,7 @@ import com.example.demo.Service.MetodoPagoService;
 @Service
 public class MetodoPagoServiceImpl implements MetodoPagoService {
 
-    /* Una imagen de QR en base64 no debe pasar de ~3 MB de texto */
+    /* una imagen de qr en base64 no debe pasar */
     private static final int MAX_QR = 3_000_000;
 
     private final MetodoPagoDao dao;
@@ -88,7 +88,7 @@ public class MetodoPagoServiceImpl implements MetodoPagoService {
         return o == null ? "" : String.valueOf(o).trim();
     }
 
-    /* Dígitos de la cuenta según el banco (sin guiones). Banco no listado: se acepta de 8 a 20 dígitos */
+    /* digitos de la cuenta segun el banco */
     private static int[] largosCuenta(String banco) {
         String b = banco.trim().toLowerCase();
         if (b.equals("bcp") || b.contains("crédito del perú") || b.contains("credito del peru")) return new int[] { 13, 14 };

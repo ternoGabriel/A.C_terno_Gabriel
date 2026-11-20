@@ -7,40 +7,37 @@ import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 
-/*
- * Datos de cobro que define el administrador y que el empleado muestra al cliente.
- * Hay un registro por tipo: YAPE (QR + número de celular) y TRANSFERENCIA (banco, cuenta, CCI y titular).
- */
+/* datos de cobro que define el administrador */
 @Entity
 @Getter
 @Setter
 public class MetodoPago extends Base {
 
-    /* YAPE o TRANSFERENCIA */
+    /* yape o transferencia */
     @NotBlank(message = "El tipo de método de pago es obligatorio")
     @Pattern(regexp = "YAPE|TRANSFERENCIA", message = "El método de pago debe ser YAPE o TRANSFERENCIA")
     @Column(unique = true, nullable = false, length = 20)
     private String tipo;
 
-    /* Nombre del titular de la cuenta o del Yape */
+    /* nombre del titular de la cuenta o del yape */
     @NotBlank(message = "El titular es obligatorio")
     @Size(max = 100, message = "El titular no debe superar 100 caracteres")
     private String titular;
 
-    /* Yape: número de celular. Transferencia: número de cuenta */
+    /* yape numero de celular */
     @NotBlank(message = "El número es obligatorio")
     @Pattern(regexp = "\\d{8,20}", message = "El número debe tener entre 8 y 20 dígitos")
     private String numero;
 
-    /* Solo transferencia */
+    /* solo transferencia */
     @Size(max = 60, message = "El nombre del banco no debe superar 60 caracteres")
     private String banco;
 
-    /* Código de cuenta interbancario (20 dígitos), solo transferencia */
+    /* codigo de cuenta interbancario */
     @Pattern(regexp = "(\\d{20})?", message = "El CCI debe tener exactamente 20 dígitos")
     private String cci;
 
-    /* Solo Yape: imagen del QR como data URL (la reduce el navegador antes de enviarla) */
+    /* solo yape imagen del qr como data url */
     @Size(max = 3_000_000, message = "La imagen del QR es demasiado pesada")
     @Column(columnDefinition = "LONGTEXT")
     private String qr;

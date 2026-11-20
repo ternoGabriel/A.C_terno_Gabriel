@@ -5,7 +5,7 @@ import org.springframework.stereotype.Repository;
 import com.example.demo.Model.Calificacion;
 import com.example.demo.Repository.CalificacionRepository;
 
-/** Implementación JPA de {@link CalificacionDao}. */
+/* implementacion jpa de calificaciondao */
 @Repository
 public class CalificacionDaoJpa extends JpaDao<Calificacion> implements CalificacionDao {
 

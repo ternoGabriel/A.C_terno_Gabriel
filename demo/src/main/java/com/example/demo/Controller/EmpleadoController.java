@@ -10,7 +10,7 @@ import com.example.demo.Service.EmpleadoService;
 
 @RestController
 @RequestMapping("/api/empleados")
-/* Solo el administrador gestiona empleados (autorización a nivel de método) */
+/* solo el administrador gestiona empleados */
 @PreAuthorize("hasAuthority('ADMIN')")
 public class EmpleadoController {
 
@@ -40,19 +40,19 @@ public class EmpleadoController {
         return servicio.suspender(id);
     }
 
-    /* Devuelve al empleado suspendido a la lista principal */
+    /* devuelve al empleado suspendido a la lista principal */
     @PutMapping("reactivar/{id}")
     public Empleado reactivar(@PathVariable Long id) {
         return servicio.reactivar(id);
     }
 
-    /* Genera una contraseña temporal y se la muestra al administrador para que se la entregue al empleado */
+    /* genera una contrasena temporal y se la muestra al administrador */
     @PutMapping("restablecer/{id}")
     public Map<String, String> restablecerContrasena(@PathVariable Long id) {
         return Map.of("mensaje", "Contraseña restablecida", "contrasena", servicio.restablecerContrasena(id));
     }
 
-    /* El administrador escribe la contraseña nueva directamente (sin contraseña temporal) */
+    /* el administrador escribe la contrasena nueva directamente */
     @PutMapping("contrasena/{id}")
     public Map<String, String> cambiarContrasena(@PathVariable Long id, @RequestBody Map<String, String> datos) {
         servicio.cambiarContrasena(id, datos.get("contrasena"));

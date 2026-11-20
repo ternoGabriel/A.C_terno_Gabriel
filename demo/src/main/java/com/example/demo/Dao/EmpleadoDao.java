@@ -3,18 +3,18 @@ package com.example.demo.Dao;
 import java.util.Optional;
 import com.example.demo.Model.Empleado;
 
-/** DAO de {@link Empleado}. */
+/* dao de empleado */
 public interface EmpleadoDao extends GenericDao<Empleado> {
 
-    /** @return empleado con ese código (E001...) */
+    /* empleado con ese codigo */
     Optional<Empleado> buscarPorCodigo(String codigo);
 
-    /** @return si ya existe un empleado con ese código */
+    /* si ya existe un empleado con ese codigo */
     boolean existePorCodigo(String codigo);
 
-    /** @return empleado con ese usuario (sin distinguir mayúsculas) */
+    /* empleado con ese usuario */
     Optional<Empleado> buscarPorUsuario(String usuario);
 
-    /** @return empleado con ese correo (sin distinguir mayúsculas) */
+    /* empleado con ese correo */
     Optional<Empleado> buscarPorCorreo(String correo);
 }

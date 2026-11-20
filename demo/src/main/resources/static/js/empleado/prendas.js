@@ -1,11 +1,10 @@
-// Estado de prendas (empleado): el inventario sale de "Costos y Productos" del administrador (no incluye las prendas suspendidas).
-// El estado cambia solo con las boletas de alquiler y devolución; a mano solo se puede pasar de Restauración o Lavandería a su siguiente paso.
+/* estado de prendas el inventario sale de costos y productos */
 document.addEventListener("DOMContentLoaded", () =>
   TG.listo(async () => {
     const searchInput = document.querySelector("[data-table-search]");
     const stateSelect = document.querySelector("[data-state-filter]");
     const tbody = document.querySelector(".data-table tbody");
-    /* Estados destino permitidos según el estado actual (texto mostrado → valor guardado) */
+    /* estados destino permitidos segun el estado actual */
     const DESTINOS = {
       "En restauración": {
         Lavandería: "En lavandería",
@@ -15,30 +14,75 @@ document.addEventListener("DOMContentLoaded", () =>
     };
     let prendas = [],
       alquiladoA = {},
-      confeccionA = {};
+      confeccionA = {},
+      vendidoA = {},
+      ordenes = [],
+      modoVendidos = false;
+    const btnVendidos = document.querySelector("[data-vendidos]");
+    const titulo = document.querySelector("[data-pr-titulo]");
 
     const filterTable = () => {
       const query = (searchInput?.value || "").toLowerCase().trim();
       const sel = stateSelect ? stateSelect.value : "Todos";
       tbody.querySelectorAll("tr[data-id]").forEach((row) => {
+        const esOrden = row.dataset.tipo === "orden";
+        /* confecciones entregadas solo salen con su filtro */
+        const okEstado =
+          sel === "Confecciones"
+            ? esOrden
+            : row.dataset.estado !== "Entregada" &&
+              (sel === "Todos" || (row.dataset.estado || "") === sel);
         row.hidden = !(
-          row.textContent.toLowerCase().includes(query) &&
-          (sel === "Todos" || (row.dataset.estado || "") === sel)
+          row.textContent.toLowerCase().includes(query) && okEstado
         );
       });
     };
 
+    /* nombre del diseno guardado en la ficha de una orden */
+    const disenoOrden = (o) => {
+      try {
+        const d = JSON.parse(o.detalle || "{}");
+        return d.diseno || "Terno a medida";
+      } catch {
+        return "Terno a medida";
+      }
+    };
+
+    const fila = (id, estado, codigo, nombre, talla, responsable, accion) =>
+      '<tr data-id="' +
+      TG.esc(id) +
+      '"' +
+      (String(id).startsWith("o") ? ' data-tipo="orden"' : "") +
+      ' data-estado="' +
+      TG.esc(estado) +
+      '"><td class="col-codigo font-mono">' +
+      TG.esc(codigo) +
+      '</td><td class="col-nombre font-medium">' +
+      TG.esc(nombre) +
+      '</td><td class="col-talla">' +
+      TG.esc(talla) +
+      '</td><td class="col-estado">' +
+      TG.insigniaEstado(estado) +
+      '</td><td class="col-responsable">' +
+      TG.esc(responsable) +
+      '</td><td class="col-accion">' +
+      accion +
+      "</td></tr>";
+
     const pintar = async () => {
-      const [todas, boletas, ordenes] = await Promise.all([
+      const [todas, boletas, ord] = await Promise.all([
         TG.prendas(),
         TG.boletas(),
         TG.get("/api/confecciones").catch(() => []),
       ]);
-      prendas = TG.prendasVisibles(todas).filter((p) => p.estado !== "Vendido");
+      ordenes = (ord || []).filter((o) => o);
+      const visibles = TG.prendasVisibles(todas);
+      prendas = visibles.filter((p) => p.estado !== "Vendido");
       alquiladoA = {};
       confeccionA = {};
-      (ordenes || [])
-        .filter((o) => o && o.estado === "En confección")
+      vendidoA = {};
+      ordenes
+        .filter((o) => o.estado === "En confección")
         .forEach((o) => {
           const detalle =
             typeof o.detalle === "string"
@@ -46,12 +90,13 @@ document.addEventListener("DOMContentLoaded", () =>
               : JSON.stringify(o.detalle || {});
           prendas.forEach((p) => {
             if (
-              detalle
+              p.estado === "En confección" &&
+              (detalle
                 .toLowerCase()
                 .includes(String(p.codigo || "").toLowerCase()) ||
-              detalle
-                .toLowerCase()
-                .includes(String(p.diseno || "").toLowerCase())
+                detalle
+                  .toLowerCase()
+                  .includes(String(p.diseno || "").toLowerCase()))
             ) {
               confeccionA[p.id] =
                 TG.nombre(o.cliente) || "Cliente de confección";
@@ -65,55 +110,149 @@ document.addEventListener("DOMContentLoaded", () =>
         .forEach((b) => {
           alquiladoA[b.prenda.id] = TG.nombre(b.cliente);
         });
-      const disp = prendas.filter((p) => p.estado === "Disponible").length;
+      boletas
+        .filter((b) => b.tipo === "Venta" && b.estado !== "Anulada" && b.prenda)
+        .forEach((b) => {
+          vendidoA[b.prenda.id] = TG.nombre(b.cliente);
+        });
+
       const sub = document.querySelector(".subtitle-stats");
-      if (sub)
-        sub.textContent =
-          prendas.length + " prendas registradas · " + disp + " disponibles";
-      tbody.innerHTML = prendas.length
-        ? prendas
+      let filas = "";
+      let total = 0;
+      if (modoVendidos) {
+        /* vendidos compras */
+        const compras = visibles.filter((p) => p.estado === "Vendido");
+        const entregadas = ordenes.filter((o) => o.estado === "Entregada");
+        total = compras.length + entregadas.length;
+        filas =
+          compras
+            .slice()
+            .sort((a, b) => a.codigo.localeCompare(b.codigo))
+            .map((p) =>
+              fila(
+                "p" + p.id,
+                "Vendido",
+                p.codigo,
+                p.diseno,
+                p.talla,
+                vendidoA[p.id] || "—",
+                "—",
+              ),
+            )
+            .join("") +
+          entregadas
+            .map((o) =>
+              fila(
+                "o" + o.id,
+                "Vendido a medida",
+                o.ticket || "—",
+                disenoOrden(o),
+                "A medida",
+                TG.nombre(o.cliente) || "—",
+                "—",
+              ),
+            )
+            .join("");
+        if (sub)
+          sub.textContent =
+            total + (total === 1 ? " prenda vendida" : " prendas vendidas");
+      } else {
+        const enConfeccion = ordenes.filter((o) => o.estado === "En confección");
+        total = prendas.length + enConfeccion.length;
+        const disp = prendas.filter((p) => p.estado === "Disponible").length;
+        filas =
+          prendas
             .slice()
             .sort((a, b) => a.codigo.localeCompare(b.codigo))
             .map((p) => {
               const editable = !!DESTINOS[p.estado];
-              return (
-                '<tr data-id="' +
-                p.id +
-                '" data-estado="' +
-                TG.esc(p.estado) +
-                '"><td class="col-codigo font-mono">' +
-                TG.esc(p.codigo) +
-                '</td><td class="col-nombre font-medium">' +
-                TG.esc(p.diseno) +
-                '</td><td class="col-talla">' +
-                TG.esc(p.talla) +
-                '</td><td class="col-costo">' +
-                TG.money(p.precioAlquiler) +
-                '</td><td class="col-precio">' +
-                TG.money(p.precioVenta) +
-                '</td><td class="col-estado">' +
-                TG.insigniaEstado(p.estado) +
-                '</td><td class="col-responsable">' +
-                (p.estado === "Alquilado" && alquiladoA[p.id]
-                  ? TG.esc(alquiladoA[p.id])
+              const responsable =
+                p.estado === "Alquilado" && alquiladoA[p.id]
+                  ? alquiladoA[p.id]
                   : p.estado === "En confección" && confeccionA[p.id]
-                    ? TG.esc(confeccionA[p.id])
+                    ? confeccionA[p.id]
                     : p.estado === "Alquilado" || p.estado === "En confección"
                       ? "No identificado"
-                      : "—") +
-                '</td><td class="col-accion"><button class="btn-mini" type="button" data-cambiar="' +
-                p.id +
-                '"' +
-                (editable
-                  ? ""
-                  : ' disabled title="Este estado cambia solo con las boletas de alquiler y devolución"') +
-                ">Cambiar estado</button></td></tr>"
+                      : "—";
+              return fila(
+                "p" + p.id,
+                p.estado,
+                p.codigo,
+                p.diseno,
+                p.talla,
+                responsable,
+                '<button class="btn-mini" type="button" data-cambiar="' +
+                  p.id +
+                  '"' +
+                  (editable
+                    ? ""
+                    : ' disabled title="Este estado cambia solo con las boletas de alquiler y devolución"') +
+                  ">Cambiar estado</button>",
               );
             })
-            .join("")
-        : '<tr><td colspan="8" class="aviso-vacio">No hay prendas registradas.</td></tr>';
+            .join("") +
+          enConfeccion
+            .map((o) =>
+              fila(
+                "o" + o.id,
+                "En confección",
+                o.ticket || "—",
+                disenoOrden(o),
+                "A medida",
+                TG.nombre(o.cliente) || "—",
+                '<button class="btn-mini" type="button" disabled title="Este estado cambia solo al entregar la confección">Cambiar estado</button>',
+              ),
+            )
+            .join("") +
+          ordenes
+            .filter((o) => o.estado === "Entregada")
+            .map((o) =>
+              fila(
+                "o" + o.id,
+                "Entregada",
+                o.ticket || "—",
+                disenoOrden(o),
+                "A medida",
+                TG.nombre(o.cliente) || "—",
+                "—",
+              ),
+            )
+            .join("");
+        if (sub)
+          sub.textContent =
+            total + " prendas registradas · " + disp + " disponibles";
+      }
+      tbody.innerHTML = total
+        ? filas
+        : '<tr><td colspan="6" class="aviso-vacio">' +
+          (modoVendidos
+            ? "Aún no hay prendas vendidas."
+            : "No hay prendas registradas.") +
+          "</td></tr>";
       filterTable();
     };
+
+    /* boton vendidos alterna entre el inventario y solo lo vendido */
+    btnVendidos?.addEventListener("click", async () => {
+      modoVendidos = !modoVendidos;
+      btnVendidos.textContent = modoVendidos ? "Inventario" : "Vendidos";
+      btnVendidos.classList.toggle("activo", modoVendidos);
+      btnVendidos.setAttribute("aria-pressed", String(modoVendidos));
+      if (titulo)
+        titulo.textContent = modoVendidos
+          ? "Prendas vendidas"
+          : "Inventario de prendas";
+      if (stateSelect) {
+        stateSelect.value = "Todos";
+        stateSelect.disabled = modoVendidos;
+        stateSelect.dispatchEvent(new Event("change"));
+      }
+      try {
+        await pintar();
+      } catch (err) {
+        TG.toast(err.message);
+      }
+    });
     searchInput?.addEventListener("input", filterTable);
     stateSelect?.addEventListener("change", filterTable);
 

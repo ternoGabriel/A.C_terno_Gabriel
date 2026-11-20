@@ -19,7 +19,7 @@
   background-color: #fcf8f2;
 }
 
-/* Disponible */
+/* disponible */
 .kpi-disponible:hover {
   border-color: #92d8b0;
   background-color: #f2fbf6;
@@ -29,7 +29,7 @@
   background-color: #eaf8f0;
 }
 
-/* Alquilado */
+/* alquilado */
 .kpi-alquilado:hover {
   border-color: #f7d2a5;
   background-color: #fffbf5;
@@ -39,7 +39,7 @@
   background-color: #fef5e7;
 }
 
-/* En confección y Restauración  */
+/* en confeccion y restauracion */
 .kpi-restauracion:hover {
   border-color: #f8b4b6;
   background-color: #fff6f7;
@@ -423,7 +423,7 @@
   }
 }
 
-/* Igualar el contenedor Inventario de prendas al diseño de Empleado */
+/* igualar el contenedor inventario de prendas al diseno de empleado */
 .page-admin-prendas .inventory-card {
   background: #ffffff;
   border-radius: 12px;

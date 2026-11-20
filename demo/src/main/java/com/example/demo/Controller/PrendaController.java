@@ -22,7 +22,7 @@ public class PrendaController {
         return servicio.listar();
     }
 
-    /* Siguiente correlativo para un prefijo de 3 letras (TRN-005) */
+    /* siguiente correlativo para un prefijo de 3 letras */
     @GetMapping("siguiente-codigo")
     public Map<String, String> siguienteCodigo(@RequestParam String prefijo) {
         return Map.of("codigo", servicio.siguienteCodigo(prefijo));

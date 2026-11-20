@@ -6,13 +6,13 @@ import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 
-/* Orden de confección: al registrarla se emite un TICKET (T001-0001); al entregarla y pagar el saldo se emite la BOLETA */
+/* orden de confeccion al registrarla se emite un ticket */
 @Entity
 @Getter
 @Setter
 public class Confeccion extends Base {
 
-    /* Lo genera el sistema al registrar la orden (T001-0001); por eso no es obligatorio al recibir la solicitud */
+    /* lo genera el sistema al registrar la orden */
     @Pattern(regexp = "T\\d{3}-\\d{4,}", message = "El ticket debe tener el formato T001-0001")
     @Column(unique = true)
     private String ticket;
@@ -37,11 +37,11 @@ public class Confeccion extends Base {
     @NotNull(message = "La fecha de entrega final es obligatoria")
     private LocalDate entregaFinal;
 
-    /* Compatibilidad con el esquema MySQL existente, que también exige fechaEntrega. */
+    /* compatibilidad con el esquema mysql existente que tambien exige fechaentrega */
     @Column(name = "fechaEntrega")
     private LocalDate fechaEntrega;
 
-    /* En confección | Entregada */
+    /* en confeccion entregada */
     @NotBlank(message = "El estado de la orden es obligatorio")
     @Pattern(regexp = "En confección|Entregada", message = "El estado debe ser En confección o Entregada")
     private String estado = "En confección";
@@ -49,7 +49,7 @@ public class Confeccion extends Base {
     @Pattern(regexp = "Efectivo|Yape|Transferencia", message = "El método de pago debe ser Efectivo, Yape o Transferencia")
     private String metodoPago;
 
-    /* Texto legado para mantener compatibilidad con la interfaz. */
+    /* texto legado para mantener compatibilidad con la interfaz */
     @Size(max = 255, message = "El nombre del empleado no debe superar 255 caracteres")
     private String empleado;
 
@@ -58,25 +58,25 @@ public class Confeccion extends Base {
     @com.fasterxml.jackson.annotation.JsonIgnore
     private Empleado empleadoResponsable;
 
-    /* Color principal de la confección (el controlador siempre guarda un valor) */
+    /* color principal de la confeccion */
     @Size(max = 255, message = "El color no debe superar 255 caracteres")
     @Column(name = "color", length = 255)
     private String color = "No especificado";
 
-    /* Diseño, telas, colores y medidas (JSON). TEXT para que nunca se corte, aunque la ficha sea larga */
+    /* diseno telas colores y medidas */
     @NotBlank(message = "La ficha de medidas es obligatoria")
     @Column(columnDefinition = "TEXT")
     private String detalle;
 
-    /* Número de la boleta emitida al entregar */
+    /* numero de la boleta emitida al entregar */
     @Pattern(regexp = "B\\d{3}-\\d{4,}", message = "El número de boleta debe tener el formato B001-0001")
     private String boleta;
 
-    /* Cuántas pruebas de confección se han registrado; con 1 o más, la pantalla propone "Entrega" por defecto */
+    /* cuantas pruebas de confeccion se han registrado */
     @PositiveOrZero(message = "La cantidad de pruebas no puede ser negativa")
     private Integer pruebas = 0;
 
-    /* Comentarios de las pruebas (qué se puede mejorar), uno por línea con su fecha */
+    /* comentarios de las pruebas */
     @Column(columnDefinition = "TEXT")
     private String comentarioPrueba;
 }

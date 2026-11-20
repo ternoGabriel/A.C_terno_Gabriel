@@ -4,12 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-/**
- * Implementación base de {@link GenericDao} apoyada en un repositorio de Spring Data JPA.
- * Los DAO concretos la extienden y solo agregan sus consultas específicas.
- *
- * @param <T> tipo de entidad
- */
+/* implementacion base de genericdao apoyada en un repositorio de spring */
 public abstract class JpaDao<T> implements GenericDao<T> {
 
     private final JpaRepository<T, Long> repositorio;

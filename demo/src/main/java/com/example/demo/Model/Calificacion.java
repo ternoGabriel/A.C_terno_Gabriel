@@ -6,8 +6,7 @@ import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 
-/* Cada vez que el empleado califica a un cliente al terminar una boleta se guarda un registro;
-   la calificación del cliente es el promedio de todos sus registros */
+/* cada vez que el empleado califica a un cliente */
 @Entity
 @Getter
 @Setter

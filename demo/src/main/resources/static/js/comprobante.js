@@ -1,7 +1,4 @@
-/* Dibuja un comprobante con el mismo aspecto que ve el empleado:
-   - Boletas (alquiler, compra, confección, devolución) → formato boleta de venta
-   - Tickets de confección → formato ticket térmico
-   Uso: TG.comprobanteHTML(tipo, datos)  con tipo = 'Alquiler' | 'Venta' | 'Confección' | 'Devolución' | 'Tickets' */
+/* dibuja un comprobante con el mismo aspecto que ve */
 (() => {
   const E = TG.esc,
     M = TG.money,
@@ -60,7 +57,7 @@
   const sello = (estado) =>
     estado === "Anulada" ? '<div class="cp-sello">Anulada</div>' : "";
 
-  /* Boleta de alquiler o de compra */
+  /* boleta de alquiler o de compra */
   const boletaPrenda = (b, esAlquiler) => {
     const monto = Number(b.monto) || 0,
       p = b.prenda || {};
@@ -111,7 +108,7 @@
     );
   };
 
-  /* Boleta de confección (entrega de la prenda y cobro del saldo) */
+  /* boleta de confeccion */
   const boletaConfeccion = (b) => {
     const c = b.confeccion || {},
       costo = Number(b.monto) || Number(c.costoTotal) || 0,
@@ -170,7 +167,7 @@
     );
   };
 
-  /* Boleta de devolución: retraso y estado de la prenda (penalidad registrada, si hubo) */
+  /* boleta de devolucion retraso y estado de la prenda */
   const boletaDevolucion = (b) => {
     const pen = b._pen,
       demora = pen
@@ -219,7 +216,7 @@
     );
   };
 
-  /* Ticket de confección (papel térmico) */
+  /* ticket de confeccion */
   const ticket = (c) => {
     let d = {};
     try {

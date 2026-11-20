@@ -1,4 +1,4 @@
-/* Paso 2 */
+/* paso 2 */
 (() => {
   class Paso2 {
     constructor(sesion, cabecera) {
@@ -47,7 +47,7 @@
         { requerido: operacion() === "Alquilar" },
       );
 
-      /* Suma un dia a la fecha */
+      /* suma un dia a la fecha */
       const sumarUnDiaLocal = (fechaStr) => {
         const [anio, mes, dia] = fechaStr.split("-").map(Number);
         const d = new Date(anio, mes - 1, dia);
@@ -80,7 +80,7 @@
 
       devol.min = recojo.value;
 
-      /* Resumen del cobro: dias de alquiler, dias que se cobran y total */
+      /* resumen del cobro dias de alquiler dias que se cobran */
       const plural = (n) => n + (n === 1 ? " día" : " días");
 
       const actualizarCobro = () => {
@@ -109,7 +109,7 @@
           TG.money(sesion.precioFinal());
       };
 
-      /* Muestra u oculta la devolucion */
+      /* muestra u oculta la devolucion */
       cabecera.alCambiar = () => {
         const alq = operacion() === "Alquilar";
 
@@ -159,7 +159,7 @@
         }
       });
 
-      /* El total se recalcula solo al cambiar fechas o la casilla (la sesion ya guardo el valor) */
+      /* el total se recalcula solo al cambiar fechas */
       [recojo, devol].forEach((el) => {
         el.addEventListener("change", actualizarCobro);
         el.addEventListener("input", actualizarCobro);
@@ -194,7 +194,7 @@
         guardarDatos();
       };
 
-      /* Busca el DNI y bloquea datos si existe */
+      /* busca el dni y bloquea datos si existe */
       const buscarAuto = async (avisar) => {
         const d = dni.value;
 
@@ -267,7 +267,7 @@
         buscarAuto(true).catch((err) => TG.toast(err.message));
       });
 
-      /* Revisa el DNI guardado al volver */
+      /* revisa el dni guardado al volver */
       if (dni.value.length === 8) {
         buscarAuto(false).catch((err) => TG.toast(err.message));
       }

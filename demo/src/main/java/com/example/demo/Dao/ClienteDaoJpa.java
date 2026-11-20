@@ -5,7 +5,7 @@ import org.springframework.stereotype.Repository;
 import com.example.demo.Model.Cliente;
 import com.example.demo.Repository.ClienteRepository;
 
-/** Implementación JPA de {@link ClienteDao}. */
+/* implementacion jpa de clientedao */
 @Repository
 public class ClienteDaoJpa extends JpaDao<Cliente> implements ClienteDao {
 

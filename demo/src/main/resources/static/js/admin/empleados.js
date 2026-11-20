@@ -19,11 +19,8 @@ document.addEventListener("DOMContentLoaded", () =>
       pintarTabla();
     };
 
-    /* En la columna NOMBRE se muestran nombre y apellido juntos (los empleados antiguos pueden no tener apellido) */
+    /* en la columna nombre se muestran nombre y apellido juntos */
     const completo = (e) => ((e.nombre || "") + " " + (e.apellido || "")).trim();
-    /* Contraseña oculta que se muestra al editar: si no se toca, la contraseña actual no cambia */
-    const CLAVE_OCULTA = "••••••••";
-
     const badgeRol = (r) =>
       '<span class="badge badge-role ' +
       (r === "Administrador" ? "role-admin" : "role-empleado") +
@@ -179,19 +176,22 @@ document.addEventListener("DOMContentLoaded", () =>
           await cargar();
         }
         if (bCl) {
-          /* Sin contraseña temporal: se abre directo el formulario para escribir la contraseña nueva */
+          /* sin contrasena temporal se abre directo el formulario */
           const emp = empleados.find((x) => x.id === Number(bCl.dataset.clave));
           TG.modal({
             titulo: "Nueva contraseña",
-            subtitulo: "Escribe la contraseña nueva de " + completo(emp) + ".",
+            subtitulo:
+              "Escribe la contraseña nueva de " +
+              completo(emp) +
+              ". Más de 8 caracteres, con mayúsculas, minúsculas y números; sin palabras fáciles como admin, clave o 1234.",
             textoOk: "Guardar contraseña",
             campos: [
               {
                 name: "contrasena",
                 label: "Contraseña nueva",
                 type: "password",
-                placeholder: "Mínimo 4 caracteres",
-                regla: "contrasena",
+                placeholder: "Ej. Luna7Cafe42",
+                regla: "contrasenaSegura",
                 autocomplete: false,
               },
             ],
@@ -208,11 +208,10 @@ document.addEventListener("DOMContentLoaded", () =>
       }
     });
 
-    /* Campos del formulario (los mismos para agregar y para editar). El código, el estado y la fecha de ingreso
-       los genera el sistema, por eso no aparecen. */
+    /* campos del formulario el codigo el estado y la fecha */
     const camposEmpleado = (e) => {
       const ed = !!e;
-      /* limpiarAlClic: al editar, cada campo conserva su valor hasta que se hace clic en él */
+      /* limpiaralclic al editar cada campo conserva su valor */
       const base = (c) => (ed ? { ...c, limpiarAlClic: true } : c);
       return [
         base({
@@ -230,27 +229,24 @@ document.addEventListener("DOMContentLoaded", () =>
           value: ed ? e.apellido || "" : undefined,
         }),
         base({
-          name: "usuario",
-          label: "Usuario",
-          placeholder: "Ej. l.salazar",
-          regla: "usuario",
-          value: ed ? e.usuario : undefined,
-        }),
-        base({
-          name: "contrasena",
-          label: "Contraseña",
-          placeholder: "Mínimo 4 caracteres",
-          regla: "contrasena",
-          type: ed ? "password" : undefined,
-          value: ed ? CLAVE_OCULTA : undefined,
-        }),
-        base({
           name: "correo",
-          label: "Correo electrónico",
+          label: "Correo electrónico (con él ingresa al sistema)",
           placeholder: "Ej. nombre@gmail.com",
-          regla: "correo",
+          regla: "correoAcceso",
           value: ed ? e.correo : undefined,
         }),
+        /* la contrasena solo se escribe al crear */
+        ...(ed
+          ? []
+          : [
+              {
+                name: "contrasena",
+                label:
+                  "Contraseña (más de 8 caracteres, con mayúsculas, minúsculas y números)",
+                placeholder: "Ej. Luna7Cafe42",
+                regla: "contrasenaSegura",
+              },
+            ]),
         base({
           name: "telefono",
           label: "Teléfono",
@@ -286,14 +282,12 @@ document.addEventListener("DOMContentLoaded", () =>
           const datos = {
             nombre: v.nombre,
             apellido: v.apellido,
-            usuario: v.usuario,
-            correo: v.correo,
+            usuario: v.correo.toLowerCase(),
+            correo: v.correo.toLowerCase(),
             telefono: v.telefono,
             area: v.area,
             rol: v.rol,
           };
-          /* Si la contraseña sigue oculta no se envía y se conserva la actual */
-          if (v.contrasena !== CLAVE_OCULTA) datos.contrasena = v.contrasena;
           await TG.put("/api/empleados/actualizar/" + emp.id, datos);
           TG.toast("Empleado actualizado");
           await cargar();
@@ -310,7 +304,12 @@ document.addEventListener("DOMContentLoaded", () =>
           textoOk: "Guardar empleado",
           campos: camposEmpleado(null),
           onOk: async (v) => {
-            await TG.post("/api/empleados/nuevo", { ...v, estado: "Activo" });
+            await TG.post("/api/empleados/nuevo", {
+              ...v,
+              correo: v.correo.toLowerCase(),
+              usuario: v.correo.toLowerCase(),
+              estado: "Activo",
+            });
             TG.toast("Empleado agregado");
             await cargar();
           },

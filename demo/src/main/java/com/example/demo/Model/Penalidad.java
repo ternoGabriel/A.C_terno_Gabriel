@@ -24,7 +24,7 @@ public class Penalidad extends Base {
     @Positive(message = "El monto debe ser mayor a 0")
     private Double monto;
 
-    // Desglose para que el tablero pueda sumar demora y mal estado por separado.
+    /* desglose para que el tablero pueda sumar demora y mal */
     @PositiveOrZero(message = "El monto por demora no puede ser negativo")
     private Double montoDemora = 0.0;
 

@@ -5,7 +5,7 @@ import org.springframework.stereotype.Repository;
 import com.example.demo.Model.Penalidad;
 import com.example.demo.Repository.PenalidadRepository;
 
-/** Implementación JPA de {@link PenalidadDao}. */
+/* implementacion jpa de penalidaddao */
 @Repository
 public class PenalidadDaoJpa extends JpaDao<Penalidad> implements PenalidadDao {
 

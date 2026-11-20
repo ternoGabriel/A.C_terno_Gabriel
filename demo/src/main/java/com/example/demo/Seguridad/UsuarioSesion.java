@@ -6,35 +6,45 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import com.example.demo.Model.Empleado;
 
-/**
- * Usuario que Spring Security guarda en la sesión tras iniciar sesión.
- * Los roles del sistema se convierten así: "Administrador" → ROLE_ADMIN y ADMIN; "Empleado" → ROLE_EMPLEADO y EMPLEADO.
- */
+/* usuario que spring security guarda en la sesion tras iniciar */
 public class UsuarioSesion extends User {
 
     private static final long serialVersionUID = 1L;
 
+    private final Long id;
     private final String nombre;
+    private final String apellido;
     private final String rol;
 
     public UsuarioSesion(Empleado empleado) {
-        /* La contraseña no se conserva en la sesión */
+        /* la contrasena no se conserva en la sesion */
         super(empleado.getUsuario(), "", autoridadesDe(empleado.getRol()));
+        this.id = empleado.getId();
         this.nombre = empleado.getNombre();
+        this.apellido = empleado.getApellido() == null ? "" : empleado.getApellido();
         this.rol = empleado.getRol();
     }
 
     static List<GrantedAuthority> autoridadesDe(String rol) {
         String autoridad = "Administrador".equals(rol) ? "ADMIN" : "EMPLEADO";
-        /* ROLE_X sirve para hasRole("X") y X para hasAuthority("X") */
+        /* role x sirve para hasrole */
         return List.of(new SimpleGrantedAuthority("ROLE_" + autoridad), new SimpleGrantedAuthority(autoridad));
+    }
+
+    /* id del empleado en la tabla */
+    public Long getId() {
+        return id;
     }
 
     public String getNombre() {
         return nombre;
     }
 
-    /** Rol tal como lo ve la pantalla: "Administrador" o "Empleado". */
+    public String getApellido() {
+        return apellido;
+    }
+
+    /* rol tal como lo ve la pantalla */
     public String getRol() {
         return rol;
     }

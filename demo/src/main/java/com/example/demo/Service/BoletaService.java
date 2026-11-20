@@ -3,18 +3,18 @@ package com.example.demo.Service;
 import java.util.List;
 import com.example.demo.Model.Boleta;
 
-/** Casos de uso de ventas, alquileres, reservas y entrega de confecciones (boletas). */
+/* casos de uso de ventas alquileres reservas y entrega */
 public interface BoletaService {
 
     List<Boleta> listar();
 
-    /** Emite la boleta: calcula el monto, genera el número y actualiza el estado de la prenda u orden. */
+    /* emite la boleta calcula el monto genera el numero */
     Boleta emitir(Boleta nueva);
 
-    /** Cierra un alquiler vigente y envía la prenda a lavandería o restauración. */
+    /* cierra un alquiler vigente y envia la prenda a lavanderia */
     Boleta devolver(Long id, String estadoPrenda);
 
-    /** Anula una boleta vigente (motivo obligatorio) y libera la prenda. */
+    /* anula una boleta vigente */
     Boleta anular(Long id, String motivo);
 
     Boleta actualizar(Long id, Boleta datos);

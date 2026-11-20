@@ -1,10 +1,9 @@
-/* Método de pago (admin): el QR de Yape, el número y los datos de transferencia se guardan en la base de datos
-   (tabla MetodoPago). El empleado los muestra al cobrar en "Comprar / Alquilar" paso 4 y en "Confección". */
+/* metodo de pago el qr de yape el numero */
 document.addEventListener("DOMContentLoaded", () =>
   TG.listo(async () => {
     const $ = (id) => document.getElementById(id);
     let metodos = {};
-    let qrNuevo = null; /* data URL elegido y aún no guardado */
+    let qrNuevo = null; /* data url elegido y aun no guardado */
     let quitarQr = false;
 
     const agrupar = (n, tam) =>
@@ -13,12 +12,12 @@ document.addEventListener("DOMContentLoaded", () =>
         .trim();
     const soloDigitos = (v) => String(v || "").replace(/\D/g, "");
 
-    /* Dígitos de la cuenta según el banco (mismos valores que valida el servidor) */
+    /* digitos de la cuenta segun el banco */
     const LARGOS = { bcp: [13, 14], interbank: [13], scotiabank: [10], bbva: [18, 20], banbif: [10] };
     const largosBanco = (banco) => LARGOS[String(banco || "").trim().toLowerCase()] || null;
     const textoLargos = (l) => l.join(" o ");
 
-    /* Cada campo numérico acepta solo dígitos y no deja pasar más de los permitidos */
+    /* cada campo numerico acepta solo digitos y no deja pasar */
     const soloNumeros = (id) =>
       $(id).addEventListener("input", (e) => {
         e.target.value = soloDigitos(e.target.value).slice(0, e.target.maxLength);
@@ -26,8 +25,7 @@ document.addEventListener("DOMContentLoaded", () =>
       });
     ["yapeNumero", "transNumero", "transCci"].forEach(soloNumeros);
 
-    /* Cada contenedor siempre muestra "lo guardado + Editar". Al pulsar Editar aparece el formulario con
-       los botones Confirmar y Cancelar; Cancelar descarta los cambios y vuelve a lo guardado. */
+    /* cada contenedor siempre muestra lo guardado editar al pulsar editar */
     const modo = (cual, editando) => {
       $(cual + "Vista").hidden = editando;
       $(cual + "Form").hidden = !editando;
@@ -38,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () =>
         ? TG.fecha(m.modificado) + " · " + (m.modificadoPor || "Administrador")
         : "—";
 
-    /* ---------- Pintar lo que hay en la base ---------- */
+    /* pintar lo que hay en la base */
     const pintarQr = (src) => {
       const img = $("yapeQrImg");
       if (src) {
@@ -68,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () =>
       $("transUltima").textContent = ultima(t);
       ayudaCuenta();
 
-      /* Vista de lo que ya guardó el administrador */
+      /* vista de lo que ya guardo el administrador */
       const vQr = $("yapeVistaImg");
       if (y.qr) {
         vQr.src = y.qr;
@@ -89,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () =>
       modo("trans", false);
     };
 
-    /* Texto de ayuda: cuántos dígitos lleva la cuenta del banco elegido */
+    /* texto de ayuda cuantos digitos lleva la cuenta del banco */
     function ayudaCuenta() {
       const l = largosBanco($("transBanco").value);
       $("transNumero").maxLength = l ? Math.max(...l) : 20;
@@ -104,7 +102,7 @@ document.addEventListener("DOMContentLoaded", () =>
     $("yapeCancelar").addEventListener("click", pintar);
     $("transCancelar").addEventListener("click", pintar);
 
-    /* ---------- Imagen QR: se reduce en el navegador antes de guardarla ---------- */
+    /* imagen qr se reduce en el navegador antes de guardarla */
     const reducir = (archivo) =>
       new Promise((ok, fallo) => {
         const lector = new FileReader();
@@ -148,7 +146,7 @@ document.addEventListener("DOMContentLoaded", () =>
       pintarQr(null);
     });
 
-    /* ---------- Guardar ---------- */
+    /* guardar */
     const guardar = async (boton, tipo, datos, mensaje) => {
       boton.disabled = true;
       try {
@@ -217,7 +215,7 @@ document.addEventListener("DOMContentLoaded", () =>
       );
     });
 
-    /* ---------- Carga inicial ---------- */
+    /* carga inicial */
     try {
       metodos = await TG.metodosPago();
     } catch (err) {

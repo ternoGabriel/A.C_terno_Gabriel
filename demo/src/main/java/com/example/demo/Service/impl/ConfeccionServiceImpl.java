@@ -24,7 +24,7 @@ import com.google.common.base.Preconditions;
 public class ConfeccionServiceImpl implements ConfeccionService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConfeccionServiceImpl.class);
-    /* Los selectores de colores están guardados como saco/pantalon/chaleco/camisa/corbata */
+    /* los selectores de colores estan guardados como saco pantalon chaleco */
     private static final Pattern COLORES = Pattern.compile("\"(?:saco|pantalon|chaleco|camisa|corbata)\"\\s*:\\s*\"([^\"]+)\"");
 
     private final ConfeccionDao dao;
@@ -47,7 +47,7 @@ public class ConfeccionServiceImpl implements ConfeccionService {
         return dao.listar();
     }
 
-    /* Registrar la orden emite el TICKET (T001-0001) */
+    /* registrar la orden emite el ticket */
     @Override
     @Transactional
     public Confeccion registrar(Confeccion nueva) {
@@ -55,7 +55,7 @@ public class ConfeccionServiceImpl implements ConfeccionService {
         nueva.setId(null);
         Cliente cliente = clientes.buscarPorId(nueva.getCliente().getId())
             .orElseThrow(() -> new IllegalArgumentException("El cliente no existe"));
-        // Fechas predeterminadas desde la creación del ticket si el formulario no las envía.
+        /* fechas predeterminadas desde la creacion del ticket si el formulario */
         LocalDate fechaCreacion = nueva.getFecha() != null ? nueva.getFecha() : LocalDate.now();
         nueva.setFecha(fechaCreacion);
         if (nueva.getPrimeraPrueba() == null) nueva.setPrimeraPrueba(fechaCreacion.plusDays(5));
@@ -68,14 +68,13 @@ public class ConfeccionServiceImpl implements ConfeccionService {
         Preconditions.checkArgument(!nueva.getEntregaFinal().isBefore(nueva.getPrimeraPrueba()),
             "La entrega final no puede ser anterior a la primera prueba");
         Preconditions.checkArgument(nueva.getAdelanto() <= nueva.getCostoTotal(), "El adelanto no puede superar el costo total");
-        // Compatibilidad con la tabla existente: color es NOT NULL. Si el frontend no
-        // manda el campo separado, se deriva del detalle JSON enviado por la ficha.
+        /* compatibilidad con la tabla existente */
         if (StringUtils.isBlank(nueva.getColor()) || "No especificado".equals(nueva.getColor())) {
             String colorDerivado = extraerColor(nueva.getDetalle());
             nueva.setColor(colorDerivado.isBlank() ? "No especificado" : colorDerivado);
         }
         nueva.setCliente(cliente);
-        // La BD existente exige ambas columnas: entregaFinal y fechaEntrega.
+        /* la bd existente exige ambas columnas */
         nueva.setFechaEntrega(nueva.getEntregaFinal());
         nueva.setEstado("En confección");
         nueva.setBoleta(null);
@@ -128,6 +127,15 @@ public class ConfeccionServiceImpl implements ConfeccionService {
             .orElseGet(() -> empleados.findAll().stream()
                 .filter(e -> e.getNombre() != null && e.getNombre().equalsIgnoreCase(referencia.trim()))
                 .findFirst().orElse(null));
-        if (encontrado != null) orden.setEmpleadoResponsable(encontrado);
+        if (encontrado != null) {
+            orden.setEmpleadoResponsable(encontrado);
+            orden.setEmpleado(nombreVisible(encontrado));
+        }
+    }
+    /* nombre y primer apellido */
+    private static String nombreVisible(Empleado e) {
+        String n = e.getNombre() == null ? "" : e.getNombre().trim().split("\\s+")[0];
+        String a = e.getApellido() == null ? "" : e.getApellido().trim().split("\\s+")[0];
+        return (n + " " + a).trim();
     }
 }

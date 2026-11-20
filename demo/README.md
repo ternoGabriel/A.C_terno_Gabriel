@@ -22,7 +22,7 @@ Alternativa: variables de entorno `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`
 ./mvnw javadoc:javadoc        # documentación técnica
 ```
 
-Usuarios de demostración (se guardan cifrados): `admin` / `admin` (Administrador) y `empleado` / `1234` (Empleado).
+Cuenta inicial del administrador (se guarda cifrada): correo `jeffersonadmin1@gmail.com` y contraseña `AJeffer01`. El inicio de sesión pide correo `@gmail.com` y una contraseña de más de 8 caracteres con mayúsculas, minúsculas y números; los empleados los crea el administrador.
 Cambiar estas contraseñas antes de cualquier uso real.
 
 ## Flujo de trabajo con Git

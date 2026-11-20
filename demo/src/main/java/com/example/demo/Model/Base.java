@@ -7,7 +7,7 @@ import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
 import lombok.Setter;
 
-/* Clase base: todas las entidades comparten el id autogenerado */
+/* clase base todas las entidades comparten el id autogenerado */
 @MappedSuperclass
 @Getter
 @Setter

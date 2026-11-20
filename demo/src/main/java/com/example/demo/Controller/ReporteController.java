@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.Service.ReporteService;
 
-/** Descarga de informes en Excel (botón "Exportar Excel" de la pantalla de informes). */
+/* descarga de informes en excel */
 @RestController
 @RequestMapping("/api/reportes")
 @PreAuthorize("hasAuthority('ADMIN')")
@@ -33,7 +33,7 @@ public class ReporteController {
                                         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
                                         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
         byte[] archivo = servicio.generarExcel(tipo, desde, hasta);
-        /* "tipo" ya fue validado contra una lista fija, por eso es seguro usarlo en el nombre del archivo */
+        /* tipo ya fue validado contra una lista fija */
         ContentDisposition descarga = ContentDisposition.attachment().filename("informe-" + tipo.toLowerCase() + ".xlsx").build();
         return ResponseEntity.ok()
             .contentType(XLSX)

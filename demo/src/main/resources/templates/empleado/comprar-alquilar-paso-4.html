@@ -11,6 +11,7 @@
     <link rel="stylesheet" th:href="@{/css/global.css}" />
     <link rel="stylesheet" th:href="@{/css/empleado/comprar-alquilar.css}" />
     <link rel="stylesheet" th:href="@{/css/responsive.css}" />
+    <link rel="stylesheet" th:href="@{/css/fluido.css}" />
   </head>
 
   <body class="page-empleado-comprar-alquilar">
@@ -49,7 +50,7 @@
         </div>
 
         <div class="content">
-          <!-- Pestañas de Tipo de Operación -->
+          <!-- pestanas de tipo de operacion -->
           <div
             aria-label="Tipo de operación"
             class="operation-tabs"
@@ -95,7 +96,7 @@
             </button>
           </div>
 
-          <!-- Stepper Circular de Ancho Completo -->
+          <!-- stepper circular de ancho completo -->
           <div aria-label="Paso 4 de 5" class="flow-stepper full-width-stepper">
             <div class="step-item active">
               <div class="step-circle step-completed">✓</div>
@@ -123,7 +124,7 @@
             </div>
           </div>
 
-          <!-- Tarjeta Principal del Paso 4 -->
+          <!-- tarjeta principal del paso 4 -->
           <section class="card flow-card">
             <div class="section-title">
               <div>
@@ -135,14 +136,14 @@
             </div>
 
             <form action="#" method="POST">
-              <!-- Sección de Finanzas y Método de Pago Solicitada -->
+              <!-- seccion de finanzas y metodo de pago solicitada -->
               <div class="finanzas-section">
                 <div class="finanzas-header">
                   <h3>Método y pago de alquiler</h3>
                   <span class="badge-tg">TG · CAJA Y PAGOS</span>
                 </div>
 
-                <!-- Botones de métodos de pago -->
+                <!-- botones de metodos de pago -->
                 <div class="metodos-pago">
                   <div class="metodo-btn active" data-metodo="Efectivo">
                     Efectivo
@@ -153,7 +154,7 @@
                   </div>
                 </div>
 
-                <!-- Grid de campos de pago dinámico -->
+                <!-- grid de campos de pago dinamico -->
                 <div class="pago-grid" id="pagoGridContainer">
                   <label class="field">
                     <span>Total a cobrar</span>
@@ -180,7 +181,7 @@
                     />
                   </label>
 
-                  <!-- Tercer campo dinámico (Vuelto automático solo para efectivo) -->
+                  <!-- tercer campo dinamico -->
                   <label class="field" id="campoDinamicoTercero">
                     <span id="labelTercerCampo">Vuelto automático</span>
                     <input
@@ -192,7 +193,7 @@
                   </label>
                 </div>
 
-                <!-- Contenedor QR de Yape configurado por el administrador -->
+                <!-- contenedor qr de yape configurado por el administrador -->
                 <div
                   id="yapeAdminContainer"
                   class="yape-qr-box"
@@ -209,7 +210,7 @@
                 </div>
               </div>
 
-              <!-- Botones de Acción -->
+              <!-- botones de accion -->
               <div class="actions">
                 <a
                   class="btn secondary"
@@ -228,6 +229,7 @@
 
     <div th:replace="~{fragments/toast :: toast('Cambios guardados')}"></div>
     <script th:src="@{/js/api.js}" defer></script>
+    <script th:src="@{/js/historial.js}" defer></script>
     <script defer="" th:src="@{/js/app.js}"></script>
     <script defer="" th:src="@{/js/empleado/comprar-alquilar.js}"></script>
     <script defer="" th:src="@{/js/empleado/comprar-alquilar-p4.js}"></script>

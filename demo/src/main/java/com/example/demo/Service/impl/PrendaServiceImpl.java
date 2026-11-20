@@ -42,7 +42,7 @@ public class PrendaServiceImpl implements PrendaService {
         return String.format("%s-%03d", pre, max + 1);
     }
 
-    /* Una prenda nueva siempre entra como Disponible: después solo cambia con las boletas */
+    /* una prenda nueva siempre entra como disponible */
     @Override
     @Transactional
     public Prenda crear(Prenda nueva) {
@@ -52,12 +52,14 @@ public class PrendaServiceImpl implements PrendaService {
             "Debe elegir una categoría: Niños, Jóvenes o Adultos");
         nueva.setEstado("Disponible");
         nueva.setSuspendida(false);
+        nueva.setFechaCreacion(java.time.LocalDate.now());
+        nueva.setFechaEdicion(null);
         Prenda guardada = dao.guardar(nueva);
         LOG.info("Prenda {} registrada", guardada.getCodigo());
         return guardada;
     }
 
-    /* El administrador solo puede cambiar tipo, precios e imagen; categoría, estado y código quedan fijos */
+    /* el administrador solo puede cambiar tipo precios e imagen */
     @Override
     @Transactional
     public Prenda actualizar(Long id, Prenda datos) {
@@ -67,10 +69,11 @@ public class PrendaServiceImpl implements PrendaService {
         actual.setPrecioVenta(datos.getPrecioVenta());
         actual.setPrecioAlquiler(datos.getPrecioAlquiler());
         if (StringUtils.isNotBlank(datos.getImagen())) actual.setImagen(datos.getImagen());
+        actual.setFechaEdicion(java.time.LocalDate.now());
         return dao.guardar(actual);
     }
 
-    /* Cambio manual de estado: solo Restauración → Lavandería/Disponible y Lavandería → Disponible */
+    /* cambio manual de estado */
     @Override
     @Transactional
     public Prenda cambiarEstado(Long id, String estado) {

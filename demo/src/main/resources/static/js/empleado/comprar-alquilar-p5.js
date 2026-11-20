@@ -1,4 +1,4 @@
-/* Paso 5 */
+/* paso 5 */
 (() => {
   class Paso5 {
     constructor(sesion) {
@@ -17,7 +17,7 @@
       let boleta = null;
       let config = {};
 
-      /* Emite la boleta o reutiliza la existente */
+      /* emite la boleta o reutiliza la existente */
       try {
         config = await TG.configuracion();
 
@@ -88,7 +88,7 @@
         ? TG.fecha(boleta.fechaDevolucion) + " · 6:00 p. m."
         : "—";
 
-      /* Valores que se muestran en la boleta */
+      /* valores que se muestran en la boleta */
       const valores = {
         fechaHora: TG.fechaHora(),
         fechaCabecera: TG.fechaCabecera(),
@@ -101,7 +101,7 @@
         codigoPrenda: boleta.prenda.codigo,
         clienteNombre: TG.nombre(boleta.cliente),
         clienteDni: boleta.cliente.dni,
-        empleado: boleta.empleado || (u ? u.nombre : ""),
+        empleado: boleta.empleado || TG.empleadoNombre(),
         devolucion: fechaPactada,
         total: money(total),
         entregado: money(entregado),
@@ -158,6 +158,17 @@
           money(config.penalidadMalEstado.valor) +
           " por manchas, roturas o daños.";
       }
+
+      /* si el administrador cambia los montos se actualizan aqui */
+      TG.vigilarPenalidades(({ demora, malEstado }) => {
+        if (pen)
+          pen.textContent =
+            "Demora: " +
+            money(demora) +
+            " por día de retraso · Mal estado: " +
+            money(malEstado) +
+            " por manchas, roturas o daños.";
+      });
 
       document
         .querySelectorAll("[data-print-receipt]")

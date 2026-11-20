@@ -24,13 +24,13 @@ public class ConfeccionController {
         return servicio.listar();
     }
 
-    /* Registrar la orden emite el TICKET (T001-0001) */
+    /* registrar la orden emite el ticket */
     @PostMapping("nuevo")
     public Confeccion guardarConfeccion(@Valid @RequestBody Confeccion nueva) {
         return servicio.registrar(nueva);
     }
 
-    /* Prueba de confección: guarda el comentario y la fecha de entrega (que se puede ampliar) */
+    /* prueba de confeccion guarda el comentario y la fecha */
     @PutMapping("prueba/{id}")
     public Confeccion registrarPrueba(@PathVariable Long id, @RequestBody Map<String, String> datos) {
         String fecha = datos.get("entregaFinal");

@@ -11,6 +11,7 @@
     <link rel="stylesheet" th:href="@{/css/global.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/prendas.css}" />
     <link rel="stylesheet" th:href="@{/css/responsive.css}" />
+    <link rel="stylesheet" th:href="@{/css/fluido.css}" />
   </head>
 
   <body class="page-admin-prendas">
@@ -49,7 +50,7 @@
         </div>
 
         <div class="content">
-          <!-- CONTENEDORES KPI FILTRADORES CON ESTILOS TEMÁTICOS POR ESTADO -->
+          <!-- contenedores kpi filtradores con estilos tematicos por estado -->
           <div class="kpi-grid four">
             <div
               class="card kpi kpi-filter active kpi-todos"
@@ -83,17 +84,17 @@
             </div>
             <div
               class="card kpi kpi-filter kpi-restauracion"
-              data-filter="restauracion"
+              data-filter="confecciones"
             >
               <div class="kpi-icon">✂</div>
               <div class="kpi-copy">
-                <span>En confección</span><strong>5</strong
-                ><small>En proceso</small>
+                <span>Confección</span><strong>0</strong
+                ><small>Realizadas</small>
               </div>
             </div>
           </div>
 
-          <!-- CONTENEDOR DE INVENTARIO DE PRENDAS -->
+          <!-- contenedor de inventario de prendas -->
           <section class="card inventory-card">
             <div class="inventory-header">
               <div class="inventory-title-group">
@@ -103,6 +104,14 @@
                 </p>
               </div>
               <div class="inventory-filters">
+                <select id="inventoryStateFilter" class="inventory-select">
+                  <option value="todos">Todos los estados</option>
+                  <option value="disponible">Disponible</option>
+                  <option value="alquilado">Alquilado</option>
+                  <option value="lavanderia">Lavandería</option>
+                  <option value="restauracion">Restauración</option>
+                  <option value="confecciones">Confección</option>
+                </select>
                 <div class="search-input-wrapper">
                   <svg
                     class="search-icon"
@@ -121,14 +130,10 @@
                     class="inventory-search-input"
                   />
                 </div>
-                <select id="inventoryStateFilter" class="inventory-select">
-                  <option value="todos">Todos los estados</option>
-                  <option value="disponible">Disponible</option>
-                  <option value="alquilado">Alquilado</option>
-                  <option value="lavanderia">Lavandería</option>
-                  <option value="restauracion">Restauración</option>
-                </select>
               </div>
+              <button type="button" class="btn-vendidos" id="btnVendidos" aria-pressed="false">
+                Vendidos
+              </button>
             </div>
 
             <div class="table-wrap">
@@ -138,8 +143,6 @@
                     <th>CÓDIGO</th>
                     <th>NOMBRE</th>
                     <th>TALLA</th>
-                    <th>COSTO DE ALQUILER</th>
-                    <th>PRECIO DE VENTA</th>
                     <th>ESTADO</th>
                     <th>CLIENTE / ORDEN</th>
                   </tr>
@@ -154,6 +157,7 @@
 
     <div th:replace="~{fragments/toast :: toast('Cambios guardados')}"></div>
     <script th:src="@{/js/api.js}" defer></script>
+    <script th:src="@{/js/historial.js}" defer></script>
     <script th:src="@{/js/app.js}" defer></script>
     <script th:src="@{/js/admin/prendas.js}" defer></script>
   </body>

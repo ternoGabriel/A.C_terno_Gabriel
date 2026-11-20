@@ -9,6 +9,7 @@
   <link rel="stylesheet" th:href="@{/css/global.css}" />
   <link rel="stylesheet" th:href="@{/css/empleado/clientes.css}" />
   <link rel="stylesheet" th:href="@{/css/responsive.css}" />
+    <link rel="stylesheet" th:href="@{/css/fluido.css}" />
 </head>
 
 <body class="page-empleado-clientes">
@@ -35,7 +36,7 @@
         </div>
       </div>
       <div class="content" style="display: flex; flex-direction: column; gap: 24px">
-        <!-- Contenedor de la Tabla -->
+        <!-- contenedor de la tabla -->
         <section class="card">
           <div class="card-head">
             <div>
@@ -69,6 +70,7 @@
   </div>
   <div th:replace="~{fragments/toast :: toast('Cambios guardados')}"></div>
   <script th:src="@{/js/api.js}" defer></script>
+  <script th:src="@{/js/historial.js}" defer></script>
   <script th:src="@{/js/app.js}" defer></script>
   <script th:src="@{/js/empleado/clientes.js}" defer></script>
 </body>

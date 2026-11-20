@@ -1,4 +1,4 @@
-// Clientes (administrador): ve los clientes que registran los empleados, con su calificación y estado.
+/* clientes ve los clientes que registran los empleados */
 document.addEventListener("DOMContentLoaded", () =>
   TG.listo(async () => {
     const tbody = document.querySelector(".data-table tbody");
@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () =>
         kpis[2].textContent = conAlquiler.size;
         kpis[3].textContent = conPenal.size;
       }
-      /* Mismo registro de clientes que ve el empleado (los clientes eliminados no se muestran) */
+      /* mismo registro de clientes que ve el empleado */
       const lista = clientes
         .filter((c) => !TG.clienteEliminado(c, boletas))
         .sort((a, b) => b.id - a.id);
@@ -77,7 +77,7 @@ document.addEventListener("DOMContentLoaded", () =>
       filtrar();
     };
 
-    /* El administrador también puede registrar clientes */
+    /* el administrador tambien puede registrar clientes */
     document
       .querySelector(".filter-row .btn.primary")
       ?.addEventListener("click", () => {

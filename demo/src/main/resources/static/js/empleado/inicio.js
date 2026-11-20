@@ -1,4 +1,4 @@
-// Inicio del empleado: resumen calculado con las boletas y prendas reales.
+/* inicio del empleado resumen calculado con las boletas y prendas */
 document.addEventListener("DOMContentLoaded", () =>
   TG.listo(async () => {
     try {
@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () =>
         alq.length,
         vencidas.length + " vencidas",
       );
-      /* Próximas entregas: alquileres por devolver y confecciones por entregar, ordenados por fecha */
+      /* proximas entregas alquileres por devolver y confecciones por entregar ordenados */
       const filas = alq
         .map((b) => ({
           fecha: b.fechaDevolucion || "",

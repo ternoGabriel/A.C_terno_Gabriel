@@ -5,7 +5,7 @@ import org.springframework.stereotype.Repository;
 import com.example.demo.Model.MetodoPago;
 import com.example.demo.Repository.MetodoPagoRepository;
 
-/** Implementación JPA de {@link MetodoPagoDao}. */
+/* implementacion jpa de metodopagodao */
 @Repository
 public class MetodoPagoDaoJpa extends JpaDao<MetodoPago> implements MetodoPagoDao {
 

@@ -39,11 +39,11 @@ public class ConfiguracionServiceImpl implements ConfiguracionService {
         return dao.listar();
     }
 
-    /* El administrador cambia un valor (penalidadDemora, penalidadMalEstado) y el empleado lo usa al registrar devoluciones */
+    /* el administrador cambia un valor */
     @Override
     @Transactional
     public Configuracion cambiar(String clave, Object valorRecibido, Object modificadoPor) {
-        /* Con la base vacía la penalidad aún no existe: el administrador la crea la primera vez que la define */
+        /* con la base vacia la penalidad aun no existe */
         Preconditions.checkArgument(CLAVES.contains(clave), "No existe la configuración " + clave);
         Configuracion c = dao.buscarPorClave(clave).orElseGet(() -> {
             Configuracion nueva = new Configuracion();

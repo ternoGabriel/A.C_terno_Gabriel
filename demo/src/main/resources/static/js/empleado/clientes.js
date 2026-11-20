@@ -1,4 +1,4 @@
-// Clientes (empleado): consulta y administración de clientes registrados
+/* clientes consulta y administracion de clientes registrados */
 document.addEventListener("DOMContentLoaded", () =>
   TG.listo(async () => {
     const tbody = document.querySelector(".data-table tbody");
@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", () =>
       TG.toast(err.message);
     }
 
-    /* La calificación se recalcula sola cuando otro empleado califica: se refresca sin recargar la página */
+    /* la calificacion se recalcula sola cuando otro empleado califica */
     setInterval(() => {
       if (!document.hidden) pintar().catch(() => { });
     }, 10000);

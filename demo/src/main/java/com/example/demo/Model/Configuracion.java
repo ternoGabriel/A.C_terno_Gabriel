@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
-/* Valores que define el administrador y usa el empleado (por ejemplo, el monto de las penalizaciones) */
+/* valores que define el administrador y usa el empleado */
 @Entity
 @Getter
 @Setter
@@ -26,7 +26,7 @@ public class Configuracion extends Base {
     @Positive(message = "El monto debe ser mayor a 0")
     private Double valor;
 
-    /* Se conserva modificadoPor como texto para no alterar el JSON existente. */
+    /* se conserva modificadopor como texto */
     @Size(max = 255, message = "El nombre de quien modificó no debe superar 255 caracteres")
     private String modificadoPor;
 

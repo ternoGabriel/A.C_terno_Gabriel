@@ -1,11 +1,11 @@
-/* Estilos específicos de Reportes - Terno Gabriel */
+/* estilos especificos de reportes */
 .page-admin-reportes .content {
   display: flex;
   flex-direction: column;
   gap: 24px;
 }
 
-/* Pestañas de tipos de reporte */
+/* pestanas de tipos de reporte */
 .report-types {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -35,7 +35,7 @@
   font-weight: 600;
 }
 
-/* Grid de filtros superior */
+/* grid de filtros superior */
 .form-grid.four-cols {
   display: grid;
   grid-template-columns: repeat(4, 1fr) minmax(120px, auto);
@@ -76,7 +76,7 @@
   background-color: #92400e !important;
 }
 
-/* Tarjetas de Indicadores (KPIs) */
+/* tarjetas de indicadores */
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -136,7 +136,7 @@
   font-weight: 500;
 }
 
-/* NUEVO: Estilos del Contenedor de Gráfico y Posiciones */
+/* nuevo estilos del contenedor de grafico y posiciones */
 .analytics-grid {
   display: grid;
   grid-template-columns: 1.2fr 1fr;
@@ -160,7 +160,7 @@
   font-weight: 600;
 }
 
-/* Gráfico de barras simulado */
+/* grafico de barras simulado */
 .chart-bars-visual {
   display: flex;
   justify-content: space-around;
@@ -210,7 +210,7 @@
   font-weight: 500;
 }
 
-/* Lista de Ranking y Posiciones */
+/* lista de ranking y posiciones */
 .ranking-list {
   list-style: none;
   display: flex;
@@ -273,7 +273,7 @@
   color: #0f172a;
 }
 
-/* Cabecera de la tarjeta de tabla */
+/* cabecera de la tarjeta de tabla */
 .card-head {
   display: flex;
   justify-content: space-between;
@@ -286,7 +286,7 @@
   gap: 10px;
 }
 
-/* Ajuste responsive para pantallas pequeñas */
+/* ajuste responsive para pantallas pequenas */
 @media (max-width: 1024px) {
   .form-grid.four-cols {
     grid-template-columns: repeat(2, 1fr);

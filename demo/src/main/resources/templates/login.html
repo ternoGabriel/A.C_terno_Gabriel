@@ -11,6 +11,7 @@
     <link rel="stylesheet" th:href="@{/css/global.css}" />
     <link rel="stylesheet" th:href="@{/css/login.css}" />
     <link rel="stylesheet" th:href="@{/css/responsive.css}" />
+    <link rel="stylesheet" th:href="@{/css/fluido.css}" />
   </head>
 
   <body>
@@ -30,7 +31,7 @@
       </section>
 
       <section class="login-panel">
-        <form class="login-form" id="loginForm">
+        <form class="login-form" id="loginForm" autocomplete="off" novalidate>
           <div class="wordmark"><strong>Terno</strong> <em>Gabriel</em></div>
 
           <div class="login-title">
@@ -40,16 +41,20 @@
           </div>
 
           <div class="error-message" id="loginError" hidden>
-            Usuario o contraseña incorrectos.
+            Correo o contraseña incorrectos.
           </div>
 
           <label class="field">
-            <span>Usuario o correo</span>
+            <span>Correo electrónico</span>
             <input
               id="email"
+              name="correo"
               type="text"
-              autocomplete="username"
-              placeholder="Ingresa tu usuario o correo"
+              inputmode="email"
+              autocomplete="email"
+              autocapitalize="none"
+              spellcheck="false"
+              placeholder="ejemplo@gmail.com"
               required
             />
           </label>
@@ -57,8 +62,17 @@
           <label class="field">
             <span>Contraseña</span>
             <input
-              id="password"
+              id="claveAcceso"
+              name="clave-acceso"
               type="password"
+              data-sin-autocompletar
+              data-clave-visual
+              autocomplete="new-password"
+              autocapitalize="none"
+              spellcheck="false"
+              data-lpignore="true"
+              data-1p-ignore
+              data-bwignore="true"
               placeholder="Ingresa tu contraseña"
               required
             />

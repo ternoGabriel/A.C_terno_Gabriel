@@ -56,7 +56,7 @@
   font-size: 0.95rem;
 }
 
-/* Tabla de Penalizaciones SIN el cuadro/borde exterior (Diseño limpio y plano) */
+/* tabla de penalizaciones sin el cuadro borde exterior */
 .penalizacion-table-container {
   background: transparent;
   border: none;
@@ -132,7 +132,7 @@
   text-align: center;
 }
 
-/* Sección de Finanzas */
+/* seccion de finanzas */
 .finanzas-section {
   background: #fff;
   border: 1px solid #e2e2e2;

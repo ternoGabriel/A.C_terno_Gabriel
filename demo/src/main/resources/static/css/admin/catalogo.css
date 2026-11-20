@@ -127,7 +127,7 @@
   cursor: pointer;
 }
 
-/* Filtro de catálogo administrativo para consultar prendas vendidas */
+/* filtro de catalogo administrativo */
 .sold-filter-toggle {
   display: inline-flex;
   align-items: center;

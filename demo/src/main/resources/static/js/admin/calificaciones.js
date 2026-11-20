@@ -1,4 +1,4 @@
-// Calificación de clientes: lista lo que califican los empleados al terminar cada boleta / devolución.
+/* calificacion de clientes lista lo que califican los empleados */
 document.addEventListener("DOMContentLoaded", () =>
   TG.listo(async () => {
     const kpiButtons = document.querySelectorAll(".kpi-btn");
@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", () =>
         else riesgo++;
       });
       const promedio = total > 0 ? (suma / total).toFixed(1) : "0.0";
-      if (elPromedio) elPromedio.textContent = promedio + " / 5";
+      if (elPromedio) elPromedio.textContent = promedio;
       if (elTotal) elTotal.textContent = total;
       if (elBuenas) elBuenas.textContent = buenas;
       if (elEstandar) elEstandar.textContent = estandar;

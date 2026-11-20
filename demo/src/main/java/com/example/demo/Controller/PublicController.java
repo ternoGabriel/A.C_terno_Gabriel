@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Rutas públicas: no exigen iniciar sesión (/public/**). */
+/* rutas publicas no exigen iniciar sesion */
 @RestController
 @RequestMapping("/public")
 public class PublicController {

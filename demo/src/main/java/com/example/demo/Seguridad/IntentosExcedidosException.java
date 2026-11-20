@@ -1,6 +1,6 @@
 package com.example.demo.Seguridad;
 
-/** Se lanza cuando un usuario supera el máximo de intentos de inicio de sesión fallidos. */
+/* se lanza cuando un usuario supera el maximo de intentos */
 public class IntentosExcedidosException extends RuntimeException {
 
     public IntentosExcedidosException(String mensaje) {

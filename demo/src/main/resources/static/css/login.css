@@ -5,7 +5,7 @@
   background: #fcfbf9;
 }
 
-/* --- Panel Izquierdo (Branding y Atmósfera) --- */
+/* panel izquierdo */
 .login-brand {
   padding: clamp(35px, 7vw, 100px);
   background: linear-gradient(135deg, #211d14, #40351e 60%, #19160f);
@@ -128,7 +128,7 @@
   color: #b8860b;
 }
 
-/* Encabezado */
+/* encabezado */
 .login-title {
   text-align: left;
   margin-bottom: 6px;
@@ -172,6 +172,14 @@
   text-transform: none;
   letter-spacing: 0.8px;
   color: #44403c;
+}
+
+.field > span.tg-msg {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.3;
+  color: #d92d20;
 }
 
 .field input {
@@ -279,16 +287,18 @@
     padding: 24px;
   }
 }
-/* El login ocupa exactamente la pantalla: sin barra de desplazamiento */
+/* el login ocupa exactamente la pantalla */
 html:has(.login-page),
 body:has(.login-page) {
   height: 100%;
   overflow: hidden;
 }
 
+/* alto de pantalla compensando la escala de pantallas grandes */
 main.login-page {
   height: 100vh;
   height: 100dvh;
+  height: calc(100dvh / var(--ui-zoom, 1));
   min-height: 0;
   overflow: hidden;
 }
@@ -297,9 +307,12 @@ main.login-page .login-panel {
   min-height: 0;
   height: 100%;
   padding: clamp(12px, 3vh, 36px) 24px;
-  overflow: hidden;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: auto;
   align-items: center;
-  justify-content: center;
+  /* el formulario se centra con margin auto */
+  justify-content: flex-start;
 }
 
 main.login-page .login-brand {
@@ -308,7 +321,7 @@ main.login-page .login-brand {
 }
 
 main.login-page .login-form {
-  margin: 0;
+  margin: auto 0;
   gap: clamp(8px, 1.8vh, 15px);
 }
 
@@ -330,5 +343,74 @@ main.login-page .gold-line {
   main.login-page .login-panel {
     height: 100%;
     align-items: center;
+  }
+}
+
+/* contrasena type password con puntos simulados encima */
+.field input[type="password"]::-ms-reveal,
+.field input[type="password"]::-ms-clear {
+  display: none;
+}
+
+.field input.clave-visual-on {
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  caret-color: transparent;
+}
+
+.field input.clave-visual-on::selection {
+  background: transparent;
+}
+
+.field input.clave-visual-on::placeholder {
+  color: #a8a29e;
+  -webkit-text-fill-color: #a8a29e;
+  opacity: 1;
+}
+
+.clave-visual {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 14px;
+  right: 42px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  pointer-events: none;
+  color: #1c1917;
+}
+
+.clave-visual[hidden] {
+  display: none;
+}
+
+.clave-puntos {
+  display: block;
+  flex: none;
+  width: 0;
+  height: 100%;
+  background: radial-gradient(circle at 50% 50%, currentColor 0 2.8px, transparent 3.4px) 0 50% / 9px 100% repeat-x;
+}
+
+.clave-cursor {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 1px;
+  height: 16px;
+  margin-top: -8px;
+  background: currentColor;
+  display: none;
+  animation: clave-parpadeo 1s steps(1) infinite;
+}
+
+.field input:focus + .clave-visual .clave-cursor {
+  display: block;
+}
+
+@keyframes clave-parpadeo {
+  50% {
+    opacity: 0;
   }
 }

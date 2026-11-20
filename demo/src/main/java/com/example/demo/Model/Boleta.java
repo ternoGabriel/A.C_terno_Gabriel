@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 public class Boleta extends Base {
 
-    /* Lo genera el sistema al emitir (B001-0001); por eso no es obligatorio al recibir la solicitud */
+    /* lo genera el sistema al emitir */
     @Pattern(regexp = "B\\d{3}-\\d{4,}", message = "El número de boleta debe tener el formato B001-0001")
     @Column(unique = true)
     private String numero;
@@ -20,13 +20,13 @@ public class Boleta extends Base {
     @Pattern(regexp = "Venta|Alquiler|Reserva|Confección", message = "El tipo debe ser Venta, Alquiler, Reserva o Confección")
     private String tipo;
 
-    /* Muchas boletas pertenecen a un cliente */
+    /* muchas boletas pertenecen a un cliente */
     @NotNull(message = "Debe seleccionar un cliente")
     @ManyToOne
     @JoinColumn(name = "idCliente")
     private Cliente cliente;
 
-    /* Muchas boletas pueden referirse a una misma prenda (en distintas fechas); la boleta de confección no tiene prenda */
+    /* muchas boletas pueden referirse a una misma prenda */
     @ManyToOne
     @JoinColumn(name = "idPrenda")
     private Prenda prenda;
@@ -34,13 +34,13 @@ public class Boleta extends Base {
     @NotNull(message = "La fecha de la boleta es obligatoria")
     private LocalDate fecha = LocalDate.now();
 
-    /* La fecha no puede ser pasada al crear la boleta (se valida en el controlador, no aquí, para poder devolver con retraso) */
+    /* la fecha no puede ser pasada al crear la boleta */
     private LocalDate fechaDevolucion;
 
-    /* Solo alquileres: fecha de recojo; con ella y la de devolución se calculan los días del alquiler */
+    /* solo alquileres fecha de recojo */
     private LocalDate fechaRecojo;
 
-    /* Solo alquileres: si el empleado lo marca, los días 1 y 2 se cobran como un solo día */
+    /* solo alquileres si el empleado lo marca los dias 1 */
     private Boolean cobrarDosDiasComoUno = Boolean.FALSE;
 
     @NotNull(message = "El monto es obligatorio")
@@ -51,12 +51,11 @@ public class Boleta extends Base {
     @Pattern(regexp = "Vigente|Devuelta|Anulada", message = "El estado debe ser Vigente, Devuelta o Anulada")
     private String estado = "Vigente";
 
-    /* Nombre visible conservado para no cambiar el JSON que consume el frontend. */
+    /* nombre visible conservado para no cambiar el json que consume */
     @Size(max = 255, message = "El nombre del empleado no debe superar 255 caracteres")
     private String empleado;
 
-    /* Relación real con el empleado que emitió la boleta. Se oculta en JSON para evitar ciclos
-       y mantener exactamente la respuesta que ya utiliza la interfaz. */
+    /* relacion real con el empleado que emitio la boleta */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idEmpleado")
     @com.fasterxml.jackson.annotation.JsonIgnore
@@ -65,7 +64,7 @@ public class Boleta extends Base {
     @Pattern(regexp = "Efectivo|Yape|Transferencia", message = "El método de pago debe ser Efectivo, Yape o Transferencia")
     private String metodoPago;
 
-    /* Solo para boletas de confección: la orden (ticket) que se está entregando */
+    /* solo para boletas de confeccion */
     @ManyToOne
     @JoinColumn(name = "idConfeccion")
     private Confeccion confeccion;

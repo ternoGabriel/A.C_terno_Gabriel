@@ -146,7 +146,7 @@
   cursor: wait;
 }
 
-/* Vista de lo guardado + botón Editar en cada contenedor */
+/* vista de lo guardado boton editar en cada contenedor */
 .page-admin-metodos-pago .pago-vista,
 .page-admin-metodos-pago .pago-form {
   display: flex;

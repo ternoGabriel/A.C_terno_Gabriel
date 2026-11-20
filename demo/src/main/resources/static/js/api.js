@@ -1,20 +1,37 @@
-/* Utilidades compartidas: conexión con la API (MySQL), sesión, formato y componentes reutilizables.
-   Todas las pantallas leen y guardan aquí, así lo que hace el admin lo ve el empleado y viceversa. */
+/* utilidades compartidas conexion con la api */
 (() => {
   const SESION = "tgUsuario";
   const TG = (window.TG = {});
 
-  /* ---------- API ---------- */
-  /* Spring Security guarda el token CSRF en la cookie XSRF-TOKEN; se envía en cada petición que modifica datos */
+  /* api */
+  /* spring security guarda el token csrf en la cookie xsrf */
   TG.csrf = () => {
     const m = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]*)/);
     return m ? decodeURIComponent(m[1]) : "";
   };
 
+  /* identificador de esta pestana se conserva al recargar */
+  TG.pestana = () => {
+    let id = "";
+    try {
+      id = sessionStorage.getItem("tgPestana") || "";
+      if (!id) {
+        id =
+          window.crypto && crypto.randomUUID
+            ? crypto.randomUUID()
+            : Date.now().toString(36) + Math.random().toString(36).slice(2);
+        sessionStorage.setItem("tgPestana", id);
+      }
+    } catch {
+      id = "";
+    }
+    return id;
+  };
+
   TG.api = async (ruta, opciones = {}) => {
     const init = {
       method: (opciones.method || "GET").toUpperCase(),
-      headers: {},
+      headers: { "X-Tab-Id": TG.pestana() },
     };
     if (init.method !== "GET" && init.method !== "HEAD") {
       const token = TG.csrf();
@@ -30,10 +47,16 @@
     } catch {
       throw new Error("No se pudo conectar con el servidor.");
     }
-    /* Si la sesión del servidor venció, se vuelve al inicio de sesión (el login mismo responde 401 con credenciales malas) */
+    /* si la sesion del servidor vencio se vuelve al inicio */
     if (resp.status === 401 && ruta !== "/api/login") {
+      let motivo = "";
+      try {
+        motivo = (await resp.json()).motivo || "";
+      } catch {
+        motivo = "";
+      }
       TG.cerrarSesion();
-      location.replace("/login");
+      location.replace("/login" + (motivo ? "?motivo=" + motivo : ""));
       throw new Error("Tu sesión venció. Inicia sesión de nuevo.");
     }
     let datos = null;
@@ -41,6 +64,12 @@
       datos = await resp.json();
     } catch {
       datos = null;
+    }
+    /* otra pestana ya tiene abierta la sesion de este usuario */
+    if (resp.status === 409 && datos && datos.motivo === "otra-pestana") {
+      TG.cerrarSesion();
+      location.replace("/login?motivo=otra-pestana");
+      throw new Error(datos.mensaje);
     }
     if (!resp.ok) {
       const msg = datos && (datos.mensaje || Object.values(datos).join(". "));
@@ -69,7 +98,30 @@
     return mapa;
   };
 
-  /* ---------- Métodos de pago: Yape y transferencia (los edita el administrador en la base de datos) ---------- */
+  /* revisa los montos de penalizacion del admin */
+  TG.vigilarPenalidades = (alCambiar) => {
+    let ultimo = "";
+    const leer = async () => {
+      try {
+        const c = await TG.configuracion();
+        const demora = Number(c.penalidadDemora?.valor) || 0;
+        const malEstado = Number(c.penalidadMalEstado?.valor) || 0;
+        const clave = demora + "|" + malEstado;
+        if (clave === ultimo) return;
+        ultimo = clave;
+        alCambiar({ demora, malEstado });
+      } catch {
+        /* sin respuesta se vuelve a intentar */
+      }
+    };
+    leer();
+    setInterval(leer, 10000);
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) leer();
+    });
+  };
+
+  /* metodos de pago yape y transferencia */
   TG.metodosPago = async () => {
     const lista = await TG.get("/api/metodos-pago");
     const mapa = {};
@@ -79,9 +131,7 @@
     return mapa;
   };
 
-  /* Muestra bajo el selector de método los datos de cobro que guardó el administrador:
-     Yape → QR + número · Transferencia → banco, titular, cuenta y CCI. Efectivo no muestra nada.
-     Lo usan el paso 4 de comprar/alquilar y la pantalla de confección (ambas tienen #yapeAdminContainer). */
+  /* muestra bajo el selector de metodo los datos de cobro */
   let pedidoPago = 0;
   TG.mostrarDatosPago = async (metodo) => {
     const yape = document.getElementById("yapeAdminContainer");
@@ -106,7 +156,7 @@
       TG.toast(err.message);
       return;
     }
-    if (id !== pedidoPago) return; /* el empleado ya eligió otro método */
+    if (id !== pedidoPago) return; /* el empleado ya eligio otro metodo */
 
     const agrupar = (n, tam) =>
       String(n || "")
@@ -153,7 +203,7 @@
     trans.style.display = "block";
   };
 
-  /* ---------- Sesión ---------- */
+  /* sesion */
   TG.usuario = () => {
     try {
       return JSON.parse(sessionStorage.getItem(SESION) || "null");
@@ -161,13 +211,21 @@
       return null;
     }
   };
+  /* nombre y primer apellido de quien atiende */
+  TG.empleadoNombre = () => {
+    const u = TG.usuario();
+    if (!u) return "";
+    const n = String(u.nombre || "").trim().split(/\s+/)[0] || "";
+    const a = String(u.apellido || "").trim().split(/\s+/)[0] || "";
+    return (n + " " + a).trim();
+  };
   TG.iniciarSesion = (u) => sessionStorage.setItem(SESION, JSON.stringify(u));
   TG.cerrarSesion = () => {
     sessionStorage.removeItem(SESION);
     sessionStorage.removeItem("ternoCompraAlquiler");
   };
 
-  /* ---------- Formato ---------- */
+  /* formato */
   const MESES = [
     "Ene",
     "Feb",
@@ -200,7 +258,7 @@
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
-  /* Monto en letras para el pie de la boleta: SON: CIENTO OCHENTA CON 00/100 SOLES */
+  /* monto en letras para el pie de la boleta */
   TG.montoLetras = (n) => {
     n = Math.round((Number(n) || 0) * 100) / 100;
     const ent = Math.floor(n),
@@ -348,7 +406,7 @@
     const s = String(c?.celular || "");
     return s.length === 9 ? s.replace(/(\d{3})(\d{3})(\d{3})/, "$1 $2 $3") : s;
   };
-  /* En las vistas de calificaciones se muestran únicamente las estrellas, sin contadores adicionales. */
+  /* en las vistas de calificaciones se muestran unicamente las estrellas */
   TG.estrellas = (n, promedio) => {
     n = Math.max(0, Math.min(5, Math.round(Number(promedio || n) || 0)));
     if (!n) return '<span class="stars-empty">Sin calificar</span>';
@@ -375,7 +433,7 @@
       Vendido: "info",
       Suspendido: "danger",
     })[e] || "info";
-  /* Texto que se muestra al usuario (en la base se guardan "En lavandería" y "En restauración") */
+  /* texto que se muestra al usuario */
   TG.etiquetaEstado = (e) =>
     ({ "En lavandería": "Lavandería", "En restauración": "Restauración" })[e] ||
     e;
@@ -385,12 +443,14 @@
       Alquilado: "alquilado",
       Reservado: "reservado",
       Vendido: "vendido",
+      "Vendido a medida": "vendidomedida",
+      Entregada: "entregada",
       "En lavandería": "lavanderia",
       "En restauración": "restauracion",
       "En confección": "confeccion",
       Suspendido: "suspendido",
     })[e] || "otro";
-  /* Insignia con punto: fondo suave, texto contrastado y punto del mismo color */
+  /* insignia con punto fondo suave texto contrastado y punto */
   TG.insigniaEstado = (e) =>
     '<span class="badge-estado est-' +
     TG.claveEstado(e) +
@@ -403,10 +463,10 @@
       "Mal estado": "Por mal estado",
       Ambos: "Por ambos",
     })[t] || t;
-  /* Las prendas suspendidas no salen en catálogos, cobros ni inventarios de empleados */
+  /* las prendas suspendidas no salen en catalogos cobros ni inventarios */
   TG.prendasVisibles = (lista) => lista.filter((p) => !p.suspendida);
 
-  /* Un cliente está "Con deuda" si tiene penalidades pendientes, "Bloqueado" si el admin bloqueó el alquiler */
+  /* un cliente esta con deuda si tiene penalidades pendientes bloqueado */
   TG.estadoCliente = (c, penalidades) => {
     if (
       (penalidades || []).some(
@@ -416,8 +476,7 @@
       return "Con deuda";
     return c.alquilerBloqueado ? "Bloqueado" : "Activo";
   };
-  /* Último servicio realmente tomado por el cliente, no solo la fecha de registro.
-     Se determina por la boleta vigente/no anulada más reciente. */
+  /* ultimo servicio realmente tomado por el cliente */
   TG.ultimaOperacion = (c, boletas) => {
     const operaciones = (boletas || [])
       .filter(
@@ -442,8 +501,7 @@
     return TG.esc(tipo) + (ultima.fecha ? " · " + TG.fecha(ultima.fecha) : "");
   };
 
-  /* Aviso emergente. tipo: 'ok' (por defecto), 'info' o 'error'. Lleva un botón × para cerrarlo y los errores
-     duran más para que se alcancen a leer (en celular aparece arriba, ver responsive.css) */
+  /* aviso emergente tipo */
   const AVISOS = {
     ok: ["✓", "Operación exitosa", 4000],
     info: ["i", "Aviso", 5500],
@@ -491,10 +549,73 @@
     if (e.key === "Escape") TG.cerrarToast();
   });
 
-  /* ---------- Ventana de formulario reutilizable ---------- */
+  /* ventana de formulario reutilizable */
   const estiloInput =
     "border:1px solid #d0d5dd;border-radius:8px;padding:10px 14px;font-size:14px;width:100%;box-sizing:border-box;font-family:inherit;";
-  TG.modal = ({ titulo, subtitulo, campos, textoOk = "Guardar", onOk }) => {
+  /* ventana de confirmacion con dos botones */
+  TG.confirmar = ({
+    titulo,
+    mensaje,
+    textoOk = "Confirmar",
+    textoCancelar = "Cancelar",
+    onOk,
+    onCancel,
+  }) => {
+    const fondo = document.createElement("div");
+    fondo.setAttribute("data-tg-modal", "");
+    fondo.style.cssText =
+      "position:fixed;inset:0;background:rgba(16,24,40,.55);display:flex;align-items:center;justify-content:center;z-index:9999;padding:16px;";
+    fondo.innerHTML =
+      '<div role="dialog" aria-modal="true" style="background:#fff;border-radius:14px;padding:24px;width:100%;max-width:400px;display:flex;flex-direction:column;gap:12px;box-shadow:0 20px 50px rgba(0,0,0,.25);">' +
+      '<h2 style="margin:0;font-size:18px;color:#101828;">' +
+      TG.esc(titulo) +
+      "</h2>" +
+      (mensaje
+        ? '<p style="margin:0;font-size:14px;line-height:1.4;color:#667085;">' +
+          TG.esc(mensaje) +
+          "</p>"
+        : "") +
+      '<div data-modal-actions style="display:flex;justify-content:flex-end;gap:10px;margin-top:8px;">' +
+      '<button type="button" data-cancelar style="padding:10px 20px;border-radius:8px;border:1px solid #d0d5dd;background:#fff;color:#344054;font-weight:600;cursor:pointer;">' +
+      TG.esc(textoCancelar) +
+      "</button>" +
+      '<button type="button" data-ok style="padding:10px 20px;border-radius:8px;border:none;background:#b3820a;color:#fff;font-weight:600;cursor:pointer;">' +
+      TG.esc(textoOk) +
+      "</button></div></div>";
+    document.body.appendChild(fondo);
+    let cerrado = false;
+    const cerrar = () => {
+      cerrado = true;
+      fondo.remove();
+      document.removeEventListener("keydown", esc);
+    };
+    const cancelar = () => {
+      if (cerrado) return;
+      cerrar();
+      onCancel && onCancel();
+    };
+    const esc = (e) => e.key === "Escape" && cancelar();
+    document.addEventListener("keydown", esc);
+    fondo.querySelector("[data-cancelar]").addEventListener("click", cancelar);
+    fondo.addEventListener("mousedown", (e) => {
+      if (e.target === fondo) cancelar();
+    });
+    fondo.querySelector("[data-ok]").addEventListener("click", () => {
+      if (cerrado) return;
+      cerrar();
+      onOk && onOk();
+    });
+    fondo.querySelector("[data-ok]").focus();
+  };
+
+  TG.modal = ({
+    titulo,
+    subtitulo,
+    campos,
+    textoOk = "Guardar",
+    onOk,
+    compacto = false,
+  }) => {
     const fondo = document.createElement("div");
     fondo.setAttribute("data-tg-modal", "");
     fondo.style.cssText =
@@ -502,25 +623,33 @@
     const filas = campos
       .map((c) => {
         let ctl;
-        if (c.options) {
+        if (c.options || c.grupos) {
+          const opcion = (o) =>
+            '<option value="' +
+            TG.esc(o) +
+            '"' +
+            (o === c.value ? " selected" : "") +
+            ">" +
+            TG.esc(o) +
+            "</option>";
           ctl =
             '<select name="' +
             c.name +
             '" style="' +
             estiloInput +
             '">' +
-            c.options
-              .map(
-                (o) =>
-                  '<option value="' +
-                  TG.esc(o) +
-                  '"' +
-                  (o === c.value ? " selected" : "") +
-                  ">" +
-                  TG.esc(o) +
-                  "</option>",
-              )
-              .join("") +
+            (c.grupos
+              ? c.grupos
+                  .map(
+                    ([g, lista]) =>
+                      '<optgroup label="' +
+                      TG.esc(g) +
+                      '">' +
+                      lista.map(opcion).join("") +
+                      "</optgroup>",
+                  )
+                  .join("")
+              : c.options.map(opcion).join("")) +
             "</select>";
         } else if (c.type === "imagen") {
           ctl =
@@ -560,13 +689,27 @@
             (c.maxlength ? ' maxlength="' + c.maxlength + '"' : "") +
             (c.autocomplete === false ? ' autocomplete="off"' : "") +
             (c.readonly ? " readonly" : "") +
+            (c.sugerencias ? ' list="tg-sug-' + c.name + '"' : "") +
             ' style="' +
             estiloInput +
             (c.readonly ? "background:#f2f4f7;" : "") +
-            '">';
+            '">' +
+            (c.sugerencias
+              ? '<datalist id="tg-sug-' +
+                c.name +
+                '">' +
+                c.sugerencias
+                  .map((o) => '<option value="' + TG.esc(o) + '"></option>')
+                  .join("") +
+                "</datalist>"
+              : "");
         }
         return (
-          '<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:500;color:#374151;">' +
+          "<label" +
+          (c.type === "imagen" || c.type === "textarea"
+            ? " data-ancho"
+            : "") +
+          ' style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:500;color:#374151;">' +
           TG.esc(c.label) +
           ctl +
           "</label>"
@@ -574,8 +717,10 @@
       })
       .join("");
     fondo.innerHTML =
-      '<form style="background:#fff;border-radius:14px;padding:24px;width:100%;max-width:480px;max-height:90vh;overflow:auto;display:flex;flex-direction:column;gap:14px;box-shadow:0 20px 50px rgba(0,0,0,.25);">' +
-      '<div><h2 style="margin:0;font-size:18px;color:#101828;">' +
+      "<form" +
+      (compacto ? " data-compacto" : "") +
+      ' style="background:#fff;border-radius:14px;padding:24px;width:100%;max-width:480px;max-height:90vh;overflow:auto;display:flex;flex-direction:column;gap:14px;box-shadow:0 20px 50px rgba(0,0,0,.25);">' +
+      '<div data-modal-head><h2 style="margin:0;font-size:18px;color:#101828;">' +
       TG.esc(titulo) +
       "</h2>" +
       (subtitulo
@@ -586,7 +731,7 @@
       "</div>" +
       filas +
       '<div data-error style="display:none;background:#fef3f2;color:#b42318;border-radius:8px;padding:10px 12px;font-size:13px;"></div>' +
-      '<div style="display:flex;justify-content:flex-end;gap:10px;margin-top:6px;">' +
+      '<div data-modal-actions style="display:flex;justify-content:flex-end;gap:10px;margin-top:6px;">' +
       '<button type="button" data-cancelar style="padding:10px 20px;border-radius:8px;border:1px solid #d0d5dd;background:#fff;color:#344054;font-weight:600;cursor:pointer;">Cancelar</button>' +
       '<button type="submit" style="padding:10px 20px;border-radius:8px;border:none;background:#b3820a;color:#fff;font-weight:600;cursor:pointer;">' +
       TG.esc(textoOk) +
@@ -652,8 +797,7 @@
       .filter((c) => c.type === "password")
       .forEach((c) => TG.ojo(form.elements[c.name]));
 
-    /* Campos con limpiarAlClic (edición): muestran su valor actual y solo se vacían cuando la persona
-       hace clic en ese campo; los que no toca se quedan como estaban */
+    /* campos con limpiaralclic muestran su valor actual */
     campos
       .filter((c) => c.limpiarAlClic)
       .forEach((c) => {
@@ -665,7 +809,7 @@
           el.value = "";
         });
       });
-    /* Al editar no se enfoca ningún campo solo, para que no se vacíe sin querer */
+    /* al editar no se enfoca ningun campo */
     const primero = campos.some((c) => c.limpiarAlClic)
       ? null
       : form.querySelector("input:not([readonly]),select,textarea");
@@ -673,7 +817,7 @@
     return { cerrar };
   };
 
-  /* Lee una foto y la reduce (máx. 700 px, JPEG) para que se guarde liviana en la base de datos */
+  /* lee una foto y la reduce */
   TG.reducirImagen = (archivo) =>
     new Promise((resolve, reject) => {
       if (!/^image\//.test(archivo.type)) {
@@ -698,7 +842,7 @@
       lector.readAsDataURL(archivo);
     });
 
-  /* Un cliente queda "eliminado" cuando tuvo boletas y todas fueron anuladas */
+  /* un cliente queda eliminado cuando tuvo boletas y todas fueron */
   TG.clienteEliminado = (c, boletas) => {
     const mias = (boletas || []).filter(
       (b) => b.cliente && b.cliente.id === c.id,
@@ -706,8 +850,8 @@
     return mias.length > 0 && mias.every((b) => b.estado === "Anulada");
   };
 
-  /* ---------- Calificación obligatoria del cliente (modal que se abre al terminar una boleta) ---------- */
-  /* La opción de calificación se elige sola según las estrellas */
+  /* calificacion obligatoria del cliente */
+  /* la opcion de calificacion se elige sola segun las estrellas */
   const ETIQUETAS = {
     5: "Excelente",
     4: "Bueno",
@@ -715,7 +859,7 @@
     2: "Malo",
     1: "Pésimo",
   };
-  /* Comentarios que se guardaban antes de este cambio */
+  /* comentarios que se guardaban antes de este cambio */
   const MOTIVOS_ANTIGUOS = [
     "Se comporta mal",
     "Insulta o maltrata al personal",
@@ -724,7 +868,7 @@
     "Recontra buen cliente",
     "Cliente excelente",
   ];
-  /* Comentario que corresponde a las estrellas: siempre la etiqueta de esas estrellas; si el comentario guardado traía un texto adicional (después de " — ") se conserva */
+  /* comentario que corresponde a las estrellas */
   TG.comentarioAuto = (estrellas, comentario) => {
     const n = Math.max(0, Math.min(5, Math.round(Number(estrellas) || 0)));
     if (!n) return "—";
@@ -778,7 +922,7 @@
           )
           .join("");
       };
-      /* Una sola opción, marcada automáticamente según las estrellas elegidas */
+      /* una sola opcion marcada automaticamente segun las estrellas elegidas */
       const pintarMotivos = () => {
         if (!estrellas) {
           motivos.style.display = "none";
@@ -837,13 +981,32 @@
       refrescar();
     });
 
-  /* ---------- Validación de formularios (borde rojo + mensaje; al corregir vuelve a lo normal) ---------- */
+  /* validacion de formularios */
   const css = document.createElement("style");
   css.textContent =
     ".tg-invalid{border-color:#d92d20!important;box-shadow:0 0 0 1px #d92d20!important;outline:none!important}" +
     ".tg-msg{display:block;color:#d92d20;font-size:12px;font-weight:500;margin-top:4px;line-height:1.3}";
   document.head.appendChild(css);
 
+  /* contrasena facil palabra comun 3 caracteres iguales */
+  const PALABRAS_FACILES = [
+    "admin", "password", "passw0rd", "contrasena", "contraseña", "clave",
+    "qwerty", "asdf", "zxcv", "empleado", "usuario", "gabriel", "terno",
+    "peru", "lima", "abc123", "letmein", "welcome",
+  ];
+  TG.esFacil = (v) => {
+    const c = String(v).toLowerCase();
+    if (PALABRAS_FACILES.some((p) => c.includes(p))) return true;
+    let iguales = 1, sube = 1, baja = 1;
+    for (let i = 1; i < c.length; i++) {
+      const d = c.charCodeAt(i) - c.charCodeAt(i - 1);
+      iguales = d === 0 ? iguales + 1 : 1;
+      sube = d === 1 ? sube + 1 : 1;
+      baja = d === -1 ? baja + 1 : 1;
+      if (iguales >= 3 || sube >= 4 || baja >= 4) return true;
+    }
+    return false;
+  };
   TG.reglas = {
     dni: {
       filtro: (v) => v.replace(/\D/g, "").slice(0, 8),
@@ -878,7 +1041,7 @@
       ok: (v) => Number(v) > 0,
       msg: "Monto inválido: debe ser mayor a 0",
     },
-    /* Prenda: 3 letras en mayúscula, guion automático y solo números después (TRN-001) */
+    /* prenda 3 letras en mayuscula guion automatico y solo numeros */
     codigoPrenda: {
       filtro: (v, e) => {
         v = v.toUpperCase();
@@ -895,7 +1058,7 @@
       ok: (v) => /^[A-Z]{3}-\d{3}$/.test(v),
       msg: "Código inválido: 3 letras, guion y 3 números (ej. TRN-005)",
     },
-    /* Precio: solo números y un punto; al salir del campo se completa a dos decimales (80 → 80.00, 80.5 → 80.50) */
+    /* precio solo numeros y un punto */
     precio: {
       filtro: (v) => {
         let s = v.replace(/[^\d.]/g, "");
@@ -916,7 +1079,7 @@
       ok: (v) => Number(v) > 0,
       msg: "Precio inválido: debe ser mayor a 0",
     },
-    /* Código de empleado: 4 caracteres, mayúsculas, sin espacios, letras y números */
+    /* codigo de empleado 4 caracteres mayusculas sin espacios letras */
     codigoEmpleado: {
       filtro: (v) =>
         v
@@ -935,6 +1098,33 @@
       ok: (v) => v.length >= 4,
       msg: "La contraseña debe tener al menos 4 caracteres",
     },
+    /* reglas de correo y contrasena de acceso */
+    correoAcceso: {
+      filtro: (v) => v.replace(/\s/g, "").slice(0, 50),
+      ok: (v) =>
+        /^(?=.{1,50}$)[a-z0-9]+([._+-][a-z0-9]+)*@gmail\.com$/i.test(v),
+      msg: (v) =>
+        !v.includes("@")
+          ? "Falta el @. Ejemplo: nombre@gmail.com"
+          : !/@gmail\.com$/i.test(v)
+            ? "El correo debe terminar en @gmail.com (revisa que no haya puntos de más). Ejemplo: nombre@gmail.com"
+            : "Revisa lo que va antes de @gmail.com: sin puntos al inicio, al final o seguidos",
+    },
+    contrasenaSegura: {
+      filtro: (v) => v.replace(/\s/g, "").slice(0, 72),
+      ok: (v) =>
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)\S{9,72}$/.test(v) && !TG.esFacil(v),
+      msg: (v) => {
+        const falta = [];
+        if (v.length < 9) falta.push("más de 8 caracteres");
+        if (!/[a-z]/.test(v)) falta.push("una minúscula");
+        if (!/[A-Z]/.test(v)) falta.push("una mayúscula");
+        if (!/\d/.test(v)) falta.push("un número");
+        return falta.length
+          ? "La contraseña necesita: " + falta.join(", ") + ". Ejemplo: Luna7Cafe42"
+          : "Contraseña muy fácil de adivinar: no uses palabras comunes (admin, clave, password…), números seguidos (1234) ni caracteres repetidos (aaa). Ejemplo: Luna7Cafe42";
+      },
+    },
     area: {
       ok: (v) => v.trim().length >= 3,
       msg: "Indica el área o puesto (mínimo 3 caracteres)",
@@ -945,10 +1135,7 @@
     },
   };
 
-  /* Buscadores: solo dejan escribir un DNI (8 números) o el código que genera el sistema.
-     letra "B" → boleta (B001-0083) · letra "T" → ticket de confección (T001-0083).
-     Si se empieza con un número es un DNI (solo números, máximo 8). Si se empieza con una letra solo se acepta
-     la letra indicada, luego la serie 001 y, tras el guion automático, hasta 4 números. */
+  /* buscadores solo dejan escribir un dni */
   TG.filtroBusqueda = (input, letra) => {
     if (!input) return;
     const SERIE = "001";
@@ -979,21 +1166,90 @@
     });
   };
 
-  /* Ojito para campos de contraseña: al pulsarlo se ve el texto y al volver a pulsarlo se oculta de nuevo */
+  /* ojito para campos de contrasena */
   const OJO_ABIERTO =
     '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>';
   const OJO_CERRADO =
     '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.9 10.9 0 0 1 12 19C5 19 1 12 1 12a19.8 19.8 0 0 1 5.06-5.94"/><path d="M9.9 4.24A10.9 10.9 0 0 1 12 4c7 0 11 8 11 8a19.8 19.8 0 0 1-3.17 4.19"/><path d="M1 1l22 22"/></svg>';
+  /* sin autocompletar ni guardado y sin copiar cortar arrastrar ni clic derecho */
+  TG.protegerClave = (input) => {
+    /* new-password lo respetan todos los navegadores y off lo ignoran */
+    input.setAttribute("autocomplete", "new-password");
+    input.setAttribute("autocapitalize", "none");
+    input.setAttribute("spellcheck", "false");
+    input.setAttribute("data-lpignore", "true");
+    input.setAttribute("data-1p-ignore", "");
+    input.setAttribute("data-bwignore", "true");
+    input.setAttribute("data-form-type", "other");
+    const frenar = (e) => e.preventDefault();
+    ["copy", "cut", "dragstart", "drag", "drop", "contextmenu"].forEach((ev) =>
+      input.addEventListener(ev, frenar),
+    );
+    input.addEventListener("keydown", (e) => {
+      const k = e.key.toLowerCase();
+      if (
+        ((e.ctrlKey || e.metaKey) && (k === "c" || k === "x" || k === "insert")) ||
+        (e.shiftKey && k === "delete")
+      )
+        e.preventDefault();
+    });
+  };
+
+  /* puntos simulados mas puntos que letras sin tocar el valor real */
+  TG.claveVisual = (input, caja) => {
+    const PASO = 9;
+    const panel = document.createElement("span");
+    panel.className = "clave-visual";
+    panel.setAttribute("aria-hidden", "true");
+    const puntos = document.createElement("i");
+    puntos.className = "clave-puntos";
+    const cursor = document.createElement("i");
+    cursor.className = "clave-cursor";
+    panel.append(puntos, cursor);
+    caja.appendChild(panel);
+    let activo = true;
+    const simulados = (n) => (n ? n + 4 + Math.floor(n / 3) : 0);
+    const pintar = () => {
+      if (!activo) return;
+      const n = input.value.length;
+      const cabe = Math.max(1, Math.floor(panel.clientWidth / PASO) - 1);
+      const m = Math.min(simulados(n), cabe);
+      puntos.style.width = m * PASO + "px";
+      const p = input.selectionStart == null ? n : input.selectionStart;
+      const sinRango = input.selectionStart === input.selectionEnd;
+      const idx = n ? Math.round((p * m) / n) : 0;
+      cursor.style.left = Math.min(idx, m) * PASO + "px";
+      cursor.style.visibility = sinRango ? "visible" : "hidden";
+    };
+    ["input", "keyup", "click", "focus", "select", "mouseup", "change"].forEach(
+      (ev) => input.addEventListener(ev, pintar),
+    );
+    input.addEventListener("keydown", () => setTimeout(pintar, 0));
+    window.addEventListener("resize", pintar);
+    input._tgPintar = pintar;
+    /* al mostrar la clave se quitan los puntos simulados */
+    input._tgOcultar = (oculta) => {
+      activo = oculta;
+      input.classList.toggle("clave-visual-on", oculta);
+      panel.hidden = !oculta;
+      if (oculta) pintar();
+    };
+    input._tgOcultar(true);
+  };
+
   TG.ojo = (input) => {
     if (!input || input._tgOjo) return;
     input._tgOjo = true;
-    /* Los mensajes de error siguen saliendo debajo del campo, no dentro del contenedor del ojito */
+    /* los mensajes de error siguen saliendo debajo del campo */
     input._tgCont = input._tgCont || input.parentElement;
     const caja = document.createElement("span");
     caja.style.cssText = "position:relative;display:block;width:100%;";
     input.parentElement.insertBefore(caja, input);
     caja.appendChild(input);
     input.style.paddingRight = "42px";
+    /* la clave sigue siendo type password */
+    if (input.hasAttribute("data-sin-autocompletar")) TG.protegerClave(input);
+    if (input.hasAttribute("data-clave-visual")) TG.claveVisual(input, caja);
     const b = document.createElement("button");
     b.type = "button";
     b.setAttribute("aria-label", "Mostrar contraseña");
@@ -1006,6 +1262,7 @@
     b.addEventListener("click", () => {
       const ver = input.type === "password";
       input.type = ver ? "text" : "password";
+      if (input._tgOcultar) input._tgOcultar(!ver);
       b.innerHTML = ver ? OJO_CERRADO : OJO_ABIERTO;
       b.setAttribute("aria-pressed", ver ? "true" : "false");
       b.setAttribute("aria-label", ver ? "Ocultar contraseña" : "Mostrar contraseña");
@@ -1013,7 +1270,7 @@
     caja.appendChild(b);
   };
 
-  /* Pone o quita el borde rojo y el mensaje de un campo */
+  /* pone o quita el borde rojo y el mensaje */
   TG.marcar = (input, mensaje) => {
     const cont = input._tgCont || input.parentElement;
     let msg = cont.querySelector(
@@ -1039,11 +1296,13 @@
     const v = String(input.value ?? "").trim();
     let mensaje = null;
     if (v === "") mensaje = cfg.requerido ? "Este campo es obligatorio" : null;
-    else if (cfg.regla.ok && !cfg.regla.ok(v)) mensaje = cfg.regla.msg;
+    else if (cfg.regla.ok && !cfg.regla.ok(v))
+      mensaje =
+        typeof cfg.regla.msg === "function" ? cfg.regla.msg(v) : cfg.regla.msg;
     TG.marcar(input, mensaje);
     return !mensaje;
   };
-  /* Valida varios campos a la vez; el primero que falle recibe el foco */
+  /* valida varios campos a la vez */
   TG.validarTodo = (inputs) => {
     let todoOk = true,
       primero = null;
@@ -1068,7 +1327,7 @@
       i._tocado = false;
     });
   };
-  /* Enlaza un campo con una regla (nombre de TG.reglas o un objeto {ok, msg, filtro}) */
+  /* enlaza un campo con una regla */
   TG.vincular = (input, regla, opciones = {}) => {
     const r = typeof regla === "string" ? TG.reglas[regla] : regla;
     input._tg = { regla: r, requerido: opciones.requerido !== false };
@@ -1094,7 +1353,7 @@
       TG.validarCampo(input);
     });
     if (input.tagName === "INPUT" && input.placeholder) {
-      /* El ejemplo desaparece al hacer clic para poder escribir */
+      /* el ejemplo desaparece al hacer clic */
       const ejemplo = input.placeholder;
       input.addEventListener("focus", () => {
         input.placeholder = "";
@@ -1106,27 +1365,45 @@
     return input;
   };
 
-  /* ---------- Catálogo (tarjetas de producto) con los precios vigentes ---------- */
+  /* catalogo con los precios vigentes */
   const IMG = {
     Ternos:
       "https://images.unsplash.com/photo-1618886614638-80e3c103d31a?auto=format&fit=crop&w=700&q=85",
     Smoking:
       "https://images.unsplash.com/photo-1617127365659-c47fa864d8bc?auto=format&fit=crop&w=700&q=85",
   };
-  /* Opciones que define el administrador y usan los filtros del catálogo (empleado y paso 1) */
+  /* opciones que define el administrador y usan los filtros */
+  /* colores base nombre color de la bolita */
+  TG.COLORES_BASE = [
+    ["Negro", "#111111", /negro/i],
+    ["Blanco", "#ffffff", /blanco/i],
+    ["Crema", "#f3e9c9", /crema|cream/i],
+    ["Gris Claro", "#d1d5db", /gris\s*(claro|perla)|perla/i],
+    ["Gris Oscuro", "#4b5058", /gris\s*oscuro|plomo|oxford/i],
+    ["Azul Marino", "#1f2f5c", /azul\s*marino|marino|navy/i],
+    ["Azul Rey", "#2347c5", /azul\s*rey|^\s*azul\s*$/i],
+    ["Celeste", "#7dd3fc", /celeste/i],
+    ["Beige", "#d9c7a3", /beige/i],
+    ["Marrón", "#6b4423", /marr[oó]n|caf[eé]/i],
+    ["Dorado", "#d4af37", /dorado|oro/i],
+    ["Guinda / Vino", "#7a1f33", /guinda|vino|burgundy|granate/i],
+    ["Rojo", "#c62828", /rojo/i],
+    ["Morado", "#7e57c2", /morado|lila|violeta/i],
+    ["Verde", "#2e7d32", /verde/i],
+    ["Rosado", "#f9a8d4", /rosado|rosa/i],
+  ];
+  /* tallas por grupo las usan agregar producto y el filtro */
+  TG.TALLAS_GRUPOS = [
+    ["Niño", ["2", "4", "6", "8", "10", "12", "14", "16"]],
+    ["Estándar", ["XS", "S", "M", "L", "XL", "XXL"]],
+    ["Saco (numérica)", ["34", "36", "38", "40", "42", "44", "46", "48"]],
+    ["Talla única", ["Talla Única"]],
+  ];
   TG.OPCIONES = {
-    color: [
-      "Azul Marino",
-      "Negro",
-      "Gris Perla",
-      "Plomo / Oxford",
-      "Rojo / Burgundy",
-      "Beige / Cream",
-      "Blanco",
-    ],
+    color: TG.COLORES_BASE.map((c) => c[0]),
     categoria: ["Niños", "Jóvenes", "Adultos"],
     estilo: ["Ejecutivo", "Smoking", "Clásico", "Moderno Slim", "Premium"],
-    talla: ["S", "M", "L", "XL"],
+    talla: TG.TALLAS_GRUPOS.flatMap((g) => g[1]),
     componente: [
       "Terno completo",
       "Saco",
@@ -1155,7 +1432,7 @@
     String(b || "")
       .trim()
       .toLowerCase();
-  /* Filtros: vacío = sin filtrar. Si hay componentes marcados solo salen esos (un terno completo incluye saco y pantalón) */
+  /* filtros vacio sin filtrar */
   TG.pasaFiltros = (p, f) => {
     if (f.color && !igual(p.color, f.color)) return false;
     if (f.categoria && !igual(p.categoria, f.categoria)) return false;
@@ -1176,8 +1453,35 @@
       return "Smoking";
     return "Ternos";
   };
-  /* Tarjetas del catálogo (empleado y administrador): la etiqueta de estado sale de la columna "estado" de la prenda
-     y "Ver detalle" estira la tarjeta para mostrar los datos que registró el administrador */
+  /* color de la prenda color css */
+  const COLORES_CSS = [
+    [/azul\s*marino|marino|navy/i, "#1f2f5c"],
+    [/azul/i, "#2563eb"],
+    [/negro/i, "#111111"],
+    [/gris\s*perla|perla/i, "#d4d4d2"],
+    [/plomo|oxford/i, "#4b5058"],
+    [/gris/i, "#9ca3af"],
+    [/burgundy|vino|guinda|granate/i, "#7a1f33"],
+    [/rojo/i, "#c62828"],
+    [/beige|cream|crema/i, "#e6d8b8"],
+    [/blanco/i, "#ffffff"],
+    [/verde/i, "#2e7d32"],
+    [/marr[oó]n|café|cafe/i, "#6b4423"],
+    [/celeste/i, "#7dd3fc"],
+    [/plateado|plata/i, "#c0c0c0"],
+    [/dorado|oro/i, "#d4af37"],
+    [/rosado|rosa/i, "#f9a8d4"],
+    [/morado|lila|violeta/i, "#7e57c2"],
+    [/amarillo/i, "#facc15"],
+    [/naranja/i, "#f97316"],
+  ];
+  TG.colorCss = (nombre) => {
+    const base = TG.COLORES_BASE.find((c) => c[2].test(String(nombre || "")));
+    if (base) return base[1];
+    const hit = COLORES_CSS.find(([re]) => re.test(String(nombre || "")));
+    return hit ? hit[1] : "#e5e7eb";
+  };
+  /* tarjetas del catalogo el titulo de la tarjeta */
   TG.tarjetasCatalogo = (prendas) =>
     prendas
       .map((p) => {
@@ -1203,44 +1507,42 @@
           '"><div class="product-image"><img src="' +
           TG.esc(p.imagen || IMG[cat] || IMG.Ternos) +
           '" alt="' +
-          TG.esc(p.diseno) +
+          TG.esc(p.estilo || p.diseno) +
           '"><span class="status est-' +
           TG.claveEstado(p.estado) +
           '"><i></i>' +
           TG.esc(TG.etiquetaEstado(p.estado)) +
-          '</span></div><div class="product-body"><span>' +
-          cat.toUpperCase() +
-          "</span><h3>" +
-          TG.esc(p.diseno) +
-          "</h3><div><span>" +
+          '</span></div><div class="product-body">' +
+          '<div class="pb-fila pb-top"><span class="pb-comp">' +
+          TG.esc(p.componente || cat) +
+          '</span><b class="pb-precio"><small>Alquiler</small><em>' +
+          TG.money(p.precioAlquiler) +
+          "</em></b></div><h3>" +
+          TG.esc(p.estilo || "—") +
+          '</h3><div class="pb-fila"><span>' +
           TG.esc(p.codigo) +
           " · Talla " +
           TG.esc(p.talla) +
-          "</span><b>" +
-          TG.money(p.precioAlquiler) +
-          "</b></div><footer><p><small>Precio de alquiler · Venta " +
+          '</span><b class="pb-precio"><small>Venta</small><em>' +
           TG.money(p.precioVenta) +
-          "</small><strong>" +
-          TG.money(p.precioAlquiler) +
-          '</strong></p><button class="btn secondary" type="button" data-detalle="' +
+          '</em></b></div><footer><button class="btn secondary" type="button" data-detalle="' +
           p.id +
-          '" aria-expanded="false">Ver detalle</button></footer>' +
+          '" aria-expanded="false">Ver detalle</button>' +
+          '<span class="pb-color"><i class="color-dot" style="background:' +
+          TG.colorCss(p.color) +
+          '"></i>' +
+          TG.esc(p.color || "—") +
+          "</span></footer>" +
           '<div class="product-extra"><div class="product-extra-inner"><dl>' +
-          fila("Código", p.codigo) +
           fila("Tipo", p.tipo) +
-          fila("Talla", p.talla) +
-          fila("Color", p.color) +
           fila("Categoría", p.categoria) +
-          fila("Estilo", p.estilo) +
-          fila("Componente", p.componente) +
+          fila("Diseño", p.diseno) +
           fila("Estado", TG.etiquetaEstado(p.estado)) +
-          fila("Precio de venta", TG.money(p.precioVenta)) +
-          fila("Precio de alquiler", TG.money(p.precioAlquiler)) +
           "</dl></div></div></div></article>"
         );
       })
       .join("");
-  /* Expande o contrae la tarjeta del botón "Ver detalle" con transición suave */
+  /* expande o contrae la tarjeta del boton ver detalle */
   TG.alternarDetalle = (boton) => {
     const tarjeta = boton.closest(".product-card");
     if (!tarjeta) return;
@@ -1249,7 +1551,7 @@
     boton.textContent = abierta ? "Ocultar detalle" : "Ver detalle";
   };
 
-  /* ---------- Arranque común ---------- */
+  /* arranque comun */
   TG.protegerPagina = () => {
     const ruta = location.pathname;
     const rol = ruta.startsWith("/admin")
@@ -1273,8 +1575,14 @@
         const av = caja.querySelector(".avatar"),
           nom = caja.querySelector("strong"),
           rol = caja.querySelector("span");
-        av && (av.textContent = TG.iniciales(u.nombre));
-        nom && (nom.textContent = u.nombre);
+        /* en el perfil se muestra solo un nombre */
+        const palabras = String(u.nombre || "").trim().split(/\s+/).filter(Boolean);
+        const apellidos = String(u.apellido || "").trim().split(/\s+/).filter(Boolean);
+        const corto = apellidos.length
+          ? palabras[0] + " " + apellidos[0]
+          : palabras.slice(0, 2).join(" ");
+        av && (av.textContent = TG.iniciales(corto));
+        nom && (nom.textContent = corto);
         rol && (rol.textContent = u.rol);
       }
     }
@@ -1285,28 +1593,154 @@
       .querySelectorAll(".logout-link")
       .forEach((a) =>
         a.addEventListener("click", (e) => {
-          /* Cierra la sesión también en el servidor (POST /logout de Spring Security) y luego va al login */
+          /* cierra la sesion tambien en el servidor */
           e.preventDefault();
-          TG.cerrarSesion();
-          const destino = a.href;
-          const token = TG.csrf();
-          fetch("/logout", {
-            method: "POST",
-            headers: token ? { "X-XSRF-TOKEN": token } : {},
-          })
-            .catch(() => {})
-            .finally(() => {
-              location.href = destino;
-            });
+          TG.salirDelSistema("");
         }),
       );
   };
 
-  /* Ejecuta fn cuando el DOM esté listo y la persona haya iniciado sesión */
+  /* cierre de sesion y vigilancia */
+  const LIMITE_INACTIVIDAD_MIN = { Administrador: 10, Empleado: 30 };
+  const CLAVE_ACTIVIDAD = "tgActividad";
+  let saliendo = false;
+
+  TG.salirDelSistema = (motivo) => {
+    if (saliendo) return;
+    saliendo = true;
+    TG.cerrarSesion();
+    const token = TG.csrf();
+    const irAlLogin = () =>
+      location.replace("/login" + (motivo ? "?motivo=" + motivo : ""));
+    /* cierra tambien la sesion del servidor */
+    const limite = setTimeout(irAlLogin, 1500);
+    fetch("/logout", {
+      method: "POST",
+      headers: token ? { "X-XSRF-TOKEN": token } : {},
+    })
+      .catch(() => {})
+      .finally(() => {
+        clearTimeout(limite);
+        irAlLogin();
+      });
+  };
+
+  TG.vigilarSesion = () => {
+    if (TG.vigilando) return;
+    const u = TG.usuario();
+    if (!u) return;
+    TG.vigilando = true;
+    const limite = (LIMITE_INACTIVIDAD_MIN[u.rol] || 30) * 60 * 1000;
+    let ultima = Date.now();
+    let ultimoAviso = 0;
+    const guardar = (valor) => {
+      try {
+        localStorage.setItem(CLAVE_ACTIVIDAD, String(valor));
+      } catch {
+        /* sin almacenamiento compartido se usa solo esta pestana */
+      }
+    };
+    const leer = () => {
+      try {
+        return Number(localStorage.getItem(CLAVE_ACTIVIDAD)) || 0;
+      } catch {
+        return 0;
+      }
+    };
+    guardar(ultima);
+
+    const hayActividad = () => {
+      const ahora = Date.now();
+      if (ahora - ultima < 1000) return;
+      ultima = ahora;
+      guardar(ahora);
+      /* avisa al servidor como maximo una vez por minuto */
+      if (ahora - ultimoAviso > 60000) {
+        ultimoAviso = ahora;
+        const token = TG.csrf();
+        fetch("/api/sesion/actividad", {
+          method: "POST",
+          headers: token ? { "X-XSRF-TOKEN": token } : {},
+        }).catch(() => {});
+      }
+    };
+    ["mousemove", "mousedown", "keydown", "touchstart", "scroll", "wheel", "click"].forEach(
+      (ev) => window.addEventListener(ev, hayActividad, { passive: true, capture: true }),
+    );
+
+    const revisarInactividad = () => {
+      /* tambien cuenta la actividad en otra pestana del mismo navegador */
+      if (Date.now() - Math.max(ultima, leer()) >= limite)
+        TG.salirDelSistema("inactividad");
+    };
+    setInterval(revisarInactividad, 5000);
+    document.addEventListener("visibilitychange", revisarInactividad);
+
+    /* suspension en vivo y sesion vencida en el servidor */
+    const preguntarAlServidor = async () => {
+      if (saliendo) return;
+      try {
+        const r = await fetch("/api/sesion", {
+          headers: { Accept: "application/json", "X-Tab-Id": TG.pestana() },
+          cache: "no-store",
+        });
+        if (r.status === 409) {
+          /* otra pestana tiene esta sesion se sale sin cerrar la del servidor */
+          saliendo = true;
+          TG.cerrarSesion();
+          location.replace("/login?motivo=otra-pestana");
+          return;
+        }
+        if (r.ok) {
+          /* avisos de intentos de ingreso con esta cuenta */
+          const d = await r.json().catch(() => null);
+          if (d && Array.isArray(d.avisos))
+            d.avisos.forEach((t) => TG.toast(t, "error"));
+        }
+        if (r.status === 401) {
+          let motivo = "sesion";
+          try {
+            motivo = (await r.json()).motivo || "sesion";
+          } catch {
+            motivo = "sesion";
+          }
+          TG.salirDelSistema(motivo);
+        }
+      } catch {
+        /* sin conexion se vuelve a intentar en la siguiente consulta */
+      }
+    };
+    setInterval(preguntarAlServidor, 4000);
+    /* al cargar confirma que esta pestana sigue viva y cancela un cierre pendiente */
+    preguntarAlServidor();
+
+    /* cerrar pestana o ventana avisa al servidor recargar no cierra la sesion */
+    window.addEventListener("pagehide", () => {
+      if (saliendo) return;
+      try {
+        const datos = new URLSearchParams({ pestana: TG.pestana() });
+        const token = TG.csrf();
+        if (token) datos.set("_csrf", token);
+        navigator.sendBeacon("/api/sesion/cierre", datos);
+      } catch {
+        /* sin beacon el servidor cierra por falta de latidos */
+      }
+    });
+
+    /* si el navegador muestra la pantalla desde su memoria */
+    window.addEventListener("pageshow", (e) => {
+      if (!TG.usuario()) location.replace("/login");
+      else if (e.persisted) preguntarAlServidor();
+    });
+  };
+
+  /* ejecuta fn cuando el dom este listo y la persona */
   TG.listo = (fn) => {
     const correr = () => {
       if (!TG.protegerPagina()) return;
       TG.iniciarPagina();
+      TG.vigilarSesion();
+      TG.historial && TG.historial.iniciar();
       fn && fn();
     };
     if (document.readyState === "loading")
@@ -1315,7 +1749,7 @@
   };
 })();
 
-/* Pone el valor (y opcionalmente el texto pequeño) de una tarjeta KPI según su título */
+/* pone el valor de una tarjeta kpi segun su titulo */
 TG.kpi = (titulo, valor, pie) => {
   document.querySelectorAll(".kpi-copy").forEach((c) => {
     if (c.querySelector("span")?.textContent.trim() !== titulo) return;

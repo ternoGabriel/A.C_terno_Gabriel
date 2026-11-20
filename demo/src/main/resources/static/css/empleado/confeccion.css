@@ -29,7 +29,7 @@
   font-weight: 600;
 }
 
-/* Ticket ya pagado por completo: reemplaza a la forma de pago y los montos */
+/* ticket ya pagado por completo */
 .aviso-pagado-total {
   display: flex;
   align-items: flex-start;
@@ -141,7 +141,7 @@
   letter-spacing: 1px;
 }
 
-/* Tarjetas de identificación de cliente/orden: crema, columnas claras y hover suave */
+/* tarjetas de identificacion de cliente orden */
 #seccionBusquedaOrdenes #listaOrdenesProximas {
   gap: 12px !important;
 }
@@ -235,7 +235,7 @@
   }
 }
 
-/* Tarjetas de confección: cada dato ocupa su propia columna y la etiqueta va encima. */
+/* tarjetas de confeccion cada dato ocupa su propia columna */
 #seccionBusquedaOrdenes #listaOrdenesProximas .orden-item-btn {
   display: grid !important;
   grid-template-columns: minmax(150px, 1.35fr) repeat(
@@ -358,7 +358,7 @@
   }
 }
 
-/* Acciones de la orden seleccionada: el botón queda fuera de la ficha de datos. */
+/* acciones de la orden seleccionada */
 #seccionBusquedaOrdenes .acciones-orden-seleccionada {
   display: flex;
   justify-content: flex-end;
@@ -384,7 +384,7 @@
   background: #f1e5cc;
   border-color: #b8860b;
 }
-/* Solo en pantallas anchas: en tableta y celular mandan las reglas responsivas de arriba (antes este !important las anulaba y desbordaba la página) */
+/* solo en pantallas anchas */
 @media (min-width: 1101px) {
   #seccionBusquedaOrdenes .orden-item-btn.orden-seleccionada {
     grid-template-columns: minmax(150px, 1.35fr) repeat(
@@ -395,7 +395,7 @@
 }
 
 
-/* Botones "Prueba de confección" / "Entrega" al abrir una orden */
+/* botones prueba de confeccion entrega al abrir una orden */
 .modo-orden-btn {
   flex: 1 1 180px;
   max-width: 260px;

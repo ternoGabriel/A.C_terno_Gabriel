@@ -623,7 +623,7 @@ tbody tr:hover {
   min-width: 140px;
 }
 
-/* Login */
+/* login */
 .login-page {
   min-height: 100vh;
   display: grid;
@@ -773,7 +773,7 @@ tbody tr:hover {
   font-size: 10px;
 }
 
-/* Transaction */
+/* transaction */
 .tabs {
   display: flex;
   gap: 3px;
@@ -1127,7 +1127,7 @@ tbody tr:hover {
   font-size: 8px;
 }
 
-/* Other workflows */
+/* other workflows */
 .return-grid {
   display: grid;
   grid-template-columns: 0.9fr 1.1fr;
@@ -1271,7 +1271,7 @@ tbody tr:hover {
   font-size: 12px;
 }
 
-/* Catalog */
+/* catalog */
 .catalog-toolbar {
   margin-bottom: 18px;
   display: flex;
@@ -1412,7 +1412,7 @@ tbody tr:hover {
   line-height: 1.7;
 }
 
-/* Admin */
+/* admin */
 .inicio-lower {
   display: grid;
   grid-template-columns: 1.45fr 0.85fr;
@@ -1611,7 +1611,7 @@ tbody tr:hover {
   color: #765908;
 }
 
-/* Modal & feedback */
+/* modal feedback */
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -1744,7 +1744,7 @@ tbody tr:hover {
   }
 }
 
-@media (max-width: 820px) {
+@media (max-width: 766px) {
   :root {
     --sidebar: 0px;
   }
@@ -1975,7 +1975,7 @@ tbody tr:hover {
   }
 }
 
-/* Ajustes de estructura: menú lateral y contenido nunca se superponen. */
+/* ajustes de estructura menu lateral y contenido nunca se superponen */
 .app-shell {
   min-height: 100vh;
   width: 100%;
@@ -2124,7 +2124,7 @@ tbody tr:hover {
   justify-content: center;
 }
 
-@media (max-width: 820px) {
+@media (max-width: 766px) {
   :root {
     --sidebar: 0px;
   }
@@ -2336,7 +2336,7 @@ tbody tr:hover {
   }
 }
 
-/* === Estados de prenda: insignia con fondo suave, texto contrastado y punto del mismo color === */
+/* estados de prenda insignia con fondo suave texto contrastado */
 .badge-estado,
 .status[class*="est-"] {
   display: inline-flex;
@@ -2366,10 +2366,13 @@ tbody tr:hover {
   color: #b45309 !important;
   background: #fff1d6 !important;
 }
-.est-lavanderia,
-.est-confeccion {
+.est-lavanderia {
   color: #1d5fbf !important;
   background: #e2edfb !important;
+}
+.est-confeccion {
+  color: #0f766e !important;
+  background: #d5f3ee !important;
 }
 .est-restauracion,
 .est-suspendido {
@@ -2384,12 +2387,20 @@ tbody tr:hover {
   color: #475467 !important;
   background: #eef0f3 !important;
 }
+.est-vendidomedida {
+  color: #3b4a7a !important;
+  background: #e6ebf8 !important;
+}
+.est-entregada {
+  color: #067647 !important;
+  background: #dcfae6 !important;
+}
 .product-image .status[class*="est-"] {
   font-size: 11px;
   padding: 5px 10px;
 }
 
-/* === Catálogo: "Ver detalle" estira la tarjeta con transición suave === */
+/* catalogo ver detalle estira la tarjeta con transicion suave */
 .product-grid {
   align-items: start;
 }
@@ -2408,6 +2419,43 @@ tbody tr:hover {
 .product-card.is-open .product-extra {
   grid-template-rows: 1fr;
   margin-top: 14px;
+}
+/* el detalle empieza oculto */
+.product-body > .product-extra {
+  display: grid;
+  grid-template-rows: 0fr;
+  align-items: stretch;
+  justify-content: stretch;
+  border-bottom: 0;
+  padding-bottom: 0;
+  margin-top: 0;
+  font-size: inherit;
+}
+.product-card.is-open .product-body > .product-extra {
+  grid-template-rows: 1fr;
+  margin-top: 14px;
+}
+.product-extra-inner {
+  visibility: hidden;
+  transition: visibility 0s linear 0.35s;
+}
+.product-card.is-open .product-extra-inner {
+  visibility: visible;
+  transition-delay: 0s;
+}
+/* circulo del color contorno negro delgado y de fondo */
+.product-extra .color-dd {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.color-dot {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border: 1px solid #000;
+  border-radius: 50%;
+  display: inline-block;
 }
 .product-extra dl {
   margin: 0;
@@ -2439,7 +2487,7 @@ tbody tr:hover {
   flex-wrap: wrap;
 }
 
-/* Pestañas (Empleados / Suspendidos, Productos / Suspendidos) */
+/* pestanas */
 .tabs-switch {
   display: inline-flex;
   gap: 6px;
@@ -2510,7 +2558,7 @@ tbody tr:hover {
   flex-wrap: wrap;
 }
 
-/* Campana de notificaciones con el mismo trazo fino de la referencia */
+/* campana de notificaciones con el mismo trazo fino */
 .icon-btn.notification {
   position: relative;
   flex: 0 0 38px;
@@ -2634,7 +2682,7 @@ tbody tr:hover {
   color: #8a650b;
 }
 
-/* Datos de cobro por transferencia (lo muestra TG.mostrarDatosPago en paso 4 y confección) */
+/* datos de cobro por transferencia */
 .pago-datos-fila {
   display: flex;
   justify-content: space-between;

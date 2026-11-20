@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import com.example.demo.Dao.EmpleadoDao;
 import com.example.demo.Model.Empleado;
+import com.example.demo.Seguridad.CuentaSuspendidaException;
 import com.example.demo.Seguridad.GestorContrasenas;
 import com.example.demo.Seguridad.IntentosExcedidosException;
 import com.example.demo.Seguridad.LimitadorIntentos;
@@ -35,14 +36,19 @@ public class AuthServiceImpl implements AuthService {
             throw new IntentosExcedidosException("Demasiados intentos fallidos. Espere unos minutos e intente de nuevo.");
         }
 
-        /* Se puede ingresar con el usuario o con el correo que registró el administrador */
+        /* se puede ingresar con el usuario o con el correo */
         Optional<Empleado> candidato = empleados.buscarPorUsuario(nombreUsuario)
             .filter(e -> e.getUsuario().equals(nombreUsuario));
         if (candidato.isEmpty() && nombreUsuario.contains("@")) candidato = empleados.buscarPorCorreo(nombreUsuario);
 
         Optional<Empleado> encontrado = candidato
-            .filter(e -> "Activo".equals(e.getEstado()))
             .filter(e -> contrasenas.coincide(contrasena, e.getContrasena()));
+
+        /* un empleado suspendido no entra */
+        if (encontrado.isPresent() && !"Activo".equals(encontrado.get().getEstado())) {
+            LOG.warn("Inicio de sesión rechazado: el usuario '{}' está suspendido", paraLog(nombreUsuario));
+            throw new CuentaSuspendidaException();
+        }
 
         if (encontrado.isEmpty()) {
             limitador.registrarFallo(nombreUsuario);
@@ -57,7 +63,7 @@ public class AuthServiceImpl implements AuthService {
         return encontrado;
     }
 
-    /* Una contraseña antigua en texto plano se cifra la primera vez que el empleado ingresa correctamente */
+    /* cifra la contrasena antigua en texto plano */
     private void migrarSiEstabaEnTextoPlano(Empleado empleado, String contrasenaEscrita) {
         if (contrasenas.estaCifrada(empleado.getContrasena())) return;
         try {
@@ -68,7 +74,7 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
-    /* Evita la inyección de saltos de línea en los registros (log forging) */
+    /* evita la inyeccion de saltos de linea en los registros */
     private String paraLog(String texto) {
         return StringUtils.abbreviate(StringUtils.replaceChars(StringUtils.defaultString(texto), "\r\n\t", "___"), 40);
     }

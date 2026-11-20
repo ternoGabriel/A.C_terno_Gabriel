@@ -5,7 +5,7 @@ import org.springframework.stereotype.Repository;
 import com.example.demo.Model.Configuracion;
 import com.example.demo.Repository.ConfiguracionRepository;
 
-/** Implementación JPA de {@link ConfiguracionDao}. */
+/* implementacion jpa de configuraciondao */
 @Repository
 public class ConfiguracionDaoJpa extends JpaDao<Configuracion> implements ConfiguracionDao {
 

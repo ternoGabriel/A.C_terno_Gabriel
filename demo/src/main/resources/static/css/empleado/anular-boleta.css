@@ -1,4 +1,4 @@
-/* Estilos específicos de Anular Boleta */
+/* estilos especificos de anular boleta */
 .page-empleado-anular-boleta .content {
   padding: 2rem 1.5rem;
 }
@@ -49,7 +49,7 @@
   background-color: #9a7009;
 }
 
-/* Contenedor de resultado encontrado: Fondo crema claro y borde crema/dorado */
+/* contenedor de resultado encontrado */
 .page-empleado-anular-boleta .cancel-summary {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -81,7 +81,7 @@
   color: #2c2518;
 }
 
-/* Contenedor de no encontrado: Fondo crema claro y borde crema/dorado */
+/* contenedor de no encontrado */
 .page-empleado-anular-boleta .not-found-box {
   background: #fdfbf7;
   border: 1.5px solid #e6dcc3;
@@ -169,7 +169,7 @@
   background-color: #e5e7eb;
 }
 
-/* Estilos del Modal de Confirmación */
+/* estilos del modal de confirmacion */
 .modal-backdrop {
   position: fixed;
   top: 0;
@@ -215,13 +215,13 @@
   justify-content: center;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 766px) {
   .page-empleado-anular-boleta .cancel-summary {
     grid-template-columns: 1fr 1fr;
   }
 }
 
-/* Presentación ordenada de los datos de la boleta */
+/* presentacion ordenada de los datos de la boleta */
 .page-empleado-anular-boleta .cancel-summary {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0;
@@ -269,7 +269,7 @@
   outline: 2px solid #e8d8b5;
   border-color: #b89a5a;
 }
-@media (max-width: 768px) {
+@media (max-width: 766px) {
   .page-empleado-anular-boleta .cancel-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -287,7 +287,7 @@
   }
 }
 
-/* La ficha de anulación usa el mismo lenguaje visual que las tarjetas de Confección. */
+/* la ficha de anulacion usa el mismo lenguaje visual */
 .page-empleado-anular-boleta .cancel-summary {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -339,7 +339,7 @@
   background: #fbf7ee;
   color: #6d6250;
 }
-@media (max-width: 768px) {
+@media (max-width: 766px) {
   .page-empleado-anular-boleta .cancel-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -350,7 +350,7 @@
   }
 }
 
-/* Ficha compacta de boleta: distribución horizontal inspirada en la referencia */
+/* ficha compacta de boleta */
 .page-empleado-anular-boleta .cancel-summary {
   display: grid;
   grid-template-columns: minmax(180px, 1.55fr) repeat(6, minmax(90px, 1fr));
@@ -415,7 +415,7 @@
     border-bottom: 0;
   }
 }
-@media (max-width: 768px) {
+@media (max-width: 766px) {
   .page-empleado-anular-boleta .cancel-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     padding: 8px;
@@ -450,7 +450,7 @@
   }
 }
 
-/* Ficha de resultado: una sola tarjeta horizontal, sin divisores internos. */
+/* ficha de resultado una sola tarjeta horizontal sin divisores internos */
 .page-empleado-anular-boleta .cancel-summary {
   display: grid;
   grid-template-columns: minmax(260px, 1.7fr) repeat(6, minmax(90px, 1fr));
@@ -545,7 +545,7 @@
   }
 }
 
-/* Resultado con apariencia de comprobante real */
+/* resultado con apariencia de comprobante real */
 .cancel-summary {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

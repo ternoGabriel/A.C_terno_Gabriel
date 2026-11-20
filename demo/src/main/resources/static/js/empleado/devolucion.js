@@ -1,5 +1,4 @@
-// Devolución: busca el alquiler real en la base de datos, cobra las penalizaciones que definió el admin,
-// libera la prenda y deja calificar al cliente.
+/* devolucion busca el alquiler real en la base de datos */
 document.addEventListener("DOMContentLoaded", () =>
   TG.listo(async () => {
     const $ = (id) => document.getElementById(id);
@@ -14,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () =>
     try {
       const c = await TG.configuracion();
       config = {
-        /* Hasta que el administrador defina las penalidades, el monto es 0 */
+        /* hasta que el administrador defina las penalidades el monto */
         demora: c.penalidadDemora?.valor ?? 0,
         malEstado: c.penalidadMalEstado?.valor ?? 0,
       };
@@ -24,10 +23,10 @@ document.addEventListener("DOMContentLoaded", () =>
     $("lblPrecioDia").textContent = TG.money(config.demora);
     $("lblPrecioDaño").textContent = TG.money(config.malEstado);
     const u = TG.usuario();
-    if (u && $("bEmpleado")) $("bEmpleado").textContent = u.nombre;
+    if (u && $("bEmpleado")) $("bEmpleado").textContent = TG.empleadoNombre();
     if ($("bFecha")) $("bFecha").textContent = TG.fechaHora();
 
-    /* Solo deja escribir un DNI (8 números) o un código de boleta (B001-0083) */
+    /* solo deja escribir un dni */
     TG.filtroBusqueda(inputBusqueda, "B");
 
     const totales = () => {
@@ -62,8 +61,28 @@ document.addEventListener("DOMContentLoaded", () =>
         ")";
       $("bResumenPago").textContent = metodo;
       $("bTotalCobrado").textContent = TG.money(total);
+      actualizarAcciones();
       return { sub, dano, total, metodo };
     };
+
+    /* si el administrador cambia los montos se recalcula */
+    TG.vigilarPenalidades(({ demora, malEstado }) => {
+      config.demora = demora;
+      config.malEstado = malEstado;
+      $("lblPrecioDia").textContent = TG.money(demora);
+      $("lblPrecioDaño").textContent = TG.money(malEstado);
+      if (boleta && !terminado) totales();
+    });
+
+    /* el cuadro de metodo de pago solo sale si hay */
+    const seccionPago = $("seccionPagoDevolucion"),
+      seccionBoleta = $("seccionBoletaDevolucion"),
+      btnEmitir = $("btnEmitirDevolucion");
+    function actualizarAcciones() {
+      const cobra = dias > 0 || estadoActual === "observaciones";
+      if (seccionPago) seccionPago.hidden = !cobra || terminado;
+      if (btnEmitir) btnEmitir.hidden = cobra || terminado;
+    }
 
     const buscar = async () => {
       const val = inputBusqueda.value.trim();
@@ -78,7 +97,7 @@ document.addEventListener("DOMContentLoaded", () =>
             .filter((b) => b.cliente.dni === val)
             .sort((a, b) => b.id - a.id)[0];
         else if (/^B\d{3}-\d{1,4}$/i.test(val)) {
-          /* B001-5 → B001-0005 (así se guardan los números de boleta) */
+          /* b001 5 b001 0005 */
           const numero =
             "B" + val.slice(1, 4) + "-" + val.split("-")[1].padStart(4, "0");
           boleta = boletas.find(
@@ -168,17 +187,18 @@ document.addEventListener("DOMContentLoaded", () =>
       }),
     );
 
-    $("btnConfirmarPago")?.addEventListener("click", async () => {
+    /* registra la devolucion cobro */
+    const procesar = async (conPago) => {
       if (!boleta) {
         TG.toast("Primero busca el alquiler a devolver");
         return;
       }
       if (terminado) return;
       const t = totales();
-      if (!TG.validarTodo([entregado])) return;
+      if (conPago && !TG.validarTodo([entregado])) return;
       try {
         const cliente = { id: boleta.cliente.id };
-        /* Un solo cargo: por demora, por mal estado o por ambos */
+        /* un solo cargo por demora por mal estado */
         if (t.sub > 0 || t.dano > 0) {
           const tipo =
             t.sub > 0 && t.dano > 0
@@ -195,7 +215,7 @@ document.addEventListener("DOMContentLoaded", () =>
             estado: "Cobrado",
           });
         }
-        /* Devolución normal → Lavandería; con daños → Restauración */
+        /* devolucion normal lavanderia con danos restauracion */
         await TG.put(
           "/api/boletas/devolver/" +
             boleta.id +
@@ -208,12 +228,20 @@ document.addEventListener("DOMContentLoaded", () =>
         );
         terminado = true;
         $("btnConfirmarPago").disabled = true;
+        if (btnEmitir) btnEmitir.disabled = true;
+        if ($("bFecha")) $("bFecha").textContent = TG.fechaHora();
+        if (seccionBoleta) seccionBoleta.hidden = false;
+        actualizarAcciones();
         TG.toast("Devolución registrada correctamente");
         await TG.calificarObligatorio(boleta.cliente);
       } catch (e) {
         alert(e.message);
       }
-    });
+    };
+    $("btnConfirmarPago")?.addEventListener("click", () => procesar(true));
+    btnEmitir?.addEventListener("click", () => procesar(false));
+    /* atras reinicia si hay avance o proceso terminado */
+    TG.historial?.registrar({ hayAvance: () => terminado || boleta !== null });
     totales();
   }),
 );

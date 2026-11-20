@@ -22,7 +22,7 @@ public class ConfiguracionController {
         return servicio.listar();
     }
 
-    /* El administrador cambia un valor (penalidadDemora, penalidadMalEstado) y el empleado lo usa al registrar devoluciones */
+    /* el administrador cambia un valor */
     @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("{clave}")
     public Configuracion cambiar(@PathVariable String clave, @RequestBody Map<String, Object> datos) {

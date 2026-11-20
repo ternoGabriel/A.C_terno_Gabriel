@@ -32,7 +32,7 @@ public class ClienteController {
         return servicio.actualizar(id, datos);
     }
 
-    /* El empleado califica al cliente al terminar la boleta o la devolución; el administrador lo ve en Calificaciones */
+    /* el empleado califica al cliente al terminar la boleta */
     @PutMapping("calificar/{id}")
     public Cliente calificar(@PathVariable Long id, @RequestBody Map<String, Object> datos) {
         return servicio.calificar(id, datos.get("calificacion"), datos.get("comentario"));

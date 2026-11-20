@@ -79,7 +79,7 @@ document.addEventListener("DOMContentLoaded", () =>
       return r;
     };
     const todas = () => TIPOS.flatMap(filasDe);
-    /* Cada penalidad se asigna a la devolución del mismo cliente (no se reparte dos veces) */
+    /* cada penalidad se asigna a la devolucion del mismo cliente */
     const asignarPenalidades = () => {
       const usadas = new Set();
       boletas
@@ -105,10 +105,7 @@ document.addEventListener("DOMContentLoaded", () =>
         });
     };
 
-    /* Buscador: mismas restricciones que el resto del sistema.
-     - Empieza con número  → DNI: solo números, máximo 8
-     - B / D / T + número  → código de comprobante: B001-0001, D001-0001, T001-0001 (guion automático)
-     - Otro texto          → cliente, prenda o palabra clave (alquiler, compra, ticket, vigente, anulada…) */
+    /* buscador mismas restricciones que el resto del sistema */
     const esModoCodigo = (v) =>
       /^[BDTbdt]$/.test(v) || /^[BDTbdt][\d-]/.test(v);
     const filtroBusqueda = (v) => {
@@ -144,7 +141,7 @@ document.addEventListener("DOMContentLoaded", () =>
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
         .toLowerCase();
-    /* Palabras que reconocen el tipo de comprobante */
+    /* palabras que reconocen el tipo de comprobante */
     const PALABRAS_TIPO = {
       alquiler: ["Alquiler"],
       alquileres: ["Alquiler"],
@@ -205,7 +202,7 @@ document.addEventListener("DOMContentLoaded", () =>
       const desde = $("fechaDesde").value,
         hasta = $("fechaHasta").value,
         estado = $("estadoBoleta").value;
-      /* Con texto en el buscador se revisan todos los comprobantes y cada resultado indica su tipo */
+      /* con texto en el buscador se revisan todos los comprobantes */
       let rows = buscando
         ? todas()
         : filtrarTipo().map((r) => ({ ...r, _k: kind }));
@@ -494,7 +491,7 @@ document.addEventListener("DOMContentLoaded", () =>
         activarGanancias();
       }
     });
-    /* Vista del comprobante como boleta o ticket real */
+    /* vista del comprobante como boleta o ticket real */
     const abrirComprobante = (r) => {
       document.getElementById("cpModal")?.remove();
       const titulo =

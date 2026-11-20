@@ -1,4 +1,4 @@
-/* Estilos específicos de Estado de Prendas */
+/* estilos especificos de estado de prendas */
 .page-empleado-prendas .inventory-card {
   background: #ffffff;
   border-radius: 12px;
@@ -7,7 +7,7 @@
   padding: 1.5rem;
 }
 
-/* Cabecera de la tarjeta con título e inputs alineados */
+/* cabecera de la tarjeta con titulo e inputs alineados */
 .page-empleado-prendas .card-head {
   display: flex;
   justify-content: space-between;
@@ -30,7 +30,7 @@
   margin-top: 0.25rem;
 }
 
-/* Filtros y buscador */
+/* filtros y buscador */
 .page-empleado-prendas .filter-row {
   display: flex;
   align-items: center;
@@ -85,13 +85,13 @@
   border-color: #6b7280;
 }
 
-/* Estructura y distribución de la Tabla */
+/* estructura y distribucion de la tabla */
 .page-empleado-prendas .table-wrap {
   width: 100%;
   overflow-x: auto;
 }
 
-/* table-layout: fixed obliga a que todas las columnas midan exactamente lo mismo (20% c/u) */
+/* table layout fixed obliga a que todas las columnas midan */
 .page-empleado-prendas .data-table {
   width: 100%;
   table-layout: fixed;
@@ -99,7 +99,7 @@
   border-spacing: 0;
 }
 
-/* Cabecera de la tabla */
+/* cabecera de la tabla */
 .page-empleado-prendas .data-table thead th {
   background-color: #f9fafb;
   color: #6b7280;
@@ -108,17 +108,17 @@
   letter-spacing: 0.05em;
   padding: 0.85rem 1rem;
   border-bottom: 1px solid #e5e7eb;
-  text-align: center; /* Centrado uniforme para todos los títulos */
+  text-align: center; /* centrado uniforme para todos los titulos */
   vertical-align: middle;
 }
 
-/* Filas y celdas */
+/* filas y celdas */
 .page-empleado-prendas .data-table tbody td {
   padding: 1rem;
   border-bottom: 1px solid #f3f4f6;
   color: #374151;
   font-size: 0.9rem;
-  text-align: center; /* Centrado uniforme para el contenido de las filas en forma de bloque */
+  text-align: center; /* centrado uniforme para el contenido de las filas en forma */
   vertical-align: middle;
 }
 
@@ -130,7 +130,7 @@
   background-color: #f9fafb;
 }
 
-/* Anchos iguales exactos (20% cada una de las 5 columnas) */
+/* anchos iguales exactos */
 .page-empleado-prendas .col-codigo,
 .page-empleado-prendas .col-nombre,
 .page-empleado-prendas .col-talla,
@@ -139,7 +139,7 @@
   width: 20%;
 }
 
-/* Clases de apoyo */
+/* clases de apoyo */
 .font-mono {
   font-family: monospace;
   color: #6b7280;
@@ -150,7 +150,7 @@
   color: #111827;
 }
 
-/* Badges con punto indicador */
+/* badges con punto indicador */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -209,7 +209,7 @@
   background-color: #ef4444;
 }
 
-/* Botón Cambiar Estado centrado */
+/* boton cambiar estado centrado */
 .btn-action {
   background: #ffffff;
   border: 1px solid #d1d5db;
@@ -233,7 +233,7 @@
   color: #111827;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
-/* Distribución uniforme: las ocho columnas tienen el mismo ancho y el contenido no se monta. */
+/* distribucion uniforme las ocho columnas tienen el mismo ancho */
 .page-empleado-prendas .table-wrap {
   width: 100%;
   max-width: 100%;

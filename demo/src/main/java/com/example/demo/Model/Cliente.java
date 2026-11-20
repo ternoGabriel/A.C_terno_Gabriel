@@ -56,7 +56,7 @@ public class Cliente extends Base {
     @Size(max = 255, message = "El comentario no debe superar 255 caracteres")
     private String comentario;
 
-    /* Promedio exacto de todas las calificaciones recibidas (la columna "calificacion" guarda el redondeo) */
+    /* promedio exacto de todas las calificaciones recibidas */
     @DecimalMin(value = "0.0", message = "El promedio no puede ser negativo")
     @DecimalMax(value = "5.0", message = "El promedio máximo es 5")
     private Double promedio;
@@ -64,10 +64,10 @@ public class Cliente extends Base {
     @PositiveOrZero(message = "La cantidad de calificaciones no puede ser negativa")
     private Integer cantidadCalificaciones;
 
-    /* Fecha en que el empleado registró la última calificación */
+    /* fecha en que el empleado registro la ultima calificacion */
     private java.time.LocalDate fechaCalificacion;
 
-    /* El administrador puede bloquear el alquiler a clientes con mala calificación */
+    /* el administrador puede bloquear el alquiler a clientes con mala */
     private boolean alquilerBloqueado = false;
 
     @OneToMany(mappedBy = "cliente")

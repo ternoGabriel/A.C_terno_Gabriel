@@ -11,6 +11,7 @@
     <link rel="stylesheet" th:href="@{/css/global.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/inicio.css}" />
     <link rel="stylesheet" th:href="@{/css/responsive.css}" />
+    <link rel="stylesheet" th:href="@{/css/fluido.css}" />
   </head>
 
   <body class="page-admin-inicio">
@@ -46,7 +47,7 @@
           </div>
         </div>
         <div class="content">
-          <!-- Fila 1 de KPIs -->
+          <!-- fila 1 de kpis -->
           <div class="kpi-grid four">
             <div class="card kpi">
               <div class="kpi-icon icon-yellow">
@@ -133,7 +134,7 @@
             </div>
           </div>
 
-          <!-- Fila 2 de KPIs -->
+          <!-- fila 2 de kpis -->
           <div class="kpi-grid four">
             <div class="card kpi">
               <div class="kpi-icon icon-blue-light">
@@ -220,7 +221,7 @@
           </div>
 
           <div class="inicio-lower">
-            <!-- Gráfico de Ingresos -->
+            <!-- grafico de ingresos -->
             <section class="card">
               <div class="card-head flex-between">
                 <div>
@@ -265,7 +266,7 @@
               </div>
             </section>
 
-            <!-- Movimientos recientes -->
+            <!-- movimientos recientes -->
             <section class="card">
               <div class="card-head">
                 <div>
@@ -377,6 +378,7 @@
     </div>
     <div th:replace="~{fragments/toast :: toast('Cambios guardados')}"></div>
     <script th:src="@{/js/api.js}" defer></script>
+    <script th:src="@{/js/historial.js}" defer></script>
     <script th:src="@{/js/app.js}" defer></script>
     <script th:src="@{/js/admin/inicio.js}" defer></script>
   </body>

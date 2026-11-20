@@ -5,7 +5,7 @@ import org.springframework.stereotype.Repository;
 import com.example.demo.Model.Boleta;
 import com.example.demo.Repository.BoletaRepository;
 
-/** Implementación JPA de {@link BoletaDao}. */
+/* implementacion jpa de boletadao */
 @Repository
 public class BoletaDaoJpa extends JpaDao<Boleta> implements BoletaDao {
 

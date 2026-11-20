@@ -1,4 +1,4 @@
-/* Paso 1 */
+/* paso 1 */
 (() => {
   class Paso1 {
     constructor(sesion, cabecera, state) {
@@ -70,7 +70,7 @@
         c.checked = false;
       });
 
-      /* Dibuja la ficha del cliente */
+      /* dibuja la ficha del cliente */
       const pintarCliente = (c) => {
         if (!fichaCliente) return;
 
@@ -128,7 +128,7 @@
           "</strong></div>";
       };
 
-      /* Aviso de cliente no encontrado */
+      /* aviso de cliente no encontrado */
       const noEncontrado = (dni) => {
         if (!fichaCliente) return;
 
@@ -147,7 +147,7 @@
         inputDni.maxLength = 8;
         inputDni.autocomplete = "off";
 
-        /* Restaura el DNI al volver */
+        /* restaura el dni al volver */
         if (state.dni) inputDni.value = state.dni;
 
         inputDni.addEventListener("input", () => {
@@ -175,7 +175,7 @@
         });
       }
 
-      /* Busca el cliente por DNI */
+      /* busca el cliente por dni */
       const buscarCliente = async () => {
         const dni = (inputDni?.value || "").replace(/\D/g, "");
 
@@ -233,7 +233,7 @@
 
       pintarCliente(null);
 
-      /* Restaura la ficha al volver */
+      /* restaura la ficha al volver */
       if (state.clienteId) {
         try {
           const cliente = (await TG.clientes()).find(
@@ -242,13 +242,13 @@
 
           pintarCliente(cliente || null);
         } catch {
-          /* Sin acceso al cliente */
+          /* sin acceso al cliente */
         }
       } else if (state.dni && state.dni.length === 8) {
         noEncontrado(state.dni);
       }
 
-      /* Dibuja el catalogo con filtros */
+      /* dibuja el catalogo con filtros */
       const pintarCatalogo = () => {
         if (!grid) return;
 
@@ -342,8 +342,16 @@
         }
       }
 
-      /* Seleccion de prenda */
+      /* seleccion de prenda */
       grid?.addEventListener("click", (e) => {
+        /* al tocar la foto se abre solo la imagen */
+        const foto = e.target.closest(".catalog-thumb");
+        if (foto) {
+          const img = foto.querySelector("img");
+          if (img) window.tgVerImagen(img.src, img.alt);
+          return;
+        }
+
         const card = e.target.closest(".catalog-item-card");
 
         if (!card) return;
@@ -381,7 +389,7 @@
         c.addEventListener("change", pintarCatalogo),
       );
 
-      /* Exige prenda para pasar al paso 2 */
+      /* exige prenda para pasar al paso 2 */
       document
         .querySelector('a[href$="paso-2"]')
         ?.addEventListener("click", (e) => {

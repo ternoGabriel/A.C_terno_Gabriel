@@ -1,4 +1,4 @@
-// Informes construidos desde los datos reales del sistema (API Spring Boot), no desde datos de demostración.
+/* informes construidos desde los datos reales del sistema */
 document.addEventListener("DOMContentLoaded", () =>
   TG.listo(async () => {
     const $ = (s) => document.querySelector(s);
@@ -258,7 +258,7 @@ document.addEventListener("DOMContentLoaded", () =>
       .forEach((el) =>
         el.addEventListener(el.type === "search" ? "input" : "change", generar),
       );
-    /* Exportar Excel: el servidor genera el .xlsx (Apache POI) con el tipo de informe y el rango de fechas elegidos */
+    /* exportar excel el servidor genera el xlsx */
     $('[data-action="export-excel"]')?.addEventListener("click", async () => {
       const q = new URLSearchParams({ tipo: tipoReporte });
       if (inputs.desde?.value) q.set("desde", inputs.desde.value);

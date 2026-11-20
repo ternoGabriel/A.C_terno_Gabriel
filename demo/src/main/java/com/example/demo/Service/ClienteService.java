@@ -3,7 +3,7 @@ package com.example.demo.Service;
 import java.util.List;
 import com.example.demo.Model.Cliente;
 
-/** Casos de uso de la gestión de clientes y sus calificaciones. */
+/* casos de uso de la gestion de clientes */
 public interface ClienteService {
 
     List<Cliente> listar();
@@ -12,12 +12,7 @@ public interface ClienteService {
 
     Cliente actualizar(Long id, Cliente datos);
 
-    /**
-     * Registra una calificación (1 a 5 estrellas) y recalcula el promedio del cliente.
-     *
-     * @param estrellas  valor recibido de la pantalla (se valida que sea un entero entre 1 y 5)
-     * @param comentario texto opcional del empleado
-     */
+    /* registra una calificacion y recalcula el promedio del cliente */
     Cliente calificar(Long id, Object estrellas, Object comentario);
 
     void eliminar(Long id);

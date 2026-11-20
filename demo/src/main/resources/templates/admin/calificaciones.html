@@ -11,6 +11,7 @@
     <link rel="stylesheet" th:href="@{/css/global.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/calificaciones.css}" />
     <link rel="stylesheet" th:href="@{/css/responsive.css}" />
+    <link rel="stylesheet" th:href="@{/css/fluido.css}" />
   </head>
 
   <body class="page-admin-calificaciones">
@@ -46,7 +47,7 @@
           </div>
         </div>
         <div class="content">
-          <!-- Tarjetas KPI que funcionan como botones de filtrado con cálculo dinámico -->
+          <!-- tarjetas kpi que funcionan como botones de filtrado con calculo -->
           <div class="kpi-grid five">
             <div
               class="card kpi kpi-large kpi-btn active"
@@ -58,7 +59,7 @@
               <div class="kpi-icon">★</div>
               <div class="kpi-copy">
                 <span>Promedio general</span>
-                <strong class="kpi-value">- / 5</strong>
+                <strong class="kpi-value">-</strong>
                 <small>Ver todas</small>
               </div>
             </div>
@@ -120,7 +121,7 @@
             </div>
           </div>
 
-          <!-- Tabla con contenedor exacto de la referencia -->
+          <!-- tabla con contenedor exacto de la referencia -->
           <section class="card ratings-card">
             <div class="ratings-header">
               <div class="ratings-info">
@@ -156,6 +157,7 @@
     </div>
     <div th:replace="~{fragments/toast :: toast('Cambios guardados')}"></div>
     <script th:src="@{/js/api.js}" defer></script>
+    <script th:src="@{/js/historial.js}" defer></script>
     <script th:src="@{/js/app.js}" defer></script>
     <script th:src="@{/js/admin/calificaciones.js}" defer></script>
   </body>

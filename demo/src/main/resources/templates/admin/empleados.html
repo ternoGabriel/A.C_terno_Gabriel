@@ -9,6 +9,7 @@
   <link rel="stylesheet" th:href="@{/css/global.css}" />
   <link rel="stylesheet" th:href="@{/css/admin/empleados.css}" />
   <link rel="stylesheet" th:href="@{/css/responsive.css}" />
+    <link rel="stylesheet" th:href="@{/css/fluido.css}" />
 </head>
 
 <body class="page-admin-empleados">
@@ -133,6 +134,7 @@
   <div th:replace="~{fragments/toast :: toast('Cambios guardados')}"></div>
 
   <script th:src="@{/js/api.js}" defer></script>
+  <script th:src="@{/js/historial.js}" defer></script>
   <script th:src="@{/js/app.js}" defer></script>
   <script th:src="@{/js/admin/empleados.js}" defer></script>
 </body>

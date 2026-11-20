@@ -29,12 +29,7 @@ import com.example.demo.Service.ReporteService;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 
-/**
- * Exporta los informes del administrador a Excel con Apache POI.
- * <p>
- * Seguridad: toda celda de texto se neutraliza contra la inyección de fórmulas (CSV/Excel injection):
- * si empieza con =, +, - o @ se antepone un apóstrofo para que Excel la trate como texto.
- */
+/* exporta los informes del administrador a excel con apache poi */
 @Service
 public class ReporteExcelServiceImpl implements ReporteService {
 
@@ -141,7 +136,7 @@ public class ReporteExcelServiceImpl implements ReporteService {
         };
     }
 
-    /* Igual que la pantalla de informes: una fecha vacía siempre entra; si no, debe estar dentro del rango */
+    /* igual que la pantalla de informes */
     private Predicate<LocalDate> enRango(LocalDate desde, LocalDate hasta) {
         return fecha -> fecha == null || ((desde == null || !fecha.isBefore(desde)) && (hasta == null || !fecha.isAfter(hasta)));
     }
@@ -166,7 +161,7 @@ public class ReporteExcelServiceImpl implements ReporteService {
         return valor == null ? 0 : valor;
     }
 
-    /* Evita que Excel interprete como fórmula un texto escrito por un usuario */
+    /* evita que excel interprete como formula un texto escrito */
     static String neutralizar(String texto) {
         if (texto.isEmpty()) return texto;
         char primero = texto.charAt(0);

@@ -5,7 +5,7 @@ import org.springframework.stereotype.Repository;
 import com.example.demo.Model.Prenda;
 import com.example.demo.Repository.PrendaRepository;
 
-/** Implementación JPA de {@link PrendaDao}. */
+/* implementacion jpa de prendadao */
 @Repository
 public class PrendaDaoJpa extends JpaDao<Prenda> implements PrendaDao {
 

@@ -1,4 +1,4 @@
-/* Paso 3 */
+/* paso 3 */
 (() => {
   class Paso3 {
     constructor(sesion) {
@@ -6,6 +6,13 @@
     }
 
     iniciar() {
+      /* montos vigentes fijados por el administrador */
+      TG.vigilarPenalidades(({ demora, malEstado }) => {
+        const d = document.getElementById("penDemora");
+        const m = document.getElementById("penMalEstado");
+        if (d) d.textContent = TG.money(demora);
+        if (m) m.textContent = TG.money(malEstado);
+      });
       const terms = document.getElementById("aceptaTerminos");
       const continueTerms = document.getElementById("continueTerms");
 

@@ -1,4 +1,4 @@
-/* Flujo de cinco pasos de Comprar / Alquilar */
+/* flujo de cinco pasos de comprar alquilar */
 .page-empleado-comprar-alquilar .content {
   display: flex;
   flex-direction: column;
@@ -65,7 +65,7 @@
   background: var(--gold, #b78b48);
 }
 
-/* Pestañas de Operación */
+/* pestanas de operacion */
 .operation-tabs,
 .payment-methods {
   display: flex;
@@ -96,7 +96,7 @@
   box-sizing: border-box;
 }
 
-/* --- Búsqueda y Ficha de Cliente a Ancho Completo --- */
+/* busqueda y ficha de cliente a ancho completo */
 .full-width-grid {
   display: flex;
   width: 100%;
@@ -161,7 +161,7 @@
   color: var(--ink, #252525);
 }
 
-/* --- Botones Seleccionables de Estado (Nuevo / Seminuevo) --- */
+/* botones seleccionables de estado */
 .condition-toggle-group {
   display: inline-flex;
   background: #f0ece6;
@@ -191,7 +191,7 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-/* --- Filtros Avanzados y Catálogo --- */
+/* filtros avanzados y catalogo */
 .catalog-header-box {
   display: flex;
   flex-direction: column;
@@ -270,7 +270,7 @@
   cursor: pointer;
 }
 
-/* --- Tarjetas del Catálogo Disponible (Grilla expandida) --- */
+/* tarjetas del catalogo disponible */
 .catalog-grid-cards {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -427,9 +427,7 @@
   }
 }
 
-/* ========================================================
-   ESTILOS NUEVOS: Contenedor de Finanzas y Métodos de Pago
-   ======================================================== */
+/* estilos nuevos */
 .finanzas-section {
   background: #fff;
   border: 1px solid var(--border, #e7e1d8);
@@ -548,14 +546,14 @@
   letter-spacing: 1px;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 766px) {
   .metodos-pago,
   .pago-grid,
   .pago-grid.transferencia-layout {
     grid-template-columns: 1fr;
   }
 }
-/* Ficha de cliente con la misma distribución compacta de las demás pantallas. */
+/* ficha de cliente con la misma distribucion compacta */
 .client-result-card {
   display: grid;
   grid-template-columns: minmax(230px, 1.5fr) repeat(3, minmax(130px, 1fr));
@@ -628,7 +626,7 @@
   }
 }
 
-/* DNI y calificación en celdas independientes dentro de la ficha. */
+/* dni y calificacion en celdas independientes dentro de la ficha */
 .client-result-card {
   grid-template-columns: minmax(180px, 1.4fr) minmax(100px, 0.8fr) minmax(
       120px,
@@ -667,7 +665,7 @@
   }
 }
 
-/* Imágenes del catálogo de Comprar / Alquilar */
+/* imagenes del catalogo de comprar alquilar */
 .page-empleado-comprar-alquilar .catalog-thumb {
   overflow: hidden;
   background: #f5f0e6;
@@ -681,7 +679,7 @@
   object-position: center;
 }
 
-/* Mantener las cinco estrellas en una sola línea */
+/* mantener las cinco estrellas en una sola linea */
 .client-stars {
   display: inline-flex !important;
   flex-wrap: nowrap !important;

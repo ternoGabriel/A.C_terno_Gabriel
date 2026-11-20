@@ -71,56 +71,56 @@
   width: 7%;
 }
 
-/* Código */
+/* codigo */
 
 .page-admin-empleados .data-table th:nth-child(2),
 .page-admin-empleados .data-table td:nth-child(2) {
   width: 13%;
 }
 
-/* Nombre */
+/* nombre */
 
 .page-admin-empleados .data-table th:nth-child(3),
 .page-admin-empleados .data-table td:nth-child(3) {
   width: 14%;
 }
 
-/* Correo */
+/* correo */
 
 .page-admin-empleados .data-table th:nth-child(4),
 .page-admin-empleados .data-table td:nth-child(4) {
   width: 9%;
 }
 
-/* Teléfono */
+/* telefono */
 
 .page-admin-empleados .data-table th:nth-child(5),
 .page-admin-empleados .data-table td:nth-child(5) {
   width: 10%;
 }
 
-/* Área / Puesto */
+/* area puesto */
 
 .page-admin-empleados .data-table th:nth-child(6),
 .page-admin-empleados .data-table td:nth-child(6) {
   width: 9%;
 }
 
-/* Rol */
+/* rol */
 
 .page-admin-empleados .data-table th:nth-child(7),
 .page-admin-empleados .data-table td:nth-child(7) {
   width: 9%;
 }
 
-/* Estado */
+/* estado */
 
 .page-admin-empleados .data-table th:nth-child(8),
 .page-admin-empleados .data-table td:nth-child(8) {
   width: 10%;
 }
 
-/* Fecha Ingreso */
+/* fecha ingreso */
 
 .page-admin-empleados .data-table th:nth-child(9),
 .page-admin-empleados .data-table td:nth-child(9) {
@@ -128,7 +128,7 @@
   text-align: center;
 }
 
-/* Acciones */
+/* acciones */
 
 .page-admin-empleados .data-table thead tr {
   background-color: #fcfbfa;
@@ -234,8 +234,7 @@
   background-color: #d93838;
 }
 
-/* Editar va al costado de Suspender (o de Restablecer); "Restablecer contraseña" ocupa el ancho de abajo,
-   así la columna no se ensancha */
+/* editar va al costado de suspender */
 .page-admin-empleados .acciones-fila {
   display: grid;
   grid-template-columns: 1fr 1fr;

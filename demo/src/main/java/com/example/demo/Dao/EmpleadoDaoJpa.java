@@ -5,7 +5,7 @@ import org.springframework.stereotype.Repository;
 import com.example.demo.Model.Empleado;
 import com.example.demo.Repository.EmpleadoRepository;
 
-/** Implementación JPA de {@link EmpleadoDao}. */
+/* implementacion jpa de empleadodao */
 @Repository
 public class EmpleadoDaoJpa extends JpaDao<Empleado> implements EmpleadoDao {
 

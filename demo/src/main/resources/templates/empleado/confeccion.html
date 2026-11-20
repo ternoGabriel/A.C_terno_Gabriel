@@ -12,6 +12,7 @@
     <link rel="stylesheet" th:href="@{/css/empleado/confeccion.css}" />
     <link rel="stylesheet" th:href="@{/css/comprobante.css}" />
     <link rel="stylesheet" th:href="@{/css/responsive.css}" />
+    <link rel="stylesheet" th:href="@{/css/fluido.css}" />
   </head>
 
   <body class="page-empleado-confeccion">
@@ -47,7 +48,7 @@
           </div>
         </div>
         <div class="content">
-          <!-- Sección 1: Identificar cliente u orden con buscador inteligente -->
+          <!-- seccion 1 identificar cliente u orden con buscador inteligente -->
           <section class="card" id="seccionBusquedaOrdenes">
             <div
               class="card-head"
@@ -96,7 +97,7 @@
               </div>
             </div>
 
-            <!-- 3 Órdenes próximas -->
+            <!-- 3 ordenes proximas -->
             <div
               style="
                 display: flex;
@@ -114,7 +115,7 @@
             ></div>
           </section>
 
-          <!-- Al abrir una orden: elegir entre registrar una prueba o hacer la entrega -->
+          <!-- al abrir una orden -->
           <section
             class="card"
             id="seccionModoOrden"
@@ -236,7 +237,7 @@
             </div>
           </section>
 
-          <!-- Tarjeta: Datos del cliente -->
+          <!-- tarjeta datos del cliente -->
           <section
             class="card"
             id="seccionDatosCliente"
@@ -312,7 +313,7 @@
             </div>
           </section>
 
-          <!-- Sección 2: Ficha de medidas y Personalización -->
+          <!-- seccion 2 ficha de medidas y personalizacion -->
           <div
             id="seccionMedidasPersonalizacion"
             style="
@@ -322,7 +323,7 @@
               margin-top: 20px;
             "
           >
-            <!-- Ficha de medidas -->
+            <!-- ficha de medidas -->
             <section class="card" style="margin-bottom: 0">
               <div class="card-head" style="margin-bottom: 16px">
                 <div>
@@ -377,7 +378,7 @@
               </div>
             </section>
 
-            <!-- Personalización -->
+            <!-- personalizacion -->
             <section class="card" style="margin-bottom: 0">
               <div class="card-head" style="margin-bottom: 16px">
                 <div>
@@ -480,7 +481,7 @@
             </section>
           </div>
 
-          <!-- Sección 3: Plazos y Estado -->
+          <!-- seccion 3 plazos y estado -->
           <section class="card" id="seccionPlazos" style="margin-top: 20px">
             <div class="card-head" style="margin-bottom: 16px">
               <div>
@@ -517,7 +518,7 @@
             </div>
           </section>
 
-          <!-- Sección 4: Contenedor de Pagos Unificado -->
+          <!-- seccion 4 contenedor de pagos unificado -->
           <section class="card" id="seccionFinanzas" style="margin-top: 20px">
             <div class="finanzas-section">
               <div class="finanzas-header">
@@ -536,7 +537,7 @@
                 <div class="badge-tg">TG · CAJA Y PAGOS</div>
               </div>
 
-              <!-- Botones de métodos de pago -->
+              <!-- botones de metodos de pago -->
               <div class="metodos-pago">
                 <div class="metodo-btn active" data-metodo="Efectivo">
                   Efectivo
@@ -547,7 +548,7 @@
                 </div>
               </div>
 
-              <!-- Grid de campos de pago -->
+              <!-- grid de campos de pago -->
               <div
                 class="pago-grid"
                 id="pagoGridContainer"
@@ -564,7 +565,7 @@
                   />
                 </label>
 
-                <!-- Campo Adelanto (Oculto al crear ticket nuevo, visible al buscar ticket existente) -->
+                <!-- campo adelanto -->
                 <label
                   class="field"
                   id="campoAdelantoContainer"
@@ -591,7 +592,7 @@
                   />
                 </label>
 
-                <!-- Tercer campo dinámico -->
+                <!-- tercer campo dinamico -->
                 <label
                   class="field"
                   id="campoDinamicoTercero"
@@ -614,7 +615,7 @@
                 </label>
               </div>
 
-              <!-- Contenedor QR de Yape -->
+              <!-- contenedor qr de yape -->
               <div
                 id="yapeAdminContainer"
                 class="yape-qr-box"
@@ -630,7 +631,7 @@
                 <div class="yape-qr-phone" id="yapeAdminNumero"></div>
               </div>
 
-              <!-- Se muestra solo si el ticket ya fue pagado completo: no se cobra nada y la boleta sale sola -->
+              <!-- se muestra solo si el ticket ya fue pagado completo -->
               <div class="aviso-pagado-total" id="avisoPagadoTotal" hidden>
                 <span class="ok-icon">✓</span>
                 <div>
@@ -665,15 +666,15 @@
                     cursor: pointer;
                   "
                 >
-                  Confirmar pago &gt;
+                  Confirmar pago
                 </button>
               </div>
             </div>
           </section>
 
-          <!-- Sección 5: Ticket (al registrar la orden) y Boleta (al entregar y cobrar el saldo) -->
+          <!-- seccion 5 ticket -->
           <section class="cp-wrap" id="seccionComprobantes" style="margin-top: 20px">
-            <!-- TICKET DE CONFECCIÓN: papel térmico angosto -->
+            <!-- ticket de confeccion papel termico angosto -->
             <article class="cp cp-ticket" id="cpTicketConf">
               <div class="t-centro">
                 <div class="t-logo">TG</div>
@@ -776,7 +777,7 @@
               </p>
             </article>
 
-            <!-- BOLETA DE CONFECCIÓN: se muestra al entregar la prenda y cobrar el saldo -->
+            <!-- boleta de confeccion se muestra al entregar la prenda -->
             <article class="cp cp-boleta" id="cpBoletaConf" hidden>
               <p class="cp-borrador" id="cbBorrador" hidden>
                 VISTA PREVIA · la boleta se emite al confirmar el pago
@@ -899,6 +900,7 @@
     </div>
     <div th:replace="~{fragments/toast :: toast('Cambios guardados')}"></div>
     <script th:src="@{/js/api.js}" defer></script>
+    <script th:src="@{/js/historial.js}" defer></script>
     <script th:src="@{/js/app.js}" defer></script>
     <script th:src="@{/js/empleado/confeccion.js}" defer></script>
   </body>

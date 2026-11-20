@@ -1,8 +1,8 @@
-/* Base compartida de Comprar y Alquilar */
+/* base compartida de comprar y alquilar */
 window.CA = (() => {
   const KEY = "ternoCompraAlquiler";
 
-  /* Sesion */
+  /* sesion */
   class Sesion {
     constructor(key) {
       this.key = key;
@@ -23,7 +23,7 @@ window.CA = (() => {
       };
     }
 
-    /* Lee los datos guardados */
+    /* lee los datos guardados */
     leer() {
       try {
         return JSON.parse(sessionStorage.getItem(this.key) || "{}");
@@ -32,7 +32,7 @@ window.CA = (() => {
       }
     }
 
-    /* Guarda sin perder lo anterior */
+    /* guarda sin perder lo anterior */
     guardar(data) {
       sessionStorage.setItem(
         this.key,
@@ -40,17 +40,17 @@ window.CA = (() => {
       );
     }
 
-    /* Reemplaza todo el contenido */
+    /* reemplaza todo el contenido */
     reemplazar(data) {
       sessionStorage.setItem(this.key, JSON.stringify(data));
     }
 
-    /* Borra todo */
+    /* borra todo */
     borrar() {
       sessionStorage.removeItem(this.key);
     }
 
-    /* Borra los datos de los pasos posteriores */
+    /* borra los datos de los pasos posteriores */
     limpiarDesde(n) {
       const s = this.leer();
 
@@ -61,12 +61,12 @@ window.CA = (() => {
       this.reemplazar(s);
     }
 
-    /* Operacion elegida */
+    /* operacion elegida */
     operacion() {
       return this.leer().operacion || "Alquilar";
     }
 
-    /* Dias del alquiler: de la fecha de recojo a la de devolucion (minimo 1) */
+    /* dias del alquiler de la fecha de recojo */
     diasAlquiler() {
       const s = this.leer();
 
@@ -75,14 +75,14 @@ window.CA = (() => {
       return Math.max(1, TG.diasEntre(s.fechaRecojo, s.fechaDevolucion));
     }
 
-    /* Dias que se cobran: con la opcion marcada, los dias 1 y 2 se cobran como uno solo */
+    /* dias que se cobran */
     diasCobrados() {
       const dias = this.diasAlquiler();
 
       return this.leer().cobrarDosDias ? Math.max(1, dias - 1) : dias;
     }
 
-    /* Precio segun la operacion (el alquiler es precio por dia x dias cobrados) */
+    /* precio segun la operacion */
     precioFinal() {
       const s = this.leer();
 
@@ -94,7 +94,7 @@ window.CA = (() => {
     }
   }
 
-  /* Cabecera */
+  /* cabecera */
   class Cabecera {
     constructor(sesion, paso) {
       this.sesion = sesion;
@@ -105,7 +105,7 @@ window.CA = (() => {
       ];
     }
 
-    /* Marca la pestana activa */
+    /* marca la pestana activa */
     pintarPestanas(op) {
       this.botones.forEach((btn) => {
         const activo = btn.dataset.operation === op;
@@ -119,7 +119,7 @@ window.CA = (() => {
       });
     }
 
-    /* Activa las pestanas y bloquea desde el paso 3 */
+    /* activa las pestanas y bloquea desde el paso 3 */
     iniciar(state) {
       const { sesion, paso } = this;
 
@@ -156,7 +156,7 @@ window.CA = (() => {
       }
     }
 
-    /* Ajusta el indicador de pasos */
+    /* ajusta el indicador de pasos */
     ajustarPasos() {
       const { sesion, paso } = this;
       const compra = sesion.operacion() === "Comprar";
@@ -207,6 +207,8 @@ window.CA = (() => {
       const st = document.querySelector(".flow-stepper");
 
       if (st) {
+        /* con comprar son 4 pasos */
+        st.classList.toggle("is-compra", compra);
         st.setAttribute(
           "aria-label",
           "Paso " + actual + " de " + total,
@@ -215,7 +217,7 @@ window.CA = (() => {
     }
   }
 
-  /* Flujo */
+  /* flujo */
   class Flujo {
     constructor(paso) {
       this.paso = paso;
@@ -223,7 +225,7 @@ window.CA = (() => {
       this.cabecera = new Cabecera(this.sesion, paso);
     }
 
-    /* Limpia solo si se entra desde otra pantalla */
+    /* limpia solo si se entra desde otra pantalla */
     reiniciarSiVieneDeFuera() {
       const tipoNav = performance.getEntriesByType("navigation")[0]
         ?.type;
@@ -250,7 +252,7 @@ window.CA = (() => {
       }
     }
 
-    /* Guarda y restaura los campos marcados */
+    /* guarda y restaura los campos marcados */
     enlazarCampos(state) {
       const { sesion } = this;
 
@@ -279,7 +281,7 @@ window.CA = (() => {
 
       this.reiniciarSiVieneDeFuera();
 
-      /* Sin prenda no se avanza del paso 1 */
+      /* sin prenda no se avanza del paso 1 */
       if (paso > 1 && !sesion.leer().prendaId) {
         location.replace("/empleado/comprar-alquilar");
         return;
@@ -292,7 +294,7 @@ window.CA = (() => {
       this.enlazarCampos(state);
       cabecera.iniciar(state);
 
-      /* En compra se salta el paso 3 */
+      /* en compra se salta el paso 3 */
       if (paso === 3 && sesion.operacion() === "Comprar") {
         location.replace("/empleado/comprar-alquilar/paso-4");
         return;
@@ -300,7 +302,7 @@ window.CA = (() => {
 
       cabecera.ajustarPasos();
 
-      /* En compra atras del paso 4 va al paso 2 */
+      /* en compra atras del paso 4 va al paso 2 */
       if (paso === 4 && sesion.operacion() === "Comprar") {
         const atras = document.querySelector('a[href$="paso-3"]');
 
@@ -313,7 +315,7 @@ window.CA = (() => {
     }
   }
 
-  /* Arranque de cada paso */
+  /* arranque de cada paso */
   const arrancar = (paso, ClasePaso) =>
     TG.listo(() => new Flujo(paso).iniciar(ClasePaso));
 

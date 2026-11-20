@@ -11,6 +11,7 @@
     <link rel="stylesheet" th:href="@{/css/global.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/penalizaciones.css}" />
     <link rel="stylesheet" th:href="@{/css/responsive.css}" />
+    <link rel="stylesheet" th:href="@{/css/fluido.css}" />
   </head>
 
   <body class="page-admin-penalizaciones">
@@ -49,9 +50,9 @@
           </div>
         </div>
         <div class="content">
-          <!-- Las 3 Tarjetas superiores -->
+          <!-- las 2 tarjetas superiores -->
           <div class="penalty-settings">
-            <!-- Penalización Demora -->
+            <!-- penalizacion demora -->
             <section class="card card-penalty" id="card-demora">
               <div class="card-top-row">
                 <div class="setting-icon icon-yellow">
@@ -82,9 +83,13 @@
                 <span class="value" id="val-demora">—</span>
               </div>
               <p class="card-sub">Por cada día de retraso.</p>
+              <div class="card-mod">
+                <span>Última modificación</span>
+                <strong id="mod-demora">—</strong>
+              </div>
             </section>
 
-            <!-- Penalización Mal Estado -->
+            <!-- penalizacion mal estado -->
             <section class="card card-penalty" id="card-malestado">
               <div class="card-top-row">
                 <div class="setting-icon icon-pink">
@@ -119,23 +124,15 @@
                 <span class="value" id="val-malestado">—</span>
               </div>
               <p class="card-sub">Por manchas, roturas o daños.</p>
+              <div class="card-mod">
+                <span>Última modificación</span>
+                <strong id="mod-malestado">—</strong>
+              </div>
             </section>
 
-            <!-- Tarjeta de Modificación -->
-            <section class="card cream-action-card">
-              <div class="meta-info">
-                <span class="meta-title">Última modificación</span>
-                <strong class="meta-value" id="last-mod-date"
-                  >—</strong
-                >
-              </div>
-              <button class="btn btn-gold" type="button" data-action="notify">
-                Guardar Cambios
-              </button>
-            </section>
           </div>
 
-          <!-- Historial de Penalizaciones -->
+          <!-- historial de penalizaciones -->
           <section class="card historial-card">
             <div class="card-head">
               <div>
@@ -144,7 +141,7 @@
               </div>
               <div class="filter-row">
                 <div class="date-input-wrap">
-                  <input type="text" class="filter-date" value="dd/mm/aaaa" />
+                  <input type="date" class="filter-date" aria-label="Filtrar por fecha" />
                   <span class="calendar-icon">📅</span>
                 </div>
                 <select class="filter-select" data-category-filter>
@@ -179,7 +176,7 @@
       </main>
     </div>
 
-    <!-- Modal de Edición de Penalización -->
+    <!-- modal de edicion de penalizacion -->
     <div class="modal-overlay" id="editPenaltyModal" hidden>
       <div class="modal-content">
         <div class="modal-header">
@@ -215,7 +212,7 @@
             Cancelar
           </button>
           <button type="button" class="btn btn-gold" id="savePenaltyModal">
-            Confirmar y Guardar
+            Confirmar
           </button>
         </div>
       </div>
@@ -223,6 +220,7 @@
 
     <div th:replace="~{fragments/toast :: toast('Cambios guardados')}"></div>
     <script th:src="@{/js/api.js}" defer></script>
+    <script th:src="@{/js/historial.js}" defer></script>
     <script th:src="@{/js/app.js}" defer></script>
     <script th:src="@{/js/admin/penalizaciones.js}" defer></script>
   </body>

@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.demo.Dao.EmpleadoDao;
 import com.example.demo.Model.Empleado;
 import com.example.demo.Seguridad.GestorContrasenas;
+import com.example.demo.Seguridad.ValidadorCredenciales;
 import com.example.demo.Service.EmpleadoService;
 import com.google.common.base.Preconditions;
 
@@ -35,6 +36,8 @@ public class EmpleadoServiceImpl implements EmpleadoService {
     public Empleado crear(Empleado nuevo) {
         Preconditions.checkArgument(nuevo.getApellido() != null && !nuevo.getApellido().isBlank(), "El apellido es obligatorio");
         Preconditions.checkArgument(nuevo.getContrasena() != null && !nuevo.getContrasena().isBlank(), "La contraseña es obligatoria");
+        Preconditions.checkArgument(ValidadorCredenciales.contrasenaSegura(nuevo.getContrasena()), ValidadorCredenciales.mensajeContrasena(nuevo.getContrasena()));
+        nuevo.setCorreo(nuevo.getCorreo().trim().toLowerCase());
         nuevo.setNombre(nuevo.getNombre().trim());
         nuevo.setApellido(nuevo.getApellido().trim());
         Preconditions.checkArgument(dao.buscarPorUsuario(nuevo.getUsuario()).isEmpty(), "Ya existe un empleado con ese usuario");
@@ -52,11 +55,12 @@ public class EmpleadoServiceImpl implements EmpleadoService {
     public Empleado actualizar(Long id, Empleado datos) {
         Empleado actual = dao.buscarPorId(id).orElseThrow(() -> new IllegalArgumentException(NO_EXISTE));
         Preconditions.checkArgument(datos.getApellido() != null && !datos.getApellido().isBlank(), "El apellido es obligatorio");
+        datos.setCorreo(datos.getCorreo().trim().toLowerCase());
         dao.buscarPorUsuario(datos.getUsuario()).ifPresent(otro ->
             Preconditions.checkArgument(otro.getId().equals(id), "Ya existe un empleado con ese usuario"));
         dao.buscarPorCorreo(datos.getCorreo()).ifPresent(otro ->
             Preconditions.checkArgument(otro.getId().equals(id), "Ya existe un empleado con ese correo"));
-        /* Solo se cambian los datos editables: código, estado y fecha de ingreso los maneja el sistema */
+        /* solo se cambian los datos editables */
         actual.setNombre(datos.getNombre().trim());
         actual.setApellido(datos.getApellido().trim());
         actual.setUsuario(datos.getUsuario());
@@ -64,9 +68,7 @@ public class EmpleadoServiceImpl implements EmpleadoService {
         actual.setTelefono(datos.getTelefono());
         actual.setArea(datos.getArea());
         actual.setRol(datos.getRol());
-        /* La contraseña solo cambia si se escribió una nueva; si no, se conserva la cifrada que ya tenía */
-        if (datos.getContrasena() != null && !datos.getContrasena().isBlank())
-            actual.setContrasena(contrasenas.cifrar(datos.getContrasena()));
+        /* editar nunca cambia la contrasena */
         LOG.info("Empleado {} editado", actual.getCodigo());
         return dao.guardar(actual);
     }
@@ -104,7 +106,7 @@ public class EmpleadoServiceImpl implements EmpleadoService {
     @Transactional
     public void cambiarContrasena(Long id, String nueva) {
         Empleado e = dao.buscarPorId(id).orElseThrow(() -> new IllegalArgumentException(NO_EXISTE));
-        Preconditions.checkArgument(nueva != null && nueva.length() >= 4, "La contraseña debe tener al menos 4 caracteres");
+        Preconditions.checkArgument(ValidadorCredenciales.contrasenaSegura(nueva), ValidadorCredenciales.mensajeContrasena(nueva));
         e.setContrasena(contrasenas.cifrar(nueva));
         dao.guardar(e);
         LOG.info("Contraseña cambiada para el empleado {}", e.getCodigo());
@@ -132,7 +134,7 @@ public class EmpleadoServiceImpl implements EmpleadoService {
         return cifradas;
     }
 
-    /* El código (E001, E002...) lo genera el sistema, no se escribe a mano */
+    /* el codigo lo genera el sistema no se escribe */
     private String siguienteCodigo() {
         int max = dao.listar().stream()
             .map(Empleado::getCodigo)

@@ -11,6 +11,7 @@
     <link rel="stylesheet" th:href="@{/css/global.css}" />
     <link rel="stylesheet" th:href="@{/css/empleado/anular-boleta.css}" />
     <link rel="stylesheet" th:href="@{/css/responsive.css}" />
+    <link rel="stylesheet" th:href="@{/css/fluido.css}" />
   </head>
 
   <body class="page-empleado-anular-boleta">
@@ -74,7 +75,7 @@
                 </button>
               </div>
 
-              <!-- Contenedor de Resultado Encontrado (Oculto por defecto) -->
+              <!-- contenedor de resultado encontrado -->
               <div class="cancel-summary" id="cancelSummary" hidden>
                 <div class="cancel-client">
                   <span class="cancel-avatar" id="sumAvatar">—</span>
@@ -96,7 +97,7 @@
                 <div><span>Monto</span><b id="sumMonto">—</b></div>
               </div>
 
-              <!-- Contenedor de No Encontrado (Oculto por defecto) -->
+              <!-- contenedor de no encontrado -->
               <div class="not-found-box" id="notFoundBox" hidden>
                 <span
                   >❌ No se encontró ninguna boleta o DNI registrado con ese
@@ -138,7 +139,7 @@
       </main>
     </div>
 
-    <!-- Modal de Confirmación de Anulación -->
+    <!-- modal de confirmacion de anulacion -->
     <div class="modal-backdrop" id="confirmModal" hidden>
       <div class="modal-card">
         <h3>¿Quieres anular esta boleta?</h3>
@@ -159,6 +160,7 @@
 
     <div th:replace="~{fragments/toast :: toast('Cambios guardados')}"></div>
     <script th:src="@{/js/api.js}" defer></script>
+    <script th:src="@{/js/historial.js}" defer></script>
     <script th:src="@{/js/app.js}" defer></script>
     <script th:src="@{/js/empleado/anular-boleta.js}" defer></script>
   </body>

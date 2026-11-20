@@ -9,10 +9,7 @@ import org.springframework.stereotype.Component;
 import com.example.demo.Model.Empleado;
 import com.example.demo.Service.AuthService;
 
-/**
- * Conecta Spring Security con la tabla empleado: delega en {@link AuthService}, que ya valida usuario o correo,
- * estado Activo, contraseña BCrypt y el límite de intentos fallidos.
- */
+/* conecta spring security con la tabla empleado */
 @Component
 public class ProveedorAutenticacion implements AuthenticationProvider {
 
@@ -28,8 +25,12 @@ public class ProveedorAutenticacion implements AuthenticationProvider {
         Object credencial = solicitud.getCredentials();
         String contrasena = credencial == null ? null : credencial.toString();
 
+        /* primero valida el formato y luego compara */
+        if (!ValidadorCredenciales.correoValido(usuario) || !ValidadorCredenciales.contrasenaSegura(contrasena))
+            throw new BadCredentialsException("Correo o contraseña con formato inválido");
+
         Empleado empleado = autenticacion.autenticar(usuario, contrasena)
-            .orElseThrow(() -> new BadCredentialsException("Usuario o contraseña incorrectos"));
+            .orElseThrow(() -> new BadCredentialsException("Correo o contraseña incorrectos"));
 
         UsuarioSesion principal = new UsuarioSesion(empleado);
         return UsernamePasswordAuthenticationToken.authenticated(principal, null, principal.getAuthorities());

@@ -44,7 +44,7 @@ public class BoletaServiceImpl implements BoletaService {
         this.empleados = empleados;
     }
 
-    /* Constructor de compatibilidad para pruebas y código legado. Spring utiliza el de cinco argumentos. */
+    /* constructor de compatibilidad para pruebas y codigo legado */
     public BoletaServiceImpl(BoletaDao boletas, PrendaDao prendas, ClienteDao clientes, ConfeccionDao confecciones) {
         this(boletas, prendas, clientes, confecciones, null);
     }
@@ -54,8 +54,7 @@ public class BoletaServiceImpl implements BoletaService {
         return boletas.listar();
     }
 
-    /* Al generar la boleta: el monto sale del precio que definió el administrador en la prenda,
-       se genera el número y cambia el estado de la prenda */
+    /* al generar la boleta */
     @Override
     @Transactional
     public Boleta emitir(Boleta nueva) {
@@ -65,7 +64,7 @@ public class BoletaServiceImpl implements BoletaService {
         Preconditions.checkArgument(nueva.getFechaDevolucion() == null || !nueva.getFechaDevolucion().isBefore(LocalDate.now()),
             "La fecha de devolución no puede ser pasada");
 
-        /* Boleta de confección: se entrega la orden y se cobra el saldo; el cliente viene del ticket */
+        /* boleta de confeccion se entrega la orden y se cobra */
         if ("Confección".equals(nueva.getTipo())) return emitirConfeccion(nueva);
 
         Preconditions.checkArgument(nueva.getPrenda() != null && nueva.getPrenda().getId() != null, "Debe seleccionar una prenda");
@@ -112,18 +111,18 @@ public class BoletaServiceImpl implements BoletaService {
         return guardada;
     }
 
-    /** Días del alquiler (mínimo 1): de la fecha de recojo (hoy si no se indica) a la de devolución. */
+    /* dias del alquiler de la fecha de recojo */
     public static long diasAlquiler(LocalDate recojo, LocalDate devolucion) {
         LocalDate desde = recojo != null ? recojo : LocalDate.now();
         return Math.max(1, ChronoUnit.DAYS.between(desde, devolucion));
     }
 
-    /** Días que se cobran: con la opción marcada, los días 1 y 2 se cobran como un solo día. */
+    /* dias que se cobran */
     public static long diasCobrados(long dias, boolean dosDiasComoUno) {
         return dosDiasComoUno ? Math.max(1, dias - 1) : dias;
     }
 
-    /** Monto del alquiler: precio por día × días cobrados (S/ 50: 3 días = 150, o 100 con la opción marcada). */
+    /* monto del alquiler precio por dia dias cobrados */
     public static double montoAlquiler(double precioPorDia, LocalDate recojo, LocalDate devolucion, boolean dosDiasComoUno) {
         long cobrados = diasCobrados(diasAlquiler(recojo, devolucion), dosDiasComoUno);
         return Math.round(precioPorDia * cobrados * 100.0) / 100.0;
@@ -138,13 +137,11 @@ public class BoletaServiceImpl implements BoletaService {
         nueva.setCliente(orden.getCliente());
         nueva.setConfeccion(orden);
         nueva.setPrenda(null);
-        /* Si el ticket ya se pagó completo no hay nada que cobrar: la boleta conserva la forma de pago elegida al
-           generar el ticket. Si no llega forma de pago, se usa la del ticket (o Efectivo si es un ticket antiguo). */
+        /* si el ticket ya se pago completo no hay nada */
         boolean pagadoCompleto = orden.getAdelanto() != null && orden.getAdelanto() + 0.005 >= orden.getCostoTotal();
         if (pagadoCompleto || StringUtils.isBlank(nueva.getMetodoPago()))
             nueva.setMetodoPago(StringUtils.defaultIfBlank(orden.getMetodoPago(), "Efectivo"));
-        /* La boleta registra el costo total de la confección (adelanto + saldo), así los informes
-           suman el ingreso real una sola vez; el ticket no cuenta como ingreso */
+        /* la boleta registra el costo total de la confeccion */
         nueva.setMonto(orden.getCostoTotal());
         vincularEmpleado(nueva);
         Boleta emitida = boletas.guardar(nueva);
@@ -157,14 +154,14 @@ public class BoletaServiceImpl implements BoletaService {
         return emitida;
     }
 
-    /* Devolución: la boleta de alquiler se cierra y la prenda vuelve al inventario */
+    /* devolucion la boleta de alquiler se cierra y la prenda */
     @Override
     @Transactional
     public Boleta devolver(Long id, String estadoPrenda) {
         Boleta boleta = boletas.buscarPorId(id).orElseThrow(() -> new IllegalArgumentException(NO_EXISTE));
         Preconditions.checkArgument("Alquiler".equals(boleta.getTipo()) && "Vigente".equals(boleta.getEstado()),
             "Esta boleta no tiene una devolución pendiente");
-        /* Devolución normal → Lavandería; devolución con daños → Restauración */
+        /* devolucion normal lavanderia devolucion con danos restauracion */
         Preconditions.checkArgument(ImmutableList.of("En lavandería", "En restauración").contains(estadoPrenda),
             "Estado de prenda no válido para una devolución");
         boleta.setEstado("Devuelta");
@@ -182,8 +179,7 @@ public class BoletaServiceImpl implements BoletaService {
         Preconditions.checkArgument(!"Anulada".equals(boleta.getEstado()), "La boleta ya fue anulada");
         Preconditions.checkArgument(ImmutableList.of("Alquiler", "Venta").contains(boleta.getTipo()) && "Vigente".equals(boleta.getEstado()),
             "Solo se pueden anular boletas vigentes de alquiler o compra/venta. Las reservas, confecciones y operaciones cerradas no se pueden anular desde esta pantalla.");
-        /* La prenda solo se libera si esta boleta todavía la tiene (una boleta ya devuelta no debe liberar
-           una prenda que ahora está alquilada a otro cliente) */
+        /* la prenda solo se libera si esta boleta todavia */
         boolean tieneLaPrenda = "Vigente".equals(boleta.getEstado());
         boleta.setEstado("Anulada");
         boleta.setMotivoAnulacion(StringUtils.abbreviate(motivo.trim(), 255));
@@ -191,7 +187,7 @@ public class BoletaServiceImpl implements BoletaService {
             boleta.getPrenda().setEstado("Disponible");
             prendas.guardar(boleta.getPrenda());
         }
-        /* Si era la entrega de una confección, la orden vuelve a estar en confección */
+        /* si era la entrega de una confeccion la orden vuelve */
         if (boleta.getConfeccion() != null) {
             boleta.getConfeccion().setEstado("En confección");
             boleta.getConfeccion().setBoleta(null);
@@ -228,6 +224,15 @@ public class BoletaServiceImpl implements BoletaService {
             .orElseGet(() -> empleados.findAll().stream()
                 .filter(e -> e.getNombre() != null && e.getNombre().equalsIgnoreCase(referencia.trim()))
                 .findFirst().orElse(null));
-        if (encontrado != null) boleta.setEmpleadoResponsable(encontrado);
+        if (encontrado != null) {
+            boleta.setEmpleadoResponsable(encontrado);
+            boleta.setEmpleado(nombreVisible(encontrado));
+        }
+    }
+    /* nombre y primer apellido */
+    private static String nombreVisible(Empleado e) {
+        String n = e.getNombre() == null ? "" : e.getNombre().trim().split("\\s+")[0];
+        String a = e.getApellido() == null ? "" : e.getApellido().trim().split("\\s+")[0];
+        return (n + " " + a).trim();
     }
 }

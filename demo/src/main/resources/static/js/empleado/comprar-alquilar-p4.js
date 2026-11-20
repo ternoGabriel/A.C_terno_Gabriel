@@ -1,4 +1,4 @@
-/* Paso 4 */
+/* paso 4 */
 (() => {
   class Paso4 {
     constructor(sesion) {
@@ -50,7 +50,7 @@
           ? Number(entregadoPrevio).toFixed(2)
           : "0.00";
 
-      /* Calcula el vuelto y guarda el pago */
+      /* calcula el vuelto y guarda el pago */
       const recalcular = () => {
         const entregado = Number(inputEntregado.value) || 0;
         const vuelto = Math.max(0, entregado - total);
@@ -80,7 +80,7 @@
         recalcular();
       });
 
-      /* Cambia el metodo de pago */
+      /* cambia el metodo de pago */
       const elegirMetodo = (m) => {
         metodosBtns.forEach((b) =>
           b.classList.toggle("active", b.dataset.metodo === m),
@@ -106,7 +106,7 @@
           inputEntregado.value = total.toFixed(2);
         }
 
-        /* Yape: QR + número · Transferencia: cuenta y CCI (datos guardados por el administrador) */
+        /* yape qr numero transferencia */
         TG.mostrarDatosPago(m);
 
         save({ metodo: m });
@@ -129,7 +129,7 @@
           ")",
       });
 
-      /* Valida el monto antes del paso 5 */
+      /* valida el monto antes del paso 5 */
       document
         .querySelector('a[href$="paso-5"]')
         ?.addEventListener("click", (e) => {

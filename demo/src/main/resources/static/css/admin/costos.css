@@ -1,4 +1,4 @@
-/* Estilos para la barra de filtros */
+/* estilos para la barra de filtros */
 .page-admin-costos .filter-row {
   display: flex;
   align-items: center;
@@ -27,7 +27,7 @@
   color: #94a3b8;
 }
 
-/* Estilos de los estados en la tabla */
+/* estilos de los estados en la tabla */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -97,4 +97,10 @@
 }
 .btn-link-action:hover {
   text-decoration: underline;
+}
+
+/* total de productos registrados en negro oscuro */
+.page-admin-costos .kpi-grid > .card.kpi .kpi-copy strong.kpi-total {
+  color: #0b0b0b;
+  font-weight: 800;
 }

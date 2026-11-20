@@ -11,6 +11,7 @@
     <link rel="stylesheet" th:href="@{/css/global.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/clientes.css}" />
     <link rel="stylesheet" th:href="@{/css/responsive.css}" />
+    <link rel="stylesheet" th:href="@{/css/fluido.css}" />
   </head>
   <body class="page-admin-clientes">
     <div class="app-shell">
@@ -87,9 +88,6 @@
                   data-table-search
                   placeholder="Buscar por DNI o nombre"
                 />
-                <button class="btn primary" type="button">
-                  + Nuevo cliente
-                </button>
               </div>
             </div>
             <div class="table-wrap">
@@ -115,6 +113,7 @@
     </div>
     <div th:replace="~{fragments/toast :: toast('Cambios guardados')}"></div>
     <script th:src="@{/js/api.js}" defer></script>
+    <script th:src="@{/js/historial.js}" defer></script>
     <script th:src="@{/js/app.js}" defer></script>
     <script th:src="@{/js/admin/clientes.js}" defer></script>
   </body>

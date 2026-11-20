@@ -11,6 +11,7 @@
     <link rel="stylesheet" th:href="@{/css/global.css}" />
     <link rel="stylesheet" th:href="@{/css/empleado/comprar-alquilar.css}" />
     <link rel="stylesheet" th:href="@{/css/responsive.css}" />
+    <link rel="stylesheet" th:href="@{/css/fluido.css}" />
   </head>
 
   <body class="page-empleado-comprar-alquilar">
@@ -49,7 +50,7 @@
         </div>
 
         <div class="content">
-          <!-- Pestañas de Tipo de Operación (Estilo Solapa Subrayada) -->
+          <!-- pestanas de tipo de operacion -->
           <div
             aria-label="Tipo de operación"
             class="operation-tabs"
@@ -95,7 +96,7 @@
             </button>
           </div>
 
-          <!-- Stepper Circular de Ancho Completo -->
+          <!-- stepper circular de ancho completo -->
           <div aria-label="Paso 1 de 5" class="flow-stepper full-width-stepper">
             <div class="step-item active">
               <div class="step-circle">1</div>
@@ -123,7 +124,7 @@
             </div>
           </div>
 
-          <!-- Sección: Búsqueda de cliente -->
+          <!-- seccion busqueda de cliente -->
           <section class="card flow-card">
             <div class="card-head">
               <div>
@@ -154,7 +155,7 @@
               </label>
             </div>
 
-            <!-- Ficha del cliente encontrado -->
+            <!-- ficha del cliente encontrado -->
             <div class="client-result-card">
               <div class="client-detail-col">
                 <span>Cliente</span><strong>Escribe el DNI y pulsa Buscar Cliente.</strong>
@@ -162,7 +163,7 @@
             </div>
           </section>
 
-          <!-- Sección: Catálogo disponible con filtros avanzados -->
+          <!-- seccion catalogo disponible con filtros avanzados -->
           <section class="card flow-card">
             <div class="card-head catalog-header-box">
               <div class="catalog-title-wrapper">
@@ -171,7 +172,7 @@
                   <p>Selecciona una prenda o filtra según tus preferencias</p>
                 </div>
 
-                <!-- Botones Seleccionables para Nuevo / Seminuevo -->
+                <!-- botones seleccionables para nuevo seminuevo -->
                 <div class="condition-toggle-group">
                   <button
                     type="button"
@@ -197,7 +198,7 @@
                 </div>
               </div>
 
-              <!-- Barra de Filtros Avanzados -->
+              <!-- barra de filtros avanzados -->
               <div class="advanced-filters-bar">
                 <div class="filter-group">
                   <label>Color</label>
@@ -248,7 +249,7 @@
                 </div>
               </div>
 
-              <!-- Componentes individuales (Selección Múltiple) -->
+              <!-- componentes individuales -->
               <div class="multi-garment-filter">
                 <span class="filter-label-title"
                   >Componentes individuales (Selección múltiple):</span
@@ -290,7 +291,7 @@
               </div>
             </div>
 
-            <!-- Tarjetas de productos del catálogo -->
+            <!-- tarjetas de productos del catalogo -->
             <div class="catalog-grid-cards">
               <article class="catalog-item-card selected">
                 <div class="catalog-thumb">
@@ -371,11 +372,12 @@
 
     <div th:replace="~{fragments/toast :: toast('Cambios guardados')}"></div>
     <script th:src="@{/js/api.js}" defer></script>
+    <script th:src="@{/js/historial.js}" defer></script>
     <script defer="" th:src="@{/js/app.js}"></script>
     <script defer="" th:src="@{/js/empleado/comprar-alquilar.js}"></script>
     <script defer="" th:src="@{/js/empleado/comprar-alquilar-p1.js}"></script>
 
-    <!-- Script simple para la selección de botones de Estado (Nuevo / Seminuevo) -->
+    <!-- script simple para la seleccion de botones de estado -->
     <script>
       document.querySelectorAll(".condition-btn").forEach((button) => {
         button.addEventListener("click", () => {

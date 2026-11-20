@@ -1,4 +1,4 @@
-// Inicio del administrador: cifras calculadas con lo que registran los empleados.
+/* inicio del administrador cifras calculadas con lo que registran */
 document.addEventListener("DOMContentLoaded", () =>
   TG.listo(async () => {
     try {
@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", () =>
         "En proceso",
       );
 
-      /* Calificaciones: promedio de lo que los empleados califican al terminar cada boleta */
+      /* calificaciones promedio de lo que los empleados califican al terminar */
       const clientes = await TG.clientes();
       const calif = clientes.filter((c) => c.calificacion);
       const prom = calif.length
@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", () =>
             : " clientes calificados"),
       );
 
-      /* Ingresos de los últimos 7 meses (boletas no anuladas), igual que las ventas del mes */
+      /* ingresos de los ultimos 7 meses */
       const MES = [
         "Ene",
         "Feb",
@@ -146,7 +146,7 @@ document.addEventListener("DOMContentLoaded", () =>
         trazos[1].setAttribute("d", linea);
       }
 
-      /* Movimientos recientes: lo último que registraron los empleados (boletas, anulaciones y penalizaciones cobradas) */
+      /* movimientos recientes lo ultimo que registraron los empleados */
       const lista = document.querySelector(".activity-list");
       const items = [...lista.querySelectorAll(".activity-item")];
       const icono = (i) => items[i]?.querySelector(".activity-icon");

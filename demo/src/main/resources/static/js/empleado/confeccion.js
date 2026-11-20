@@ -1,4 +1,4 @@
-/* Confeccion tickets y boletas */
+/* confeccion tickets y boletas */
 document.addEventListener("DOMContentLoaded", () =>
   TG.listo(async () => {
     const $ = (id) => document.getElementById(id);
@@ -16,12 +16,25 @@ document.addEventListener("DOMContentLoaded", () =>
       );
     };
 
-    /* Buscador de ordenes */
+    /* fecha siguiente la entrega final solo puede ser un dia */
+    const masDias = (iso, n) => {
+      const [y, m, d] = iso.split("-").map(Number);
+      const f = new Date(y, m - 1, d + n);
+      return (
+        f.getFullYear() +
+        "-" +
+        String(f.getMonth() + 1).padStart(2, "0") +
+        "-" +
+        String(f.getDate()).padStart(2, "0")
+      );
+    };
+
+    /* buscador de ordenes */
     const inputBusquedaOrden = $("inputBusquedaOrden");
-    /* Solo deja escribir un DNI (8 números) o un código de ticket (T001-0083) */
+    /* solo deja escribir un dni */
     TG.filtroBusqueda(inputBusquedaOrden, "T");
 
-    /* Referencias */
+    /* referencias */
     const inpDni = $("inputDni"),
       inpNombres = $("inputNombres"),
       inpApellidos = $("inputApellidos"),
@@ -123,10 +136,10 @@ document.addEventListener("DOMContentLoaded", () =>
             : parseFloat(inputCostoTotal.value) || 0,
         ),
       );
-    /* Indica si el ticket ya esta pagado */
+    /* indica si el ticket ya esta pagado */
     const ordenPagada = () => !!orden && saldoFijo() <= 0;
 
-    /* Validaciones */
+    /* validaciones */
     TG.vincular(inpDni, "dni");
     TG.vincular(inpNombres, "nombre");
     TG.vincular(inpApellidos, "nombre");
@@ -138,8 +151,8 @@ document.addEventListener("DOMContentLoaded", () =>
     inpDni.setAttribute("inputmode", "numeric");
     TG.vincular(inpPrueba, "fechaHoy");
     TG.vincular(inpEntrega, {
-      ok: (v) => v >= hoy && v >= (inpPrueba.value || hoy),
-      msg: "Fecha inválida: no puede ser anterior a hoy ni a la primera prueba",
+      ok: (v) => v > (inpPrueba.value || hoy),
+      msg: "Fecha inválida: debe ser posterior a la primera prueba",
     });
     TG.vincular(inputCostoTotal, "monto");
     const reglaAdelanto = {
@@ -161,9 +174,11 @@ document.addEventListener("DOMContentLoaded", () =>
     inpPrueba.value = sumarDias(3);
     inpEntrega.value = sumarDias(7);
     inpPrueba.min = hoy;
-    inpEntrega.min = hoy;
+    inpEntrega.min = masDias(inpPrueba.value || hoy, 1);
     inpPrueba.addEventListener("change", () => {
-      inpEntrega.min = inpPrueba.value > hoy ? inpPrueba.value : hoy;
+      const base = inpPrueba.value && inpPrueba.value >= hoy ? inpPrueba.value : hoy;
+      inpEntrega.min = masDias(base, 1);
+      if (inpEntrega.value && inpEntrega.value <= base) inpEntrega.value = inpEntrega.min;
       if (inpEntrega.value) {
         inpEntrega._tocado = true;
         TG.validarCampo(inpEntrega);
@@ -172,9 +187,27 @@ document.addEventListener("DOMContentLoaded", () =>
     });
     ticketEntrega.textContent = TG.fecha(inpEntrega.value);
     $("ticketFecha").textContent = TG.fechaHora();
-    $("ticketEmpleado").textContent = u ? u.nombre : "";
+    /* el ticket solo aparece al confirmar el pago */
+    const cpTicket = $("cpTicketConf");
+    const ocultarTicket = () => {
+      cpTicket.hidden = true;
+      if (!orden) seccionComprobantes.style.display = "none";
+    };
+    cpTicket.hidden = true;
+    seccionComprobantes.style.display = "none";
+    [seccionDatosCliente, seccionMedidas, seccionPlazos, seccionFinanzas].forEach(
+      (sec) =>
+        sec &&
+        ["input", "change", "click"].forEach((ev) =>
+          sec.addEventListener(ev, (e) => {
+            if (ev === "click" && !e.target.closest(".metodo-btn")) return;
+            if (!cpTicket.hidden && !orden) ocultarTicket();
+          }),
+        ),
+    );
+    $("ticketEmpleado").textContent = TG.empleadoNombre();
 
-    /* Datos del cliente */
+    /* datos del cliente */
     const bloquear = (b) =>
       datos.forEach((el) => {
         el.readOnly = b;
@@ -228,7 +261,7 @@ document.addEventListener("DOMContentLoaded", () =>
       }),
     );
 
-    /* Ficha y diseno en el ticket */
+    /* ficha y diseno en el ticket */
     Object.keys(SELECTS).forEach((k) => {
       const s = $(SELECTS[k]),
         o = $(SALIDAS[k]);
@@ -274,7 +307,7 @@ document.addEventListener("DOMContentLoaded", () =>
       });
     };
 
-    /* Finanzas */
+    /* finanzas */
     function ajustarGrid() {
       const transf = metodoActual() === "Transferencia";
       pagoGridContainer.classList.toggle("transferencia-layout", transf);
@@ -328,13 +361,13 @@ document.addEventListener("DOMContentLoaded", () =>
         b.classList.add("active");
         ticketMetodoPago.textContent = b.dataset.metodo;
         ajustarGrid();
-        /* Yape: QR + número · Transferencia: cuenta y CCI (datos guardados por el administrador) */
+        /* yape qr numero transferencia */
         TG.mostrarDatosPago(b.dataset.metodo);
         calcular();
       }),
     );
 
-    /* Ordenes pendientes de entrega */
+    /* ordenes pendientes de entrega */
     const textoVence = (f) => {
       const d = TG.diasEntre(hoy, f);
       return d < 0
@@ -398,7 +431,7 @@ document.addEventListener("DOMContentLoaded", () =>
         : '<p style="padding:16px;color:#667085;">No hay órdenes de confección pendientes de entrega.</p>';
     };
 
-    /* Boleta de confeccion */
+    /* boleta de confeccion */
     function pintarBoleta(emitida) {
       const set = (id, v) => {
         const el = $(id);
@@ -415,10 +448,10 @@ document.addEventListener("DOMContentLoaded", () =>
       set("cbCliente", TG.nombre(orden.cliente));
       set("cbDni", orden.cliente.dni);
       set("cbFecha", TG.fechaHora());
-      set("cbEmpleado", u ? u.nombre : "");
+      set("cbEmpleado", TG.empleadoNombre());
       set("cbPago", metodo);
       set("cbTicket", orden.ticket);
-      /* Si en una prueba se cambió la fecha de entrega, la boleta muestra la fecha nueva */
+      /* si en una prueba se cambio la fecha de entrega */
       set("cbEntrega", TG.fecha(orden.entregaFinal));
       set("cbCodigo", orden.ticket);
       set(
@@ -434,7 +467,7 @@ document.addEventListener("DOMContentLoaded", () =>
       set("cbAdelanto", "- " + TG.money(adelanto));
       set("cbAdelanto2", "- " + TG.money(adelanto));
       set("cbSaldo", TG.money(saldo));
-      /* Total en letras segun pago */
+      /* total en letras segun pago */
       set("cbLetras", TG.montoLetras(pagada ? costo : saldo));
       set(
         "cbEtqRecibido",
@@ -448,7 +481,7 @@ document.addEventListener("DOMContentLoaded", () =>
       set("cbVuelto", TG.money(Math.max(0, redondear(pagadoHoy - saldo))));
       $("cbFilaVuelto").style.display = efectivo ? "" : "none";
       $("cbBorrador").hidden = !!emitida;
-      /* Imprimir solo si ya se emitio */
+      /* imprimir solo si ya se emitio */
       document.querySelectorAll("[data-print-receipt]").forEach((btn) => {
         btn.disabled = !emitida;
       });
@@ -459,21 +492,12 @@ document.addEventListener("DOMContentLoaded", () =>
       .querySelectorAll("[data-print-receipt]")
       .forEach((btn) => btn.addEventListener("click", () => window.print()));
 
-    /* Ticket pagado emite la boleta sola */
-    function modoTicketPagado() {
-      document.querySelector(".metodos-pago").style.display = "none";
-      pagoGridContainer.style.display = "none";
-      TG.mostrarDatosPago("Efectivo");
-      $("avisoPagadoMetodo").textContent = orden.metodoPago || "Efectivo";
-      $("avisoPagadoTotal").hidden = false;
-      btnConfirmar.textContent = "Generar boleta >";
-      emitirBoleta();
-    }
     function seleccionarOrden(o, tarjeta) {
-      /* Evita emitir dos veces */
+      /* evita emitir dos veces */
       if (orden) return;
       orden = o;
       terminado = false;
+      cpTicket.hidden = true;
       clienteExistente = o.cliente;
       ticketCliente.textContent = TG.nombre(o.cliente);
       ticketDni.textContent = o.cliente.dni;
@@ -492,7 +516,7 @@ document.addEventListener("DOMContentLoaded", () =>
       inputEntregado._tocado = false;
       TG.marcar(inputEntregado, null);
       ajustarGrid();
-      /* Dibuja la boleta */
+      /* dibuja la boleta */
       calcular();
       seccionDatosCliente.style.display = "none";
       seccionMedidas.style.display = "none";
@@ -517,29 +541,46 @@ document.addEventListener("DOMContentLoaded", () =>
         tarjeta.style.border = "1px solid #e4d7bb";
         tarjeta.style.background = "#fbf7ee";
       }
-      /* Dos opciones: Prueba de confección o Entrega. Si ya se registró una prueba, propone Entrega */
+      /* dos opciones prueba de confeccion o entrega */
       seccionModo.style.display = "";
       elegirModo((orden.pruebas || 0) > 0 ? "entrega" : "prueba");
     }
 
-    /* Prueba / Entrega */
-    let entregaIniciada = false;
+    /* prueba entrega */
+    let modalEntrega = false;
     function elegirModo(m) {
       if (!orden || terminado) return;
       btnModoPrueba.classList.toggle("activo", m === "prueba");
       btnModoEntrega.classList.toggle("activo", m === "entrega");
       panelPrueba.style.display = m === "prueba" ? "" : "none";
-      /* En la prueba no se cobra ni se muestra la boleta; eso es de la entrega */
-      seccionFinanzas.style.display = m === "entrega" ? "" : "none";
-      seccionComprobantes.style.display = m === "entrega" ? "" : "none";
+      const pagada = ordenPagada();
+      /* en la prueba no se cobra */
+      seccionFinanzas.style.display = m === "entrega" && !pagada ? "" : "none";
+      /* la boleta aparece recien al confirmar el pago */
+      seccionComprobantes.style.display = "none";
       if (m === "prueba") {
         pruebaEntrega.min = hoy;
         pruebaEntrega.value = orden.entregaFinal || sumarDias(7);
         pintarHistorial();
-      } else if (ordenPagada() && !entregaIniciada) {
-        /* Ticket pagado completo: la boleta sale sola al elegir Entrega */
-        entregaIniciada = true;
-        modoTicketPagado();
+      } else if (pagada && !modalEntrega) {
+        modalEntrega = true;
+        TG.confirmar({
+          titulo: "Confirmar entrega",
+          mensaje:
+            "El ticket " +
+            orden.ticket +
+            " está pagado completo. Al confirmar se generará la boleta.",
+          textoOk: "Confirmar",
+          textoCancelar: "Cancelar",
+          onOk: () => {
+            modalEntrega = false;
+            emitirBoleta();
+          },
+          onCancel: () => {
+            modalEntrega = false;
+            elegirModo("prueba");
+          },
+        });
       }
     }
     function pintarHistorial() {
@@ -613,7 +654,7 @@ document.addEventListener("DOMContentLoaded", () =>
       );
     });
 
-    /* Emitir la boleta */
+    /* emitir la boleta */
     async function emitirBoleta() {
       if (emitiendo || terminado) return;
       emitiendo = true;
@@ -640,16 +681,17 @@ document.addEventListener("DOMContentLoaded", () =>
       terminado = true;
       emitiendo = false;
       seccionModo.style.display = "none";
+      seccionComprobantes.style.display = "";
       pintarBoleta(emitida);
       btnConfirmar.disabled = false;
       btnConfirmar.textContent = "＋ Nueva confección";
       TG.toast("Boleta " + emitida.numero + " emitida");
     }
 
-    /* Guarda el texto original del boton */
+    /* guarda el texto original del boton */
     const textoConfirmar = btnConfirmar.textContent;
 
-    /* Deja el formulario listo para otra confeccion */
+    /* deja el formulario listo */
     function reiniciarFormulario() {
       [inpDni, ...datos].forEach((el) => {
         el.value = "";
@@ -669,7 +711,7 @@ document.addEventListener("DOMContentLoaded", () =>
 
       inpPrueba.value = sumarDias(3);
       inpEntrega.value = sumarDias(7);
-      inpEntrega.min = hoy;
+      inpEntrega.min = masDias(inpPrueba.value, 1);
       inputCostoTotal.value = "0.00";
       inputEntregado.value = "0.00";
 
@@ -683,8 +725,8 @@ document.addEventListener("DOMContentLoaded", () =>
       btnConfirmar.textContent = textoConfirmar;
     }
 
-    /* Confirmar pago */
-    /* Evita perder el foco antes del clic */
+    /* confirmar pago */
+    /* evita perder el foco antes del clic */
     btnConfirmar?.addEventListener("mousedown", (e) => e.preventDefault());
 
     btnConfirmar?.addEventListener("click", async () => {
@@ -693,7 +735,7 @@ document.addEventListener("DOMContentLoaded", () =>
         return;
       }
       if (orden) {
-        /* Entrega con boleta */
+        /* entrega con boleta */
         if (!ordenPagada() && !TG.validarTodo([inputEntregado])) return;
         await emitirBoleta();
         return;
@@ -735,7 +777,7 @@ document.addEventListener("DOMContentLoaded", () =>
       if (!TG.validarTodo(campos)) return;
       btnConfirmar.disabled = true;
       try {
-        /* Orden nueva con ticket */
+        /* orden nueva con ticket */
         let c = clienteExistente;
         if (!c)
           c = await TG.post("/api/clientes/nuevo", {
@@ -775,13 +817,18 @@ document.addEventListener("DOMContentLoaded", () =>
         ticketSaldoPendiente.textContent = TG.money(
           Math.max(0, redondear(costo - pagado)),
         );
+        $("ticketFecha").textContent = TG.fechaHora();
+        $("ticketEmpleado").textContent = r.empleado || TG.empleadoNombre();
+        seccionComprobantes.style.display = "";
+        $("cpBoletaConf").hidden = true;
+        cpTicket.hidden = false;
         TG.toast("Ticket " + r.ticket + " registrado");
 
-        /* Limpia el formulario para otra confeccion */
+        /* limpia el formulario para otra confeccion */
         reiniciarFormulario();
         btnConfirmar.disabled = false;
 
-        /* Actualiza la lista de ordenes */
+        /* actualiza la lista de ordenes */
         try {
           await pintarOrdenes();
         } catch (e) {
@@ -792,6 +839,14 @@ document.addEventListener("DOMContentLoaded", () =>
         TG.toast(err.message, "error");
         TG.marcar(inpDni, err.message);
       }
+    });
+
+    /* atras reinicia si hay avance o proceso terminado */
+    TG.historial?.registrar({
+      hayAvance: () =>
+        terminado ||
+        Boolean(orden) ||
+        seccionComprobantes.style.display !== "none",
     });
 
     ajustarGrid();

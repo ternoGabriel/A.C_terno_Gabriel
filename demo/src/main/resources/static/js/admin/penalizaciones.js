@@ -1,4 +1,4 @@
-// Penalizaciones: los montos se guardan en la base de datos y el empleado los usa en la devolución y en la boleta.
+/* penalizaciones los montos se guardan en la base de datos */
 document.addEventListener("DOMContentLoaded", () =>
   TG.listo(async () => {
     let activeKey = null,
@@ -27,16 +27,17 @@ document.addEventListener("DOMContentLoaded", () =>
         document.getElementById("val-malestado").textContent = Number(
           config.penalidadMalEstado.valor,
         ).toFixed(2);
-      const ult = Object.values(config)
-        .filter((c) => c.modificado)
-        .sort((a, b) => a.modificado.localeCompare(b.modificado))
-        .pop();
-      const span = document.getElementById("last-mod-date");
-      if (ult && span)
-        span.textContent =
-          TG.fecha(ult.modificado) +
-          " · " +
-          (ult.modificadoPor || "Administrador");
+      /* cada monto muestra cuando y quien lo modifico */
+      [
+        ["penalidadDemora", "mod-demora"],
+        ["penalidadMalEstado", "mod-malestado"],
+      ].forEach(([clave, id]) => {
+        const c = config[clave];
+        const el = document.getElementById(id);
+        if (c && c.modificado && el)
+          el.textContent =
+            TG.fecha(c.modificado) + " · " + (c.modificadoPor || "Administrador");
+      });
     };
 
     const pintarHistorial = async () => {
@@ -53,6 +54,8 @@ document.addEventListener("DOMContentLoaded", () =>
               (p) =>
                 '<tr data-product-category="' +
                 TG.esc(p.tipo) +
+                '" data-fecha="' +
+                TG.esc(String(p.fecha || "").slice(0, 10)) +
                 '"><td>' +
                 TG.fecha(p.fecha) +
                 "</td><td>" +
@@ -77,25 +80,25 @@ document.addEventListener("DOMContentLoaded", () =>
     const filterSelect = document.querySelector("[data-category-filter]");
     function aplicarFiltro() {
       const val = filterSelect ? filterSelect.value : "Todos";
+      const dia = document.querySelector(".filter-date")?.value || "";
       document
         .querySelectorAll(".historial-card tbody tr[data-product-category]")
         .forEach((row) => {
-          row.style.display =
-            val === "Todos" || row.dataset.productCategory === val
-              ? ""
-              : "none";
+          const okTipo = val === "Todos" || row.dataset.productCategory === val;
+          const okDia = !dia || row.dataset.fecha === dia;
+          row.style.display = okTipo && okDia ? "" : "none";
         });
     }
     filterSelect?.addEventListener("change", aplicarFiltro);
-    /* Restablecer filtros: tipo y fecha vuelven a su valor inicial */
+    document.querySelector(".filter-date")?.addEventListener("change", aplicarFiltro);
+    /* restablecer filtros tipo y fecha vuelven a su valor inicial */
     document
       .getElementById("resetPenaltyFilters")
       ?.addEventListener("click", () => {
         if (filterSelect) filterSelect.value = "Todos";
         const fecha = document.querySelector(".filter-date");
         if (fecha) {
-          fecha.value = "dd/mm/aaaa";
-          fecha.dispatchEvent(new Event("input"));
+          fecha.value = "";
         }
         aplicarFiltro();
       });

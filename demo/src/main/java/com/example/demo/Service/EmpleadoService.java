@@ -3,12 +3,12 @@ package com.example.demo.Service;
 import java.util.List;
 import com.example.demo.Model.Empleado;
 
-/** Casos de uso de la gestión de empleados (módulo del administrador). */
+/* casos de uso de la gestion de empleados */
 public interface EmpleadoService {
 
     List<Empleado> listar();
 
-    /** Crea un empleado: genera su código, lo deja Activo y guarda la contraseña cifrada. */
+    /* crea un empleado genera su codigo lo deja activo */
     Empleado crear(Empleado nuevo);
 
     Empleado actualizar(Long id, Empleado datos);
@@ -17,14 +17,14 @@ public interface EmpleadoService {
 
     Empleado reactivar(Long id);
 
-    /** Genera una contraseña temporal, la guarda cifrada y la devuelve en texto plano una sola vez. */
+    /* genera una contrasena temporal la guarda cifrada y la devuelve */
     String restablecerContrasena(Long id);
 
-    /** El administrador escribe una contraseña nueva para el empleado (se guarda cifrada). */
+    /* el administrador escribe una contrasena nueva */
     void cambiarContrasena(Long id, String nueva);
 
     void eliminar(Long id);
 
-    /** Cifra las contraseñas que todavía estén en texto plano (bases de datos antiguas). @return cuántas se cifraron */
+    /* cifra las contrasenas que todavia esten en texto plano */
     int cifrarContrasenasPendientes();
 }

@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Rutas privadas: exigen haber iniciado sesión (autenticación) y, en /admin, tener la autoridad ADMIN (autorización). */
+/* rutas privadas exigen haber iniciado sesion */
 @RestController
 @RequestMapping("/privado")
 public class PrivateController {
@@ -15,7 +15,7 @@ public class PrivateController {
         return "Vista Privada de Marcos Web";
     }
 
-    /* Acceso solo al rol ADMIN */
+    /* acceso solo al rol admin */
     @GetMapping("/admin")
     @PreAuthorize("hasAuthority('ADMIN')")
     public String admin() {

@@ -8,11 +8,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-/**
- * Obliga a que el token CSRF se cargue en cada petición, así la cookie XSRF-TOKEN siempre está disponible
- * para que el JavaScript de las pantallas la envíe en la cabecera X-XSRF-TOKEN.
- * No se anota como @Component: solo se registra dentro de la cadena de Spring Security.
- */
+/* obliga a que el token csrf se cargue */
 public class CookieCsrfFilter extends OncePerRequestFilter {
 
     @Override

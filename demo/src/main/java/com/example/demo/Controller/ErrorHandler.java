@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import jakarta.validation.ConstraintViolationException;
 import com.example.demo.Seguridad.IntentosExcedidosException;
 
-/* Devuelve siempre un mensaje legible ({"mensaje": ...}) en lugar de un 500 con todo el stack */
+/* devuelve siempre un mensaje legible */
 @RestControllerAdvice
 public class ErrorHandler {
 
@@ -28,7 +28,7 @@ public class ErrorHandler {
         return ResponseEntity.badRequest().body(Map.of("mensaje", ex.getMessage() == null ? "Solicitud no válida" : ex.getMessage()));
     }
 
-    /* Demasiados intentos de inicio de sesión fallidos */
+    /* demasiados intentos de inicio de sesion fallidos */
     @ExceptionHandler(IntentosExcedidosException.class)
     public ResponseEntity<Map<String, String>> demasiadosIntentos(IntentosExcedidosException ex) {
         return ResponseEntity.status(429).body(Map.of("mensaje", ex.getMessage()));
@@ -39,7 +39,7 @@ public class ErrorHandler {
         return ResponseEntity.status(404).body(Map.of("mensaje", "El registro solicitado no existe"));
     }
 
-    /* Validaciones de las entidades al guardar (por ejemplo, un cliente antiguo sin correo) */
+    /* validaciones de las entidades al guardar */
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<Map<String, String>> entidad(ConstraintViolationException ex) {
         String detalle = ex.getConstraintViolations().stream().map(v -> v.getMessage()).distinct().collect(Collectors.joining(". "));
@@ -51,7 +51,7 @@ public class ErrorHandler {
         return ResponseEntity.badRequest().body(Map.of("mensaje", "Hay un dato con formato no válido (revisa fechas y montos)"));
     }
 
-    /* La validación de la entidad puede fallar al confirmar la transacción */
+    /* la validacion de la entidad puede fallar al confirmar */
     @ExceptionHandler(TransactionSystemException.class)
     public ResponseEntity<Map<String, String>> transaccion(TransactionSystemException ex) {
         Throwable t = ex.getMostSpecificCause();

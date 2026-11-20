@@ -12,6 +12,7 @@
     <link rel="stylesheet" th:href="@{/css/empleado/devolucion.css}" />
     <link rel="stylesheet" th:href="@{/css/comprobante.css}" />
     <link rel="stylesheet" th:href="@{/css/responsive.css}" />
+    <link rel="stylesheet" th:href="@{/css/fluido.css}" />
   </head>
 
   <body class="page-empleado-devolucion">
@@ -49,7 +50,7 @@
 
         <div class="content">
           <div class="return-grid">
-            <!-- Buscar operación -->
+            <!-- buscar operacion -->
             <section class="card">
               <div class="card-head">
                 <div>
@@ -120,13 +121,20 @@
               </div>
             </section>
 
-            <!-- Evaluación de la prenda -->
-            <section class="card">
-              <div class="card-head">
-                <div>
+            <!-- evaluacion de la prenda -->
+            <section class="card ev-card">
+              <div class="card-head ev-head">
+                <div class="ev-titulo">
                   <h2>Evaluación de la prenda</h2>
                   <p>Selecciona la condición recibida</p>
                 </div>
+                <button
+                  class="btn primary ev-emitir"
+                  type="button"
+                  id="btnEmitirDevolucion"
+                >
+                  Emitir devolución
+                </button>
               </div>
               <div class="condition-options">
                 <button
@@ -161,16 +169,15 @@
 
                 <label class="field field-observaciones">
                   <span>Observaciones</span>
-                  <input
-                    type="text"
+                  <textarea
                     id="inputObservaciones"
+                    rows="2"
                     placeholder="Describe el estado de la prenda"
-                    value=""
-                  />
+                  ></textarea>
                 </label>
               </div>
 
-              <!-- Tabla de Penalizaciones SIN el cuadro/borde exterior -->
+              <!-- tabla de penalizaciones sin el cuadro borde exterior -->
               <div class="penalizacion-table-container">
                 <div class="p-table-header">
                   <span>Concepto</span>
@@ -206,8 +213,8 @@
             </section>
           </div>
 
-          <!-- Sección de Finanzas y Método de Pago -->
-          <div class="finanzas-section">
+          <!-- seccion de finanzas y metodo de pago -->
+          <div class="finanzas-section" id="seccionPagoDevolucion" hidden>
             <div class="finanzas-header">
               <h3>Método y pago de devolución</h3>
               <span class="badge-tg">TG · CAJA Y PAGOS</span>
@@ -273,13 +280,13 @@
 
             <div class="finanzas-actions">
               <button class="btn primary" type="button" id="btnConfirmarPago">
-                Confirmar pago y registrar devolución
+                Confirmar pago
               </button>
             </div>
           </div>
 
-          <!-- Boleta de devolución (formato comprobante) -->
-          <section class="cp-wrap">
+          <!-- boleta de devolucion -->
+          <section class="cp-wrap" id="seccionBoletaDevolucion" hidden>
             <article class="cp cp-boleta">
               <div class="cp-cab">
                 <div class="cp-marca">
@@ -377,6 +384,7 @@
     ></div>
 
     <script th:src="@{/js/api.js}" defer></script>
+    <script th:src="@{/js/historial.js}" defer></script>
     <script th:src="@{/js/app.js}" defer></script>
     <script th:src="@{/js/empleado/devolucion.js}" defer></script>
   </body>

@@ -1,4 +1,4 @@
-// Anular boleta: busca la boleta real; al anular, la prenda vuelve a estar Disponible para todos.
+/* anular boleta busca la boleta real */
 document.addEventListener("DOMContentLoaded", () =>
   TG.listo(async () => {
     const $ = (id) => document.getElementById(id);
@@ -8,9 +8,12 @@ document.addEventListener("DOMContentLoaded", () =>
       anularBtn = $("anularBtn");
     const confirmModal = $("confirmModal"),
       motivoInput = $("motivoInput");
-    let boleta = null;
+    let boleta = null,
+      anulada = false;
+    /* atras reinicia si hay avance o proceso terminado */
+    TG.historial?.registrar({ hayAvance: () => anulada || boleta !== null });
 
-    /* Solo deja escribir un DNI (8 números) o un código de boleta (B001-0083) */
+    /* solo deja escribir un dni */
     TG.filtroBusqueda(searchInput, "B");
 
     const buscar = async () => {
@@ -31,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () =>
         anularBtn.disabled = true;
         return;
       }
-      /* B001-83 → B001-0083 (así se guardan los números de boleta) */
+      /* b001 83 b001 0083 */
       const numeroBuscado = esBoleta
         ? codigo.toUpperCase().split("-")[0] +
           "-" +
@@ -66,7 +69,7 @@ document.addEventListener("DOMContentLoaded", () =>
       $("sumTipo").textContent =
         boleta.tipo === "Venta" ? "Compra / Venta" : boleta.tipo;
       $("sumEstado").textContent = boleta.estado;
-      /* La boleta de confección no tiene prenda: se muestra el ticket de la orden */
+      /* la boleta de confeccion no tiene prenda */
       $("sumPrenda").textContent = boleta.prenda
         ? boleta.prenda.diseno + " - " + boleta.prenda.codigo
         : "Confección a medida" +
@@ -105,6 +108,7 @@ document.addEventListener("DOMContentLoaded", () =>
             encodeURIComponent(motivoInput.value.trim()),
         );
         TG.toast("¡Boleta anulada correctamente!");
+        anulada = true;
         cancelSummary.hidden = true;
         notFoundBox.hidden = true;
         anularBtn.disabled = true;

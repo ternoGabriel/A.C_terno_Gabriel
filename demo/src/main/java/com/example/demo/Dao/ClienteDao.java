@@ -3,9 +3,9 @@ package com.example.demo.Dao;
 import java.util.Optional;
 import com.example.demo.Model.Cliente;
 
-/** DAO de {@link Cliente}. */
+/* dao de cliente */
 public interface ClienteDao extends GenericDao<Cliente> {
 
-    /** @return cliente con ese DNI */
+    /* cliente con ese dni */
     Optional<Cliente> buscarPorDni(String dni);
 }

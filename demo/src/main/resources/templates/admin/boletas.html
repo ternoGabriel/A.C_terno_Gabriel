@@ -31,7 +31,6 @@
         transition: transform 0.18s ease;
       }
       .boleta-tabs button.active {
-        transform: scale(1.055);
         background: #f0e2bf;
         border-color: #b99a5b;
         font-weight: 750;
@@ -185,7 +184,7 @@
         }
       }
 
-      /* Presentación cuidada de comprobantes */
+      /* presentacion cuidada de comprobantes */
       .boleta-tabs button {
         min-height: 48px;
         line-height: 1.35;
@@ -249,7 +248,7 @@
       .boleta-table tbody tr:last-child td {
         border-bottom: 0;
       }
-      /* El mismo acabado de boleta se aplica también a los tickets */
+      /* el mismo acabado de boleta se aplica */
       .boleta-table td {
         overflow-wrap: anywhere;
       }
@@ -369,6 +368,7 @@
       }
     </style>
     <link rel="stylesheet" th:href="@{/css/responsive.css}" />
+    <link rel="stylesheet" th:href="@{/css/fluido.css}" />
   </head>
   <body class="page-admin-boletas">
     <div class="app-shell">
@@ -492,6 +492,7 @@
     </div>
     <div th:replace="~{fragments/toast :: toast('Cambios guardados')}"></div>
     <script th:src="@{/js/api.js}" defer></script>
+    <script th:src="@{/js/historial.js}" defer></script>
     <script th:src="@{/js/app.js}" defer></script>
     <script th:src="@{/js/comprobante.js}" defer></script>
     <script th:src="@{/js/admin/boletas.js}" defer></script>

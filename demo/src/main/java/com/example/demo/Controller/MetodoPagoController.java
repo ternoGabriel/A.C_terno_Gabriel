@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import com.example.demo.Model.MetodoPago;
 import com.example.demo.Service.MetodoPagoService;
 
-/* El administrador edita los datos de cobro; el empleado los consulta al cobrar con Yape o transferencia */
+/* el administrador edita los datos de cobro */
 @RestController
 @RequestMapping("/api/metodos-pago")
 public class MetodoPagoController {

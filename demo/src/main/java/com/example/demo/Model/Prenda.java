@@ -12,7 +12,7 @@ import lombok.Setter;
 @Setter
 public class Prenda extends Base {
 
-    /* Tres letras mayúsculas, guion y números: TRN-001 */
+    /* tres letras mayusculas guion y numeros */
     @NotBlank(message = "El código es obligatorio")
     @Pattern(regexp = "[A-Z]{3}-\\d{3,}", message = "El código debe tener 3 letras, un guion y números (ej. TRN-001)")
     @Column(unique = true)
@@ -43,11 +43,11 @@ public class Prenda extends Base {
     @Positive(message = "El precio de alquiler debe ser mayor a 0")
     private Double precioAlquiler;
 
-    /* Atributos que usan los filtros del catálogo (los define el administrador) */
+    /* atributos que usan los filtros del catalogo */
     @Size(max = 255, message = "El color no debe superar 255 caracteres")
     private String color;
 
-    /* Niños | Jóvenes | Adultos */
+    /* ninos jovenes adultos */
     @Pattern(regexp = "Niños|Jóvenes|Adultos", message = "La categoría debe ser Niños, Jóvenes o Adultos")
     private String categoria;
 
@@ -57,10 +57,13 @@ public class Prenda extends Base {
     @Size(max = 255, message = "El componente no debe superar 255 caracteres")
     private String componente;
 
-    /* El administrador puede dar de baja una prenda sin borrarla: deja de verse en los catálogos */
+    /* el administrador puede dar de baja una prenda sin borrarla */
     private boolean suspendida = false;
+    /* fecha en que el administrador registro la prenda y fecha */
+    private java.time.LocalDate fechaCreacion;
+    private java.time.LocalDate fechaEdicion;
 
-    /* Foto de la prenda (data URL reducida desde el navegador) */
+    /* foto de la prenda */
     @Size(max = 5_000_000, message = "La imagen de la prenda es demasiado pesada")
     @Column(columnDefinition = "LONGTEXT")
     private String imagen;

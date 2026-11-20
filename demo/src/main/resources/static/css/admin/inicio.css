@@ -1,4 +1,4 @@
-/* Estilos de Inicio del Administrador */
+/* estilos de inicio del administrador */
 .page-admin-inicio .content {
   display: flex;
   flex-direction: column;
@@ -31,7 +31,7 @@
   flex-shrink: 0;
 }
 
-/* Colores de fondo y texto para los iconos */
+/* colores de fondo y texto */
 .icon-yellow {
   background: #fef3c7;
   color: #d97706;
@@ -124,7 +124,7 @@
   color: #b8860b;
 }
 
-/* Gráfico */
+/* grafico */
 .chart {
   position: relative;
   margin-top: 10px;

@@ -1,11 +1,11 @@
-/* Estilos específicos de Inicio Empleado */
+/* estilos especificos de inicio empleado */
 .page-empleado-inicio .content {
   display: flex;
   flex-direction: column;
   gap: 24px;
 }
 
-/* Cuadrícula de KPIs */
+/* cuadricula de kpis */
 .page-empleado-inicio .kpi-grid.four {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -18,13 +18,13 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 766px) {
   .page-empleado-inicio .kpi-grid.four {
     grid-template-columns: 1fr;
   }
 }
 
-/* Tarjetas y KPIs */
+/* tarjetas y kpis */
 .page-empleado-inicio .card {
   background: #ffffff;
   border-radius: 12px;
@@ -40,7 +40,7 @@
   padding: 20px;
 }
 
-/* --- Colores de los iconos KPI --- */
+/* colores de los iconos kpi */
 .page-empleado-inicio .kpi-grid > div:nth-child(1) .kpi-icon {
   background-color: #fcf8f2;
   border: 1px solid #faeeda;
@@ -101,7 +101,7 @@
   margin-top: 2px;
 }
 
-/* Cabecera de la sección de la tabla */
+/* cabecera de la seccion de la tabla */
 .page-empleado-inicio .card-head {
   display: flex;
   justify-content: space-between;
@@ -133,7 +133,7 @@
   width: 240px;
 }
 
-/* Tabla de datos */
+/* tabla de datos */
 .page-empleado-inicio .table-wrap {
   overflow-x: auto;
 }
@@ -165,7 +165,7 @@
   border-bottom: none;
 }
 
-/* --- Badges / Etiquetas de Estado (Exacto a la imagen) --- */
+/* badges etiquetas de estado */
 .page-empleado-inicio .badge {
   display: inline-flex;
   align-items: center;
@@ -182,7 +182,7 @@
   border-radius: 50%;
 }
 
-/* Estado: Listo para entrega (Verde) */
+/* estado listo para entrega */
 .page-empleado-inicio .badge.success {
   background-color: #e6f4ea;
   color: #137333;
@@ -191,7 +191,7 @@
   background-color: #137333;
 }
 
-/* Estado: Pendiente (Amarillo / Naranja suave)[cite: 1] */
+/* estado pendiente */
 .page-empleado-inicio .badge.warning {
   background-color: #fef7e0;
   color: #b06000;
@@ -200,7 +200,7 @@
   background-color: #b06000;
 }
 
-/* Estado: En demora (Rojo)[cite: 1] */
+/* estado en demora */
 .page-empleado-inicio .badge.danger {
   background-color: #fce8e6;
   color: #c5221f;

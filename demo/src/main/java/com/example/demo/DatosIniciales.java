@@ -18,56 +18,48 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import com.example.demo.Model.Empleado;
+import com.example.demo.Seguridad.GestorContrasenas;
 import com.example.demo.Service.EmpleadoService;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.metamodel.Attribute;
 import jakarta.persistence.metamodel.EntityType;
 
-/*
- * Arranque de la base de datos:
- *  1) Repara el esquema de una base MySQL antigua (columnas viejas NOT NULL que ya no existen en las entidades
- *     y columnas demasiado cortas). Esto evita errores como "Field 'x' doesn't have a default value" o
- *     "Data too long for column" al guardar tickets, boletas o prendas con foto.
- *  2) Cifra con BCrypt las contraseñas de empleados que estén en texto plano.
- *
- * El sistema arranca con la base de datos VACÍA: no se carga ningún dato de ejemplo. El único registro inicial es
- * la cuenta del administrador, que se guarda en la tabla Empleado al arrancar si la tabla está vacía (también hay un
- * script equivalente en demo/database/crear_administrador.sql); desde ahí el administrador agrega empleados, clientes, prendas, penalidades y métodos de pago.
- * El borrado completo requiere activar explícitamente terno.reiniciar-datos=true en application.properties
- * (úsalo una sola vez para limpiar una base antigua y vuelve a ponerlo en false).
- */
+/* arranque de la base de datos */
 @Configuration
 public class DatosIniciales {
 
     private static final Logger LOG = LoggerFactory.getLogger(DatosIniciales.class);
 
+    private static final String CORREO_ADMIN = "jeffersonadmin1@gmail.com";
+    private static final String CONTRASENA_ADMIN = "AJeffer01";
+    private static final List<String> CONTRASENAS_ANTIGUAS = List.of("Admin1pru", "admin", "Admin");
+
     @Value("${terno.reiniciar-datos:false}")
     private boolean forzarReinicio;
 
     @Bean
-    CommandLineRunner cargar(DataSource ds, EntityManagerFactory emf, EmpleadoService empleados) {
+    CommandLineRunner cargar(DataSource ds, EntityManagerFactory emf, EmpleadoService empleados, GestorContrasenas contrasenas) {
         return args -> {
             repararEsquema(ds, emf);
 
-            /* El arranque normal nunca borra datos. El reinicio destructivo solo se permite si el operador
-               lo activa explícitamente con terno.reiniciar-datos=true. */
+            /* el arranque normal nunca borra datos */
             if (forzarReinicio) {
                 LOG.warn("Se solicitó explícitamente terno.reiniciar-datos=true; se vaciarán todas las tablas.");
                 borrarTodo(ds);
             }
 
-            /* Si la tabla de empleados está vacía, se inserta en la base la cuenta del administrador */
+            /* si la tabla de empleados esta vacia se inserta */
             crearAdministradorInicial(empleados);
+            actualizarContrasenaInicialAntigua(empleados, contrasenas);
 
-            /* Seguridad: las contraseñas cargadas desde el script SQL (texto plano) se guardan cifradas (BCrypt) */
+            /* seguridad las contrasenas cargadas desde el script sql */
             empleados.cifrarContrasenasPendientes();
         };
     }
 
-    /* ---------- Administrador inicial ---------- */
+    /* administrador inicial */
 
-    /* Solo cuando NO hay ningún empleado: guarda en la tabla Empleado al administrador (contraseña cifrada con BCrypt).
-       Si ya existe cualquier empleado no hace nada, así que borrar o cambiar este usuario después no lo vuelve a crear. */
+    /* solo cuando no hay ningun empleado */
     private void crearAdministradorInicial(EmpleadoService empleados) {
         try {
             if (!empleados.listar().isEmpty()) return;
@@ -75,7 +67,7 @@ public class DatosIniciales {
             admin.setNombre("Jefferson");
             admin.setApellido("Encarnacion");
             admin.setUsuario("admin");
-            admin.setContrasena("Admin1pru");
+            admin.setContrasena(CONTRASENA_ADMIN);
             admin.setCorreo("jeffersonadmin1@gmail.com");
             admin.setTelefono("974673845");
             admin.setArea("Administración");
@@ -87,10 +79,28 @@ public class DatosIniciales {
         }
     }
 
-    /* ---------- Esquema ---------- */
+    /* si la cuenta del administrador se creo con alguna contrasena */
+    private void actualizarContrasenaInicialAntigua(EmpleadoService empleados, GestorContrasenas contrasenas) {
+        try {
+            for (Empleado e : empleados.listar()) {
+                if (!CORREO_ADMIN.equalsIgnoreCase(e.getCorreo())) continue;
+                for (String antigua : CONTRASENAS_ANTIGUAS) {
+                    if (contrasenas.coincide(antigua, e.getContrasena())) {
+                        empleados.cambiarContrasena(e.getId(), CONTRASENA_ADMIN);
+                        LOG.info("Se actualizó la contraseña inicial de la cuenta del administrador.");
+                        return;
+                    }
+                }
+            }
+        } catch (RuntimeException ex) {
+            LOG.error("No se pudo actualizar la contraseña inicial del administrador: {}", ex.getMessage());
+        }
+    }
+
+    /* esquema */
 
     private void repararEsquema(DataSource ds, EntityManagerFactory emf) {
-        /* Columnas que sí usa cada entidad (nombre del atributo y nombre de la clave foránea idXxx) */
+        /* columnas que si usa cada entidad */
         Map<String, Set<String>> conocidas = new HashMap<>();
         for (EntityType<?> et : emf.getMetamodel().getEntities()) {
             Set<String> cols = new HashSet<>();
@@ -103,7 +113,7 @@ public class DatosIniciales {
             conocidas.put(et.getName().toLowerCase(), cols);
         }
         try (Connection con = ds.getConnection()) {
-            /* Columnas antiguas NOT NULL sin valor por defecto que la entidad actual no conoce: se vuelven opcionales */
+            /* columnas antiguas not null sin valor por defecto */
             List<String[]> viejas = new ArrayList<>();
             try (Statement st = con.createStatement();
                  ResultSet rs = st.executeQuery("SELECT TABLE_NAME, COLUMN_NAME, COLUMN_TYPE FROM information_schema.COLUMNS "
@@ -117,7 +127,7 @@ public class DatosIniciales {
                 ejecutar(con, "ALTER TABLE `" + c[0] + "` MODIFY `" + c[1] + "` " + c[2] + " NULL");
                 LOG.warn("Columna antigua {}.{} ahora acepta valores vacíos.", c[0], c[1]);
             }
-            /* Columnas de texto que en bases antiguas quedaron cortas (la ficha de confección y las fotos) */
+            /* columnas de texto que en bases antiguas quedaron cortas */
             asegurarTexto(con, "Confeccion", "detalle", "TEXT", Set.of("text", "mediumtext", "longtext"));
             asegurarTexto(con, "Prenda", "imagen", "LONGTEXT", Set.of("longtext"));
         } catch (SQLException e) {
@@ -146,7 +156,7 @@ public class DatosIniciales {
         }
     }
 
-    /* Vacía todas las tablas de la base (reinicia también los contadores de id) */
+    /* vacia todas las tablas de la base */
     private void borrarTodo(DataSource ds) throws SQLException {
         try (Connection con = ds.getConnection()) {
             List<String> tablas = new ArrayList<>();
