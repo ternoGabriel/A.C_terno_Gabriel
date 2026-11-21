@@ -1,5 +1,8 @@
 package com.example.demo.Service.impl;
 
+import org.springframework.cache.annotation.Cacheable;
+import com.example.demo.Config.InvalidaCache;
+import com.example.demo.Config.NombresCache;
 import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -43,6 +46,7 @@ public class ConfeccionServiceImpl implements ConfeccionService {
     }
 
     @Override
+    @Cacheable(NombresCache.CONFECCIONES)
     public List<Confeccion> listar() {
         return dao.listar();
     }
@@ -50,6 +54,7 @@ public class ConfeccionServiceImpl implements ConfeccionService {
     /* registrar la orden emite el ticket */
     @Override
     @Transactional
+    @InvalidaCache
     public Confeccion registrar(Confeccion nueva) {
         Preconditions.checkArgument(nueva.getCliente() != null && nueva.getCliente().getId() != null, "Debe seleccionar un cliente");
         nueva.setId(null);
@@ -88,6 +93,7 @@ public class ConfeccionServiceImpl implements ConfeccionService {
 
     @Override
     @Transactional
+    @InvalidaCache
     public Confeccion registrarPrueba(Long id, String comentario, LocalDate entregaFinal) {
         Confeccion orden = dao.buscarPorId(id).orElseThrow(() -> new IllegalArgumentException("La orden de confección no existe"));
         Preconditions.checkArgument("En confección".equals(orden.getEstado()), "Solo se puede registrar una prueba en órdenes que siguen en confección");

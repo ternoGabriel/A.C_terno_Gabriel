@@ -1,5 +1,8 @@
 package com.example.demo.Service.impl;
 
+import org.springframework.cache.annotation.Cacheable;
+import com.example.demo.Config.InvalidaCache;
+import com.example.demo.Config.NombresCache;
 import java.time.LocalDate;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
@@ -31,12 +34,14 @@ public class ClienteServiceImpl implements ClienteService {
     }
 
     @Override
+    @Cacheable(NombresCache.CLIENTES)
     public List<Cliente> listar() {
         return dao.listar();
     }
 
     @Override
     @Transactional
+    @InvalidaCache
     public Cliente crear(Cliente nuevo) {
         Preconditions.checkArgument(dao.buscarPorDni(nuevo.getDni()).isEmpty(), "Ya existe un cliente registrado con ese DNI");
         return dao.guardar(nuevo);
@@ -44,6 +49,7 @@ public class ClienteServiceImpl implements ClienteService {
 
     @Override
     @Transactional
+    @InvalidaCache
     public Cliente actualizar(Long id, Cliente datos) {
         Cliente actual = dao.buscarPorId(id).orElseThrow();
         datos.setId(id);
@@ -58,6 +64,7 @@ public class ClienteServiceImpl implements ClienteService {
 
     @Override
     @Transactional
+    @InvalidaCache
     public Cliente calificar(Long id, Object estrellasRecibidas, Object comentarioRecibido) {
         Cliente cliente = dao.buscarPorId(id).orElseThrow(() -> new IllegalArgumentException("El cliente no existe"));
         Integer estrellas = Ints.tryParse(String.valueOf(estrellasRecibidas));
@@ -87,6 +94,7 @@ public class ClienteServiceImpl implements ClienteService {
 
     @Override
     @Transactional
+    @InvalidaCache
     public void eliminar(Long id) {
         dao.eliminarPorId(id);
     }

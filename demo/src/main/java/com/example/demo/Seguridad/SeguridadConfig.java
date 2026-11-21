@@ -62,6 +62,8 @@ public class SeguridadConfig {
                 .requestMatchers("/", "/login", "/acceso-denegado", "/error", "/favicon.ico",
                     "/css/**", "/js/**", "/img/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/login").permitAll()
+                /* ping publico para que el servidor no se duerma */
+                .requestMatchers("/api/health").permitAll()
                 /* rutas de ejemplo de la sesion 14 */
                 .requestMatchers("/public/**").permitAll()
                 .requestMatchers("/privado/admin").hasAuthority("ADMIN")

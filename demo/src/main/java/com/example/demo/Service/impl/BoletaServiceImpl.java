@@ -1,5 +1,8 @@
 package com.example.demo.Service.impl;
 
+import org.springframework.cache.annotation.Cacheable;
+import com.example.demo.Config.InvalidaCache;
+import com.example.demo.Config.NombresCache;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -50,6 +53,7 @@ public class BoletaServiceImpl implements BoletaService {
     }
 
     @Override
+    @Cacheable(NombresCache.BOLETAS)
     public List<Boleta> listar() {
         return boletas.listar();
     }
@@ -57,6 +61,7 @@ public class BoletaServiceImpl implements BoletaService {
     /* al generar la boleta */
     @Override
     @Transactional
+    @InvalidaCache
     public Boleta emitir(Boleta nueva) {
         nueva.setId(null);
         nueva.setMotivoAnulacion(null);
@@ -157,6 +162,7 @@ public class BoletaServiceImpl implements BoletaService {
     /* devolucion la boleta de alquiler se cierra y la prenda */
     @Override
     @Transactional
+    @InvalidaCache
     public Boleta devolver(Long id, String estadoPrenda) {
         Boleta boleta = boletas.buscarPorId(id).orElseThrow(() -> new IllegalArgumentException(NO_EXISTE));
         Preconditions.checkArgument("Alquiler".equals(boleta.getTipo()) && "Vigente".equals(boleta.getEstado()),
@@ -173,6 +179,7 @@ public class BoletaServiceImpl implements BoletaService {
 
     @Override
     @Transactional
+    @InvalidaCache
     public Boleta anular(Long id, String motivo) {
         Preconditions.checkArgument(StringUtils.isNotBlank(motivo), "El motivo de anulación es obligatorio");
         Boleta boleta = boletas.buscarPorId(id).orElseThrow(() -> new IllegalArgumentException(NO_EXISTE));
@@ -199,6 +206,7 @@ public class BoletaServiceImpl implements BoletaService {
 
     @Override
     @Transactional
+    @InvalidaCache
     public Boleta actualizar(Long id, Boleta datos) {
         boletas.buscarPorId(id).orElseThrow();
         datos.setId(id);
@@ -207,6 +215,7 @@ public class BoletaServiceImpl implements BoletaService {
 
     @Override
     @Transactional
+    @InvalidaCache
     public void eliminar(Long id) {
         boletas.eliminarPorId(id);
     }

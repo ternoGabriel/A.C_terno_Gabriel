@@ -1,5 +1,8 @@
 package com.example.demo.Service.impl;
 
+import org.springframework.cache.annotation.Cacheable;
+import com.example.demo.Config.InvalidaCache;
+import com.example.demo.Config.NombresCache;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -22,12 +25,14 @@ public class MetodoPagoServiceImpl implements MetodoPagoService {
     }
 
     @Override
+    @Cacheable(NombresCache.METODOS_PAGO)
     public List<MetodoPago> listar() {
         return dao.listar();
     }
 
     @Override
     @Transactional
+    @InvalidaCache
     public MetodoPago guardar(String tipoRecibido, Map<String, Object> datos) {
         String tipo = tipoRecibido == null ? "" : tipoRecibido.trim().toUpperCase();
         if (!tipo.equals("YAPE") && !tipo.equals("TRANSFERENCIA"))

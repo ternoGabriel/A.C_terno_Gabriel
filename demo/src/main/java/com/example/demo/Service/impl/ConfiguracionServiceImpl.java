@@ -1,5 +1,8 @@
 package com.example.demo.Service.impl;
 
+import org.springframework.cache.annotation.Cacheable;
+import com.example.demo.Config.InvalidaCache;
+import com.example.demo.Config.NombresCache;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.slf4j.Logger;
@@ -35,6 +38,7 @@ public class ConfiguracionServiceImpl implements ConfiguracionService {
     }
 
     @Override
+    @Cacheable(NombresCache.CONFIGURACION)
     public List<Configuracion> listar() {
         return dao.listar();
     }
@@ -42,6 +46,7 @@ public class ConfiguracionServiceImpl implements ConfiguracionService {
     /* el administrador cambia un valor */
     @Override
     @Transactional
+    @InvalidaCache
     public Configuracion cambiar(String clave, Object valorRecibido, Object modificadoPor) {
         /* con la base vacia la penalidad aun no existe */
         Preconditions.checkArgument(CLAVES.contains(clave), "No existe la configuración " + clave);

@@ -1,5 +1,8 @@
 package com.example.demo.Service.impl;
 
+import org.springframework.cache.annotation.Cacheable;
+import com.example.demo.Config.InvalidaCache;
+import com.example.demo.Config.NombresCache;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -26,6 +29,7 @@ public class PrendaServiceImpl implements PrendaService {
     }
 
     @Override
+    @Cacheable(NombresCache.PRENDAS)
     public List<Prenda> listar() {
         return dao.listar();
     }
@@ -45,6 +49,7 @@ public class PrendaServiceImpl implements PrendaService {
     /* una prenda nueva siempre entra como disponible */
     @Override
     @Transactional
+    @InvalidaCache
     public Prenda crear(Prenda nueva) {
         Preconditions.checkArgument(dao.listar().stream().noneMatch(p -> p.getCodigo().equals(nueva.getCodigo())),
             "Ya existe una prenda con ese código");
@@ -62,6 +67,7 @@ public class PrendaServiceImpl implements PrendaService {
     /* el administrador solo puede cambiar tipo precios e imagen */
     @Override
     @Transactional
+    @InvalidaCache
     public Prenda actualizar(Long id, Prenda datos) {
         Prenda actual = dao.buscarPorId(id).orElseThrow(() -> new IllegalArgumentException(NO_EXISTE));
         Preconditions.checkArgument(!"Vendido".equals(actual.getEstado()), "Una prenda vendida es de solo consulta y no se puede editar");
@@ -76,6 +82,7 @@ public class PrendaServiceImpl implements PrendaService {
     /* cambio manual de estado */
     @Override
     @Transactional
+    @InvalidaCache
     public Prenda cambiarEstado(Long id, String estado) {
         Prenda p = dao.buscarPorId(id).orElseThrow(() -> new IllegalArgumentException(NO_EXISTE));
         boolean permitido =
@@ -88,6 +95,7 @@ public class PrendaServiceImpl implements PrendaService {
 
     @Override
     @Transactional
+    @InvalidaCache
     public Prenda suspender(Long id) {
         Prenda p = dao.buscarPorId(id).orElseThrow(() -> new IllegalArgumentException(NO_EXISTE));
         Preconditions.checkArgument(!"Vendido".equals(p.getEstado()), "Una prenda vendida no se puede suspender");
@@ -98,6 +106,7 @@ public class PrendaServiceImpl implements PrendaService {
 
     @Override
     @Transactional
+    @InvalidaCache
     public Prenda reactivar(Long id) {
         Prenda p = dao.buscarPorId(id).orElseThrow(() -> new IllegalArgumentException(NO_EXISTE));
         Preconditions.checkArgument(!"Vendido".equals(p.getEstado()), "Una prenda vendida no se puede reactivar");
@@ -107,6 +116,7 @@ public class PrendaServiceImpl implements PrendaService {
 
     @Override
     @Transactional
+    @InvalidaCache
     public void eliminar(Long id) {
         dao.eliminarPorId(id);
     }
