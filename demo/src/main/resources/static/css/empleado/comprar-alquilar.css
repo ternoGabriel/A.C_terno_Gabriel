@@ -699,3 +699,62 @@
 .client-detail-col {
   min-width: 0;
 }
+
+
+/* paginador del catalogo volver y siguiente */
+.catalog-pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+.catalog-pager[hidden] {
+  display: none;
+}
+.catalog-pager button {
+  padding: 9px 20px;
+  border-radius: 8px;
+  border: 1px solid var(--gold, #b78b48);
+  background: #fff;
+  color: var(--gold, #b3820a);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+.catalog-pager button:hover:not(:disabled) {
+  background: var(--gold, #b3820a);
+  color: #fff;
+}
+.catalog-pager button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.catalog-pager span {
+  font-size: 13px;
+  color: var(--muted, #777);
+  min-width: 100px;
+  text-align: center;
+}
+
+/* prenda que otro empleado ya eligio */
+.catalog-item-card.reservada {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background: #f5f5f4;
+}
+.catalog-item-card.reservada:hover {
+  border-color: var(--border, #e7e1d8);
+}
+.catalog-item-card .lock-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #475467;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 999px;
+}

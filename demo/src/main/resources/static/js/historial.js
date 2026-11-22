@@ -60,6 +60,11 @@
       return;
     }
     if (d.limpiar) new CA.Sesion(CA.KEY).borrar();
+    /* al salir de comprar y alquiler la prenda elegida queda libre */
+    else if (window.CA && d.url && !d.url.startsWith(RAIZ)) {
+      const id = new CA.Sesion(CA.KEY).leer().prendaId;
+      if (id && TG.liberarPrenda) TG.liberarPrenda(id);
+    }
     location.replace(d.url);
   };
 

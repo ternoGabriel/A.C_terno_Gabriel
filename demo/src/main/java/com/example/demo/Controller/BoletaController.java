@@ -2,19 +2,25 @@ package com.example.demo.Controller;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import com.example.demo.Model.Boleta;
+import com.example.demo.Seguridad.UsuarioSesion;
 import com.example.demo.Service.BoletaService;
+import com.example.demo.Service.ReservaPrendas;
 
 @RestController
 @RequestMapping("/api/boletas")
 public class BoletaController {
 
     private final BoletaService servicio;
+    private final ReservaPrendas reservas;
 
-    public BoletaController(BoletaService servicio) {
+    public BoletaController(BoletaService servicio, ReservaPrendas reservas) {
         this.servicio = servicio;
+        this.reservas = reservas;
     }
 
     @GetMapping
@@ -23,8 +29,20 @@ public class BoletaController {
     }
 
     @PostMapping("nuevo")
-    public Boleta guardarBoleta(@Valid @RequestBody Boleta nueva) {
-        return servicio.emitir(nueva);
+    public Boleta guardarBoleta(@Valid @RequestBody Boleta nueva, Authentication autenticacion) {
+        Long prendaId = nueva.getPrenda() != null ? nueva.getPrenda().getId() : null;
+        Long yo = autenticacion != null && autenticacion.getPrincipal() instanceof UsuarioSesion usuario ? usuario.getId() : null;
+        /* si otro empleado eligio primero esa prenda no se emite */
+        if (prendaId != null) {
+            reservas.ocupante(prendaId)
+                .filter(r -> !Objects.equals(r.empleadoId(), yo))
+                .ifPresent(r -> {
+                    throw new IllegalArgumentException("Esta prenda ya está seleccionada por " + r.empleado());
+                });
+        }
+        Boleta emitida = servicio.emitir(nueva);
+        if (prendaId != null) reservas.liberarPrenda(prendaId);
+        return emitida;
     }
 
     @PutMapping("devolver/{id}")

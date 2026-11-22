@@ -29,13 +29,15 @@
 
       const hoy = TG.hoyISO();
       let existente = false;
+      let bloqueado = false;
 
       TG.vincular(dni, "dni");
       TG.vincular(nombres, "nombre");
       TG.vincular(apellidos, "nombre");
       TG.vincular(tel, "celular");
       TG.vincular(dir, "direccion");
-      TG.vincular(correo, "correo", { requerido: false });
+      /* el correo es obligatorio igual que en el registro de clientes */
+      TG.vincular(correo, "correo");
       TG.vincular(recojo, "fechaHoy");
 
       TG.vincular(
@@ -214,6 +216,7 @@
 
         if (c) {
           existente = true;
+          bloqueado = Boolean(c.alquilerBloqueado);
 
           nombres.value = c.nombres;
           apellidos.value = c.apellidos;
@@ -239,6 +242,7 @@
           if (existente) vaciar();
 
           existente = false;
+          bloqueado = false;
           bloquear(false);
 
           save({
@@ -266,6 +270,26 @@
 
         buscarAuto(true).catch((err) => TG.toast(err.message));
       });
+
+      /* revisa los datos antes del siguiente paso para que la boleta no falle al final */
+      document
+        .querySelector('a[href$="paso-3"]')
+        ?.addEventListener("click", (e) => {
+          const campos = [dni, nombres, apellidos, tel, dir, correo, recojo];
+
+          if (operacion() === "Alquilar") campos.push(devol);
+
+          if (!TG.validarTodo(campos)) {
+            e.preventDefault();
+            TG.toast("Revisa los datos marcados en rojo", "error");
+            return;
+          }
+
+          if (bloqueado && operacion() === "Alquilar") {
+            e.preventDefault();
+            TG.toast("Este cliente tiene el alquiler bloqueado", "error");
+          }
+        });
 
       /* revisa el dni guardado al volver */
       if (dni.value.length === 8) {

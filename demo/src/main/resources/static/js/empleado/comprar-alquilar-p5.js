@@ -30,6 +30,18 @@
         }
 
         if (!boleta) {
+          /* si el dni ya esta registrado se usa ese cliente en vez de crear otro */
+          if (!s.clienteId && s.dni) {
+            const registrado = (await TG.clientes()).find(
+              (x) => x.dni === s.dni,
+            );
+
+            if (registrado) {
+              save({ clienteId: registrado.id });
+              s = read();
+            }
+          }
+
           if (!s.clienteId) {
             const nuevo = await TG.post("/api/clientes/nuevo", {
               dni: s.dni,
@@ -69,6 +81,10 @@
           '<p style="color:#b42318;">' +
           TG.esc(err.message) +
           "</p>" +
+          '<a class="btn secondary" href="/empleado/comprar-alquilar/paso-2" ' +
+          'style="display:inline-block;margin-top:12px;margin-right:8px;">' +
+          "Corregir los datos" +
+          "</a>" +
           '<a class="btn secondary" href="/empleado/comprar-alquilar" ' +
           'style="display:inline-block;margin-top:12px;">' +
           "Volver al inicio del proceso" +

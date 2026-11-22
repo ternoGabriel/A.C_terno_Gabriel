@@ -158,17 +158,26 @@ document.addEventListener("DOMContentLoaded", () =>
             TG.toast("No puedes suspender tu propia cuenta");
             return;
           }
-          if (
-            !confirm(
+          /* ventana de confirmacion en vez de la alerta del navegador */
+          TG.confirmar({
+            titulo: "Suspender empleado",
+            mensaje:
               "¿Suspender a " +
               completo(emp) +
               "? Ya no podrá ingresar al sistema.",
-            )
-          )
-            return;
-          await TG.put("/api/empleados/suspender/" + emp.id);
-          TG.toast("Empleado suspendido");
-          await cargar();
+            textoOk: "Suspender",
+            textoCancelar: "Cancelar",
+            onOk: async () => {
+              try {
+                await TG.put("/api/empleados/suspender/" + emp.id);
+                TG.toast("Empleado suspendido");
+                await cargar();
+              } catch (err) {
+                TG.toast(err.message);
+              }
+            },
+          });
+          return;
         }
         if (bRe) {
           await TG.put("/api/empleados/reactivar/" + bRe.dataset.reactivar);

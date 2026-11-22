@@ -45,8 +45,14 @@ window.CA = (() => {
       sessionStorage.setItem(this.key, JSON.stringify(data));
     }
 
-    /* borra todo */
+    /* borra todo y suelta la prenda que estaba elegida */
     borrar() {
+      const { prendaId } = this.leer();
+
+      if (prendaId && window.TG && TG.liberarPrenda) {
+        TG.liberarPrenda(prendaId);
+      }
+
       sessionStorage.removeItem(this.key);
     }
 
@@ -276,6 +282,77 @@ window.CA = (() => {
         });
     }
 
+    /* mantiene la prenda elegida mientras el proceso sigue abierto */
+    mantenerPrenda() {
+      const { sesion, paso } = this;
+
+      if (paso < 2 || paso > 4) return;
+
+      const sinPrenda = (mensaje) => {
+        try {
+          sessionStorage.setItem("tgAvisoPrenda", mensaje);
+        } catch {
+          /* sin almacenamiento no se muestra el aviso */
+        }
+
+        const s = sesion.leer();
+
+        ["prendaId", "prenda", "prendaDiseno", "codigoPrenda"].forEach(
+          (k) => delete s[k],
+        );
+
+        sesion.reemplazar(s);
+        location.replace("/empleado/comprar-alquilar");
+      };
+
+      /* renueva la eleccion y si otro empleado ya la tomo vuelve al catalogo */
+      const renovar = async () => {
+        const id = sesion.leer().prendaId;
+
+        if (!id) return;
+
+        try {
+          await TG.post("/api/prendas/reservar/" + id);
+        } catch (err) {
+          if (err.status === 409) sinPrenda(err.message);
+        }
+      };
+
+      renovar();
+      setInterval(renovar, 60000);
+
+      /* al irse a otra pantalla la prenda queda libre para los demas */
+      document.addEventListener(
+        "click",
+        (e) => {
+          const a = e.target.closest && e.target.closest("a[href]");
+
+          if (!a || a.target === "_blank") return;
+
+          const href = a.getAttribute("href") || "";
+
+          if (!href || href.startsWith("#") || /^javascript:/i.test(href)) {
+            return;
+          }
+
+          let ruta = "";
+
+          try {
+            ruta = new URL(a.href, location.href).pathname;
+          } catch {
+            return;
+          }
+
+          if (ruta.startsWith("/empleado/comprar-alquilar")) return;
+
+          const id = sesion.leer().prendaId;
+
+          if (id) TG.liberarPrenda(id);
+        },
+        true,
+      );
+    }
+
     async iniciar(ClasePaso) {
       const { sesion, paso, cabecera } = this;
 
@@ -291,6 +368,7 @@ window.CA = (() => {
 
       const state = sesion.leer();
 
+      this.mantenerPrenda();
       this.enlazarCampos(state);
       cabecera.iniciar(state);
 

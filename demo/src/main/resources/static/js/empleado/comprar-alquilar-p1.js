@@ -33,6 +33,34 @@
       let condicion = "all";
       let prendas = [];
 
+      /* catalogo de 10 en 10 */
+      const POR_PAGINA = 10;
+      let pagina = 0;
+
+      /* prendas que otros empleados ya eligieron */
+      let reservas = new Map();
+
+      const paginador = document.getElementById("catalogoPaginador");
+
+      const esDeOtro = (id) => {
+        const r = reservas.get(id);
+
+        return Boolean(r && !r.mia);
+      };
+
+      const cargarReservas = async () => {
+        try {
+          const lista = await TG.get("/api/prendas/reservas");
+
+          reservas = new Map(lista.map((r) => [r.prendaId, r]));
+        } catch {
+          /* sin respuesta se conserva lo anterior */
+        }
+      };
+
+      const MENSAJE_OCUPADA =
+        "Podrás elegirla cuando termine o anule su proceso.";
+
       const TEXTOS = {
         color: "Todos los colores",
         categoria: "Todas las edades",
@@ -264,11 +292,23 @@
           f[s.dataset.filter] = s.value;
         });
 
-        const lista = prendas.filter(
+        const filtradas = prendas.filter(
           (p) =>
             (condicion === "all" ||
               p.tipo.toLowerCase() === condicion) &&
             TG.pasaFiltros(p, f),
+        );
+
+        const totalPaginas = Math.max(
+          1,
+          Math.ceil(filtradas.length / POR_PAGINA),
+        );
+
+        if (pagina >= totalPaginas) pagina = totalPaginas - 1;
+
+        const lista = filtradas.slice(
+          pagina * POR_PAGINA,
+          pagina * POR_PAGINA + POR_PAGINA,
         );
 
         grid.innerHTML = lista.length
@@ -277,6 +317,7 @@
                 (p) =>
                   '<article class="catalog-item-card' +
                   (p.id === sel ? " selected" : "") +
+                  (esDeOtro(p.id) ? " reservada" : "") +
                   '" data-id="' +
                   p.id +
                   '">' +
@@ -312,12 +353,62 @@
                   (p.id === sel
                     ? '<div class="check-badge">✓</div>'
                     : "") +
+                  (esDeOtro(p.id)
+                    ? '<div class="lock-badge">Ya seleccionada</div>'
+                    : "") +
                   "</article>",
               )
               .join("")
           : '<p style="padding:16px;color:#667085;">' +
             "No hay prendas disponibles con ese filtro." +
             "</p>";
+
+        pintarPaginador(filtradas.length, totalPaginas);
+      };
+
+      /* botones volver y siguiente bajo el catalogo */
+      const pintarPaginador = (cantidad, totalPaginas) => {
+        if (!paginador) return;
+
+        paginador.hidden = cantidad <= POR_PAGINA;
+
+        const info = paginador.querySelector("[data-pag-info]");
+        const volver = paginador.querySelector('[data-pag="volver"]');
+        const siguiente = paginador.querySelector('[data-pag="siguiente"]');
+
+        if (info) {
+          info.textContent = "Página " + (pagina + 1) + " de " + totalPaginas;
+        }
+
+        if (volver) volver.disabled = pagina <= 0;
+        if (siguiente) siguiente.disabled = pagina >= totalPaginas - 1;
+      };
+
+      paginador?.addEventListener("click", (e) => {
+        const b = e.target.closest("[data-pag]");
+
+        if (!b || b.disabled) return;
+
+        pagina += b.dataset.pag === "siguiente" ? 1 : -1;
+        pagina = Math.max(0, pagina);
+        pintarCatalogo();
+
+        /* sube al inicio del catalogo para ver las 10 nuevas */
+        grid?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+
+      /* vuelve a leer prendas y selecciones */
+      const refrescar = async () => {
+        try {
+          prendas = (await TG.prendas()).filter(
+            (p) => p.estado === "Disponible" && !p.suspendida,
+          );
+        } catch {
+          /* se conserva la lista anterior */
+        }
+
+        await cargarReservas();
+        pintarCatalogo();
       };
 
       try {
@@ -332,6 +423,43 @@
           save({ prendaId: null, prenda: "" });
         }
 
+        await cargarReservas();
+
+        /* aviso si otro empleado se quedo con la prenda mientras no estabas */
+        try {
+          const aviso = sessionStorage.getItem("tgAvisoPrenda");
+
+          if (aviso) {
+            sessionStorage.removeItem("tgAvisoPrenda");
+            TG.toast(aviso, "info");
+          }
+        } catch {
+          /* sin almacenamiento no hay aviso */
+        }
+
+        /* renueva la prenda elegida y si ya no es tuya se limpia */
+        const elegida = read().prendaId;
+
+        if (elegida) {
+          try {
+            await TG.post("/api/prendas/reservar/" + elegida);
+            await cargarReservas();
+          } catch (err) {
+            if (err.status === 409) {
+              save({
+                prendaId: null,
+                prenda: "",
+                prendaDiseno: "",
+                codigoPrenda: "",
+                precioVenta: null,
+                precioAlquiler: null,
+              });
+              TG.toast(err.message, "info");
+              await cargarReservas();
+            }
+          }
+        }
+
         pintarCatalogo();
       } catch (err) {
         if (grid) {
@@ -342,8 +470,8 @@
         }
       }
 
-      /* seleccion de prenda */
-      grid?.addEventListener("click", (e) => {
+      /* seleccion de prenda solo la primera persona que elige se queda con ella */
+      grid?.addEventListener("click", async (e) => {
         /* al tocar la foto se abre solo la imagen */
         const foto = e.target.closest(".catalog-thumb");
         if (foto) {
@@ -362,6 +490,47 @@
 
         if (!p) return;
 
+        /* otro empleado la eligio primero */
+        if (esDeOtro(p.id)) {
+          TG.toast(
+            "Esta prenda ya está seleccionada por " +
+              reservas.get(p.id).empleado +
+              ". " +
+              MENSAJE_OCUPADA,
+            "info",
+          );
+          return;
+        }
+
+        const previa = read().prendaId;
+
+        /* tocar otra vez la prenda elegida anula la seleccion */
+        if (previa === p.id) {
+          TG.liberarPrenda(p.id);
+          save({
+            prendaId: null,
+            prenda: "",
+            prendaDiseno: "",
+            codigoPrenda: "",
+            precioVenta: null,
+            precioAlquiler: null,
+          });
+          reservas.delete(p.id);
+          pintarCatalogo();
+          return;
+        }
+
+        /* el servidor decide quien llego primero */
+        try {
+          await TG.post("/api/prendas/reservar/" + p.id);
+        } catch (err) {
+          TG.toast(err.message, err.status === 409 ? "info" : "error");
+
+          if (err.status === 409) await refrescar();
+
+          return;
+        }
+
         save({
           prendaId: p.id,
           prenda: TG.descripcionPrenda(p),
@@ -371,23 +540,42 @@
           precioAlquiler: p.precioAlquiler,
         });
 
+        /* la prenda anterior queda libre para los demas */
+        if (previa && previa !== p.id) TG.liberarPrenda(previa);
+
+        await cargarReservas();
         pintarCatalogo();
       });
+
+      /* cada pocos segundos se ve si otro empleado eligio o solto una prenda */
+      setInterval(async () => {
+        if (document.hidden) return;
+
+        const antes = JSON.stringify([...reservas.entries()]);
+
+        await cargarReservas();
+
+        if (JSON.stringify([...reservas.entries()]) !== antes) {
+          pintarCatalogo();
+        }
+      }, 5000);
+
+      /* con otro filtro el catalogo vuelve a la primera pagina */
+      const filtrar = () => {
+        pagina = 0;
+        pintarCatalogo();
+      };
 
       document.querySelectorAll(".condition-btn").forEach((b) =>
         b.addEventListener("click", () => {
           condicion = b.dataset.condition;
-          pintarCatalogo();
+          filtrar();
         }),
       );
 
-      selects.forEach((s) =>
-        s.addEventListener("change", pintarCatalogo),
-      );
+      selects.forEach((s) => s.addEventListener("change", filtrar));
 
-      checks.forEach((c) =>
-        c.addEventListener("change", pintarCatalogo),
-      );
+      checks.forEach((c) => c.addEventListener("change", filtrar));
 
       /* exige prenda para pasar al paso 2 */
       document

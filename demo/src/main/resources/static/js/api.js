@@ -73,7 +73,10 @@
     }
     if (!resp.ok) {
       const msg = datos && (datos.mensaje || Object.values(datos).join(". "));
-      throw new Error(msg || "Ocurrió un error (" + resp.status + ").");
+      const fallo = new Error(msg || "Ocurrió un error (" + resp.status + ").");
+      /* la pantalla distingue por ejemplo una prenda ya elegida 409 */
+      fallo.status = resp.status;
+      throw fallo;
     }
     return datos;
   };
@@ -220,7 +223,31 @@
     return (n + " " + a).trim();
   };
   TG.iniciarSesion = (u) => sessionStorage.setItem(SESION, JSON.stringify(u));
+  /* suelta la prenda elegida en comprar y alquilar sin esperar la respuesta */
+  TG.liberarPrenda = (id) => {
+    if (!id) return;
+    const token = TG.csrf();
+    const cabeceras = { "X-Tab-Id": TG.pestana() };
+    if (token) cabeceras["X-XSRF-TOKEN"] = token;
+    try {
+      fetch("/api/prendas/liberar/" + id, {
+        method: "POST",
+        headers: cabeceras,
+        keepalive: true,
+      }).catch(() => {});
+    } catch {
+      /* si falla el servidor la suelta solo en unos minutos */
+    }
+  };
   TG.cerrarSesion = () => {
+    try {
+      const flujo = JSON.parse(
+        sessionStorage.getItem("ternoCompraAlquiler") || "{}",
+      );
+      if (flujo.prendaId) TG.liberarPrenda(flujo.prendaId);
+    } catch {
+      /* sin datos del flujo no hay prenda que soltar */
+    }
     sessionStorage.removeItem(SESION);
     sessionStorage.removeItem("ternoCompraAlquiler");
   };

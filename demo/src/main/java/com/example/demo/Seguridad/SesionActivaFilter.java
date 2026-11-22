@@ -110,8 +110,14 @@ public class SesionActivaFilter extends OncePerRequestFilter {
         return actual.isPresent() && "Activo".equals(actual.get().getEstado());
     }
 
+    /* consultas automaticas de la pantalla no cuentan como actividad de la persona */
     private static boolean esSondeo(HttpServletRequest peticion) {
-        return "GET".equals(peticion.getMethod()) && peticion.getRequestURI().equals(peticion.getContextPath() + "/api/sesion");
+        String ruta = peticion.getRequestURI();
+        String base = peticion.getContextPath();
+        boolean lectura = "GET".equals(peticion.getMethod());
+        return (lectura && ruta.equals(base + "/api/sesion"))
+            || (lectura && ruta.equals(base + "/api/prendas/reservas"))
+            || ("POST".equals(peticion.getMethod()) && ruta.startsWith(base + "/api/prendas/reservar/"));
     }
 
     private static boolean esApi(HttpServletRequest peticion) {

@@ -23,6 +23,7 @@ import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.header.writers.ClearSiteDataHeaderWriter;
 import org.springframework.security.web.authentication.logout.HeaderWriterLogoutHandler;
 import com.example.demo.Dao.EmpleadoDao;
+import com.example.demo.Service.ReservaPrendas;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -53,7 +54,7 @@ public class SeguridadConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, SecurityContextRepository repositorio, EmpleadoDao empleados,
-            RegistroSesiones registro) throws Exception {
+            RegistroSesiones registro, ReservaPrendas reservas) throws Exception {
         CsrfTokenRequestAttributeHandler manejadorCsrf = new CsrfTokenRequestAttributeHandler();
 
         http
@@ -105,6 +106,12 @@ public class SeguridadConfig {
                 .invalidateHttpSession(true)
                 .clearAuthentication(true)
                 .deleteCookies("JSESSIONID", "XSRF-TOKEN")
+                /* las prendas elegidas por quien sale vuelven a quedar libres */
+                .addLogoutHandler((peticion, respuesta, autenticacion) -> {
+                    if (autenticacion != null && autenticacion.getPrincipal() instanceof UsuarioSesion usuario) {
+                        reservas.liberarDe(usuario.getId());
+                    }
+                })
                 .addLogoutHandler(new HeaderWriterLogoutHandler(new ClearSiteDataHeaderWriter(
                     ClearSiteDataHeaderWriter.Directive.CACHE, ClearSiteDataHeaderWriter.Directive.COOKIES))))
 
