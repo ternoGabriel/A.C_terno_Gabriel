@@ -1761,11 +1761,104 @@
     });
   };
 
+  /* paginador anterior y siguiente para tablas y catalogos
+     trabaja sobre las filas o tarjetas que ya estan dibujadas asi no
+     cambia como cada pantalla las pinta ni como las filtra */
+  TG.paginar = (contenedor, porPagina) => {
+    if (!contenedor || contenedor.dataset.paginado) return;
+    contenedor.dataset.paginado = "1";
+    const esTabla = contenedor.tagName === "TBODY";
+    const barra = document.createElement("nav");
+    barra.className = "tg-pager";
+    barra.hidden = true;
+    barra.setAttribute("aria-label", "Páginas");
+    barra.innerHTML =
+      '<button type="button" data-pag="anterior">‹ Anterior</button>' +
+      '<span data-pag-info>Página 1 de 1</span>' +
+      '<button type="button" data-pag="siguiente">Siguiente ›</button>';
+    const ancla = esTabla
+      ? contenedor.closest("table").parentElement
+      : contenedor;
+    ancla.insertAdjacentElement("afterend", barra);
+    const info = barra.querySelector("[data-pag-info]");
+    const btnAnterior = barra.querySelector('[data-pag="anterior"]');
+    const btnSiguiente = barra.querySelector('[data-pag="siguiente"]');
+    let pagina = 0,
+      firma = "",
+      pendiente = false;
+
+    /* las filas que un filtro oculta no cuentan */
+    const visible = (el) => !el.hidden && el.style.display !== "none";
+
+    const aplicar = () => {
+      pendiente = false;
+      const items = [...contenedor.children].filter(visible);
+      const nueva =
+        items.length +
+        "|" +
+        (items[0] ? items[0].textContent.slice(0, 40) : "") +
+        "|" +
+        (items.length
+          ? items[items.length - 1].textContent.slice(0, 40)
+          : "");
+      /* si cambio la busqueda o el filtro vuelve a la primera pagina */
+      if (nueva !== firma) {
+        firma = nueva;
+        pagina = 0;
+      }
+      const total = Math.max(1, Math.ceil(items.length / porPagina));
+      if (pagina >= total) pagina = total - 1;
+      const desde = pagina * porPagina;
+      [...contenedor.children].forEach((el) => {
+        const idx = items.indexOf(el);
+        if (idx !== -1 && (idx < desde || idx >= desde + porPagina))
+          el.setAttribute("data-pag-oculta", "");
+        else el.removeAttribute("data-pag-oculta");
+      });
+      barra.hidden = items.length <= porPagina;
+      info.textContent = "Página " + (pagina + 1) + " de " + total;
+      btnAnterior.disabled = pagina <= 0;
+      btnSiguiente.disabled = pagina >= total - 1;
+    };
+    const programar = () => {
+      if (pendiente) return;
+      pendiente = true;
+      requestAnimationFrame(aplicar);
+    };
+    new MutationObserver(programar).observe(contenedor, {
+      childList: true,
+      ...(esTabla
+        ? {
+            subtree: true,
+            attributes: true,
+            attributeFilter: ["style", "hidden"],
+          }
+        : {}),
+    });
+    barra.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-pag]");
+      if (!b || b.disabled) return;
+      pagina += b.dataset.pag === "siguiente" ? 1 : -1;
+      pagina = Math.max(0, pagina);
+      aplicar();
+      /* sube al inicio del listado para ver los nuevos */
+      ancla.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    aplicar();
+  };
+
+  /* activa el paginador en todo lo marcado con data-paginar */
+  TG.iniciarPaginadores = () =>
+    document.querySelectorAll("[data-paginar]").forEach((el) => {
+      TG.paginar(el, Number(el.dataset.paginar) || 50);
+    });
+
   /* ejecuta fn cuando el dom este listo y la persona */
   TG.listo = (fn) => {
     const correr = () => {
       if (!TG.protegerPagina()) return;
       TG.iniciarPagina();
+      TG.iniciarPaginadores();
       TG.vigilarSesion();
       TG.historial && TG.historial.iniciar();
       fn && fn();

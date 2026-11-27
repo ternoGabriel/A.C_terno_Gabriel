@@ -182,6 +182,43 @@
       "</span>"
     );
   }
+  /* alertas de mal estado cuyo monto cambio el empleado en la devolucion */
+  function alertasMalEstado(penalidades) {
+    const lista = (penalidades || [])
+      .filter((p) => p.malEstadoModificado)
+      .sort((a, b) => b.id - a.id)
+      .slice(0, 10);
+    const cuando = (p) => {
+      const d = new Date(p.fechaHora || p.fecha);
+      return isNaN(d)
+        ? TG.fecha(p.fecha)
+        : d.toLocaleDateString("es-PE") +
+            " " +
+            d.toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" });
+    };
+    return (
+      "<h3>Mal estado modificado por empleados</h3>" +
+      (lista.length
+        ? lista
+            .map(
+              (p) =>
+                '<div class="tg-notify-item"><strong>' +
+                TG.esc(p.empleado || "Empleado") +
+                '</strong><div class="tg-meta">Cliente: ' +
+                TG.esc(TG.nombre(p.cliente)) +
+                "</div><div>Cobró " +
+                TG.money(p.montoMalEstado) +
+                ' <span class="tg-meta">por mal estado</span>' +
+                '</div><div class="tg-meta">Comentario: ' +
+                TG.esc(p.comentarioMalEstado || "—") +
+                '</div><div class="tg-meta">' +
+                TG.esc(cuando(p)) +
+                "</div></div>",
+            )
+            .join("")
+        : '<div class="tg-notify-empty">Ningún empleado modificó el monto por mal estado.</div>')
+    );
+  }
   let cerrarNotificaciones = null;
   async function openNotifications() {
     if (cerrarNotificaciones) cerrarNotificaciones();
@@ -220,9 +257,10 @@
     botonX.addEventListener("click", close);
     botonX.focus({ preventScroll: true });
     try {
-      const [boletas, confs] = await Promise.all([
+      const [boletas, confs, penalidades] = await Promise.all([
         TG.boletas(),
         TG.get("/api/confecciones"),
+        isAdmin ? TG.penalidades() : Promise.resolve([]),
       ]);
       const body = panel.querySelector(".tg-notify-body");
       if (isAdmin) {
@@ -259,7 +297,8 @@
                 "</span></span></div>",
             )
             .join("") +
-          '<p class="tg-notify-sub">Ordenado por cantidad de boletas vigentes; el importe se muestra como referencia.</p>';
+          '<p class="tg-notify-sub">Ordenado por cantidad de boletas vigentes; el importe se muestra como referencia.</p>' +
+          alertasMalEstado(penalidades);
         return;
       }
       const hoy = TG.hoyISO();

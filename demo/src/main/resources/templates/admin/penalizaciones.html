@@ -9,6 +9,7 @@
     <title>Configuración de Penalizaciones | Terno Gabriel</title>
     <link rel="icon" th:href="@{/img/favicon.svg}" />
     <link rel="stylesheet" th:href="@{/css/global.css}" />
+    <link rel="stylesheet" th:href="@{/css/comprobante.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/penalizaciones.css}" />
     <link rel="stylesheet" th:href="@{/css/responsive.css}" />
     <link rel="stylesheet" th:href="@{/css/fluido.css}" />
@@ -166,9 +167,10 @@
                     <th>TIPO</th>
                     <th>MONTO</th>
                     <th>ESTADO COBRO</th>
+                    <th>BOLETA</th>
                   </tr>
                 </thead>
-                <tbody></tbody>
+                <tbody data-paginar="50"></tbody>
               </table>
             </div>
           </section>
@@ -222,6 +224,7 @@
     <script th:src="@{/js/api.js}" defer></script>
     <script th:src="@{/js/historial.js}" defer></script>
     <script th:src="@{/js/app.js}" defer></script>
+    <script th:src="@{/js/comprobante.js}" defer></script>
     <script th:src="@{/js/admin/penalizaciones.js}" defer></script>
   </body>
 </html>

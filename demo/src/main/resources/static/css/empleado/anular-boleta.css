@@ -10,7 +10,7 @@
 }
 
 .page-empleado-anular-boleta .frame-label {
-  font-size: 0.75rem;
+  font-size: calc(0.75rem * var(--fs, 1.08));
   font-weight: 700;
   color: #b8860b;
   letter-spacing: 0.05em;
@@ -69,7 +69,7 @@
 }
 
 .page-empleado-anular-boleta .cancel-summary span {
-  font-size: 0.7rem;
+  font-size: calc(0.7rem * var(--fs, 1.08));
   color: #8c7b53;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -77,7 +77,7 @@
 }
 
 .page-empleado-anular-boleta .cancel-summary b {
-  font-size: 0.9rem;
+  font-size: calc(0.9rem * var(--fs, 1.08));
   color: #2c2518;
 }
 
@@ -90,7 +90,7 @@
   border-radius: 8px;
   margin-bottom: 1.5rem;
   font-weight: 500;
-  font-size: 0.95rem;
+  font-size: calc(0.95rem * var(--fs, 1.08));
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -108,7 +108,7 @@
   border-radius: 6px;
   resize: vertical;
   font-family: inherit;
-  font-size: 0.95rem;
+  font-size: calc(0.95rem * var(--fs, 1.08));
 }
 
 .page-empleado-anular-boleta .amber-notice {
@@ -121,12 +121,12 @@
   gap: 0.75rem;
   align-items: flex-start;
   margin: 1.5rem 0;
-  font-size: 0.9rem;
+  font-size: calc(0.9rem * var(--fs, 1.08));
 }
 
 .page-empleado-anular-boleta .amber-notice .notice-icon {
   font-weight: bold;
-  font-size: 1.1rem;
+  font-size: calc(1.1rem * var(--fs, 1.08));
 }
 
 .page-empleado-anular-boleta .actions.right-align {
@@ -200,12 +200,12 @@
 .modal-card h3 {
   margin-bottom: 0.75rem;
   color: #1f2937;
-  font-size: 1.25rem;
+  font-size: calc(1.25rem * var(--fs, 1.08));
 }
 
 .modal-card p {
   color: #4b5563;
-  font-size: 0.95rem;
+  font-size: calc(0.95rem * var(--fs, 1.08));
   margin-bottom: 1.5rem;
 }
 
@@ -243,13 +243,13 @@
 }
 .page-empleado-anular-boleta .cancel-summary span {
   color: #777064;
-  font-size: 0.76rem;
+  font-size: calc(0.76rem * var(--fs, 1.08));
   letter-spacing: 0.02em;
   text-transform: none;
 }
 .page-empleado-anular-boleta .cancel-summary b {
   color: #211d17;
-  font-size: 0.98rem;
+  font-size: calc(0.98rem * var(--fs, 1.08));
   line-height: 1.35;
   font-weight: 750;
 }
@@ -315,7 +315,7 @@
 }
 .page-empleado-anular-boleta .cancel-summary span {
   color: #777064;
-  font-size: 11px;
+  font-size: calc(11px * var(--fs, 1.08));
   font-weight: 600;
   letter-spacing: 0;
   text-transform: none;
@@ -323,7 +323,7 @@
 }
 .page-empleado-anular-boleta .cancel-summary b {
   color: #211d17;
-  font-size: 15px;
+  font-size: calc(15px * var(--fs, 1.08));
   font-weight: 750;
   line-height: 1.35;
 }
@@ -390,7 +390,7 @@
 }
 .page-empleado-anular-boleta .cancel-summary span {
   color: #776b58;
-  font-size: 11px;
+  font-size: calc(11px * var(--fs, 1.08));
   font-weight: 500;
   letter-spacing: 0.01em;
   line-height: 1.2;
@@ -398,7 +398,7 @@
 }
 .page-empleado-anular-boleta .cancel-summary b {
   color: #171512;
-  font-size: 13px;
+  font-size: calc(13px * var(--fs, 1.08));
   font-weight: 750;
   line-height: 1.3;
 }
@@ -498,7 +498,7 @@
   border-radius: 50%;
   background: #f1e5cc;
   color: #6d5529;
-  font-size: 11px;
+  font-size: calc(11px * var(--fs, 1.08));
   font-weight: 700;
 }
 .page-empleado-anular-boleta .cancel-client-text {
@@ -509,7 +509,7 @@
 }
 .page-empleado-anular-boleta .cancel-summary span:not(.cancel-avatar) {
   color: #776b58;
-  font-size: 11px;
+  font-size: calc(11px * var(--fs, 1.08));
   font-weight: 500;
   letter-spacing: 0;
   line-height: 1.2;
@@ -517,7 +517,7 @@
 }
 .page-empleado-anular-boleta .cancel-summary b {
   color: #171512;
-  font-size: 13px;
+  font-size: calc(13px * var(--fs, 1.08));
   font-weight: 750;
   line-height: 1.3;
 }
@@ -566,7 +566,7 @@
   margin-bottom: 4px;
   border-bottom: 1px dashed #cbb88f;
   color: #8a7042;
-  font-size: 11px;
+  font-size: calc(11px * var(--fs, 1.08));
   font-weight: 800;
   letter-spacing: 0.12em;
 }
@@ -582,7 +582,7 @@
   display: block;
   margin-bottom: 6px;
   color: #85775e;
-  font-size: 11px;
+  font-size: calc(11px * var(--fs, 1.08));
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.055em;
@@ -590,7 +590,7 @@
 .cancel-summary > div b {
   display: block;
   color: #342f27;
-  font-size: 14px;
+  font-size: calc(14px * var(--fs, 1.08));
   font-weight: 700;
   line-height: 1.45;
   overflow-wrap: anywhere;
@@ -607,7 +607,7 @@
   margin-bottom: 4px;
 }
 .cancel-summary .cancel-client-text b {
-  font-size: 18px;
+  font-size: calc(18px * var(--fs, 1.08));
 }
 .cancel-summary .cancel-avatar {
   display: flex;

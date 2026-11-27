@@ -65,7 +65,6 @@
         color: "Todos los colores",
         categoria: "Todas las edades",
         estilo: "Todos los estilos",
-        talla: "Todas las tallas",
       };
 
       const selects = [
@@ -96,6 +95,92 @@
 
       checks.forEach((c) => {
         c.checked = false;
+      });
+
+      /* filtro de talla segun la categoria */
+      const selCategoria = document.querySelector(
+        '.advanced-filters-bar [data-filter="categoria"]',
+      );
+      const selTallaGrupo = document.getElementById("tallaGrupo");
+      const selTallaValor = document.getElementById("tallaValor");
+
+      const [GRUPO_NINO, GRUPO_ESTANDAR, GRUPO_SACO, GRUPO_UNICA] =
+        TG.TALLAS_GRUPOS.map((g) => g[1]);
+      const TALLAS_ADULTO = [
+        ...GRUPO_ESTANDAR,
+        ...GRUPO_SACO,
+        ...GRUPO_UNICA,
+      ];
+      const TALLAS_POR_CATEGORIA = {
+        Niños: GRUPO_NINO,
+        Jóvenes: TALLAS_ADULTO,
+        Adultos: TALLAS_ADULTO,
+      };
+
+      /* categoria que manda en la talla la del otro filtro o la que se elige en talla */
+      const categoriaDeTalla = () =>
+        (selCategoria && selCategoria.value) ||
+        (selTallaGrupo && selTallaGrupo.value) ||
+        "";
+
+      const opcionesTalla = (categoria) =>
+        '<option value="">Todas las de ' +
+        TG.esc(categoria) +
+        "</option>" +
+        TALLAS_POR_CATEGORIA[categoria]
+          .map((t) => '<option value="' + TG.esc(t) + '">' + TG.esc(t) + "</option>")
+          .join("");
+
+      /* sin categoria en el otro filtro primero se elige entre niños jovenes y adultos */
+      const armarTalla = () => {
+        if (!selTallaGrupo || !selTallaValor) return;
+
+        const fija = selCategoria ? selCategoria.value : "";
+
+        if (fija) {
+          /* ya hay categoria se muestran directo sus tallas */
+          selTallaGrupo.hidden = true;
+          selTallaGrupo.value = "";
+          selTallaValor.innerHTML = opcionesTalla(fija);
+          selTallaValor.hidden = false;
+          return;
+        }
+
+        const grupo = selTallaGrupo.value;
+        selTallaGrupo.hidden = false;
+        selTallaGrupo.innerHTML =
+          '<option value="">Todas las tallas</option>' +
+          TG.OPCIONES.categoria
+            .map(
+              (c) =>
+                '<option value="' +
+                TG.esc(c) +
+                '"' +
+                (c === grupo ? " selected" : "") +
+                ">" +
+                TG.esc(c) +
+                "</option>",
+            )
+            .join("");
+
+        if (grupo) {
+          selTallaValor.innerHTML = opcionesTalla(grupo);
+          selTallaValor.hidden = false;
+        } else {
+          selTallaValor.innerHTML = "";
+          selTallaValor.hidden = true;
+        }
+      };
+
+      armarTalla();
+
+      selCategoria?.addEventListener("change", () => {
+        selTallaGrupo.value = "";
+        armarTalla();
+      });
+
+      selTallaGrupo?.addEventListener("change", () => {
+        armarTalla();
       });
 
       /* dibuja la ficha del cliente */
@@ -291,6 +376,10 @@
         selects.forEach((s) => {
           f[s.dataset.filter] = s.value;
         });
+
+        /* talla y categoria elegida desde el filtro de talla */
+        f.categoria = categoriaDeTalla();
+        f.talla = selTallaValor && !selTallaValor.hidden ? selTallaValor.value : "";
 
         const filtradas = prendas.filter(
           (p) =>
@@ -574,6 +663,10 @@
       );
 
       selects.forEach((s) => s.addEventListener("change", filtrar));
+
+      [selTallaGrupo, selTallaValor].forEach((s) =>
+        s?.addEventListener("change", filtrar),
+      );
 
       checks.forEach((c) => c.addEventListener("change", filtrar));
 

@@ -5,7 +5,7 @@
 .page-admin-clientes .status-badge {
     padding: 6px 12px;
     border-radius: 20px;
-    font-size: 13px;
+    font-size: calc(13px * var(--fs, 1.08));
     font-weight: 500;
     display: inline-flex;
     align-items: center;

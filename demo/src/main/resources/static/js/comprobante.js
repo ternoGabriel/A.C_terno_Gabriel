@@ -199,7 +199,13 @@
       "</td></tr>" +
       '<tr><td>Penalidad por mal estado de la prenda</td><td class="num">' +
       M(malEstado) +
-      "</td></tr></tbody></table>" +
+      "</td></tr>" +
+      (pen && malEstado > 0 && pen.comentarioMalEstado
+        ? '<tr><td>Motivo del mal estado</td><td class="num">' +
+          E(pen.comentarioMalEstado) +
+          "</td></tr>"
+        : "") +
+      "</tbody></table>" +
       pieBoleta(
         TG.montoLetras(total),
         pen

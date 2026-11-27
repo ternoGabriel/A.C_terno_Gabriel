@@ -40,8 +40,32 @@ document.addEventListener("DOMContentLoaded", () =>
       });
     };
 
+    let boletas = [],
+      penalidades = [];
+
+    /* boleta de devolucion de cada penalizacion */
+    const boletaDe = (p) => {
+      if (p.idBoleta) return boletas.find((b) => b.id === p.idBoleta) || null;
+      /* penalizaciones anteriores sin boleta guardada la devolucion mas cercana del cliente */
+      return (
+        boletas
+          .filter(
+            (b) =>
+              b.estado === "Devuelta" &&
+              b.cliente?.id === p.cliente?.id &&
+              String(b.fecha || "") <= String(p.fecha || ""),
+          )
+          .sort((x, y) => (y.id || 0) - (x.id || 0))[0] || null
+      );
+    };
+
     const pintarHistorial = async () => {
-      const [pens] = await Promise.all([TG.penalidades()]);
+      const [pens, todasBoletas] = await Promise.all([
+        TG.penalidades(),
+        TG.boletas(),
+      ]);
+      penalidades = pens;
+      boletas = todasBoletas;
       const tbody = document.querySelector(".historial-card tbody");
       const lista = pens
         .slice()
@@ -70,12 +94,55 @@ document.addEventListener("DOMContentLoaded", () =>
                 (p.estado === "Cobrado" ? "success" : "pending") +
                 '">● ' +
                 TG.esc(p.estado) +
-                "</span></td></tr>",
+                '</span></td><td class="col-boleta">' +
+                (boletaDe(p)
+                  ? '<button type="button" class="btn-mini" data-ver-boleta="' +
+                    p.id +
+                    '">Ver</button>'
+                  : "—") +
+                "</td></tr>",
             )
             .join("")
-        : '<tr><td colspan="6" style="text-align:center;color:#667085;padding:20px;">Aún no se han aplicado penalizaciones.</td></tr>';
+        : '<tr><td colspan="7" style="text-align:center;color:#667085;padding:20px;">Aún no se han aplicado penalizaciones.</td></tr>';
       aplicarFiltro();
     };
+
+    /* ver la boleta de la devolucion en una ventana */
+    const abrirBoleta = (p) => {
+      const b = boletaDe(p);
+      if (!b) return;
+      document.getElementById("cpModal")?.remove();
+      const fondo = document.createElement("div");
+      fondo.className = "modal-backdrop";
+      fondo.id = "cpModal";
+      fondo.innerHTML =
+        '<div class="modal modal-comprobante" role="dialog" aria-modal="true"><div class="modal-head"><h2>' +
+        TG.esc("Boleta de devolución " + (b.numero || "")) +
+        '</h2><button type="button" class="btn secondary" data-cerrar>Cerrar</button></div>' +
+        TG.comprobanteHTML("Devolución", { ...b, _pen: p }) +
+        '<div class="cp-acciones"><button type="button" class="btn primary" data-imprimir>🖨 Imprimir</button></div></div>';
+      const cerrar = () => {
+        fondo.remove();
+        document.removeEventListener("keydown", alTeclear);
+      };
+      const alTeclear = (e) => {
+        if (e.key === "Escape") cerrar();
+      };
+      fondo.addEventListener("click", (e) => {
+        if (e.target === fondo || e.target.closest("[data-cerrar]")) cerrar();
+        if (e.target.closest("[data-imprimir]")) window.print();
+      });
+      document.addEventListener("keydown", alTeclear);
+      document.body.appendChild(fondo);
+    };
+    document
+      .querySelector(".historial-card tbody")
+      ?.addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-ver-boleta]");
+        if (!btn) return;
+        const p = penalidades.find((x) => x.id === Number(btn.dataset.verBoleta));
+        if (p) abrirBoleta(p);
+      });
 
     const filterSelect = document.querySelector("[data-category-filter]");
     function aplicarFiltro() {

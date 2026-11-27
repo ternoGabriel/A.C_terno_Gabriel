@@ -8,6 +8,9 @@ document.addEventListener("DOMContentLoaded", () =>
     let config = { demora: 0, malEstado: 0 },
       boleta = null,
       estadoActual = "bueno",
+      /* monto por mal estado el del administrador por defecto el empleado lo puede cambiar */
+      precioDano = 0,
+      precioModificado = false,
       dias = 0,
       terminado = false;
     try {
@@ -20,8 +23,13 @@ document.addEventListener("DOMContentLoaded", () =>
     } catch (e) {
       TG.toast(e.message);
     }
+    precioDano = config.malEstado;
+    const inputPrecioDano = $("inputPrecioDano");
+    const mostrarPrecioDano = () => {
+      if (inputPrecioDano) inputPrecioDano.value = precioDano.toFixed(2);
+    };
     $("lblPrecioDia").textContent = TG.money(config.demora);
-    $("lblPrecioDaño").textContent = TG.money(config.malEstado);
+    mostrarPrecioDano();
     const u = TG.usuario();
     if (u && $("bEmpleado")) $("bEmpleado").textContent = TG.empleadoNombre();
     if ($("bFecha")) $("bFecha").textContent = TG.fechaHora();
@@ -31,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () =>
 
     const totales = () => {
       const sub = dias * config.demora,
-        dano = estadoActual === "observaciones" ? config.malEstado : 0,
+        dano = estadoActual === "observaciones" ? precioDano : 0,
         total = sub + dano;
       const metodo =
         document.querySelector(".metodo-btn.active")?.dataset.metodo ||
@@ -43,6 +51,8 @@ document.addEventListener("DOMContentLoaded", () =>
           ? "Estado de prenda: Con observaciones (dañado)"
           : "Estado de prenda: Buen estado";
       $("lblCantDaño").textContent = estadoActual === "observaciones" ? 1 : 0;
+      if (inputPrecioDano)
+        inputPrecioDano.disabled = estadoActual !== "observaciones" || terminado;
       $("txtCargoDaño").textContent = TG.money(dano);
       $("lblTipoPagoFila").textContent = metodo;
       $("txtTotalPenalizacion").textContent = TG.money(total);
@@ -59,6 +69,12 @@ document.addEventListener("DOMContentLoaded", () =>
         " (" +
         TG.money(dano) +
         ")";
+      /* la boleta muestra el motivo del mal estado que escribio el empleado */
+      const motivo = ($("inputObservaciones")?.value || "").trim();
+      if ($("bFilaMotivo")) {
+        $("bFilaMotivo").hidden = estadoActual !== "observaciones" || !motivo;
+        $("bResumenMotivo").textContent = motivo || "—";
+      }
       $("bResumenPago").textContent = metodo;
       $("bTotalCobrado").textContent = TG.money(total);
       actualizarAcciones();
@@ -70,7 +86,11 @@ document.addEventListener("DOMContentLoaded", () =>
       config.demora = demora;
       config.malEstado = malEstado;
       $("lblPrecioDia").textContent = TG.money(demora);
-      $("lblPrecioDaño").textContent = TG.money(malEstado);
+      /* si el empleado no lo cambio se actualiza al monto del administrador */
+      if (!precioModificado) {
+        precioDano = malEstado;
+        mostrarPrecioDano();
+      }
       if (boleta && !terminado) totales();
     });
 
@@ -159,6 +179,36 @@ document.addEventListener("DOMContentLoaded", () =>
       totales();
     });
 
+    /* el empleado puede cambiar el monto por mal estado */
+    inputPrecioDano?.addEventListener("input", () => {
+      let v = inputPrecioDano.value.replace(/[^\d.]/g, "");
+      const i = v.indexOf(".");
+      if (i !== -1)
+        v = v.slice(0, i + 1) + v.slice(i + 1).replace(/\./g, "").slice(0, 2);
+      v = v.slice(0, 7);
+      if (v !== inputPrecioDano.value) inputPrecioDano.value = v;
+      precioDano = parseFloat(v) || 0;
+      precioModificado = precioDano !== config.malEstado;
+      totales();
+    });
+    inputPrecioDano?.addEventListener("focus", function () {
+      this.select();
+    });
+    inputPrecioDano?.addEventListener("blur", () => mostrarPrecioDano());
+
+    /* el motivo empieza siempre con mayuscula y se refleja en la boleta */
+    const inputMotivo = $("inputObservaciones");
+    inputMotivo?.addEventListener("input", () => {
+      const v = inputMotivo.value.replace(/^\s+/, "");
+      const mayus = v.charAt(0).toUpperCase() + v.slice(1);
+      if (mayus !== inputMotivo.value) {
+        const pos = inputMotivo.selectionStart;
+        inputMotivo.value = mayus;
+        inputMotivo.setSelectionRange(pos, pos);
+      }
+      totales();
+    });
+
     const entregado = $("pagoEntregado");
     TG.vincular(entregado, {
       ok: (v) =>
@@ -195,6 +245,21 @@ document.addEventListener("DOMContentLoaded", () =>
       }
       if (terminado) return;
       const t = totales();
+      const comentario = ($("inputObservaciones")?.value || "").trim();
+      if (estadoActual === "observaciones") {
+        if (precioDano <= 0) {
+          TG.toast("Escribe el monto a cobrar por el mal estado");
+          return;
+        }
+        /* si cambia el monto del administrador el motivo es obligatorio */
+        if (precioModificado && !comentario) {
+          TG.toast(
+            "Escribe el motivo del mal estado: se manchó, se rompió levemente o se destrozó totalmente",
+          );
+          $("inputObservaciones")?.focus();
+          return;
+        }
+      }
       if (conPago && !TG.validarTodo([entregado])) return;
       try {
         const cliente = { id: boleta.cliente.id };
@@ -213,6 +278,16 @@ document.addEventListener("DOMContentLoaded", () =>
             montoDemora: t.sub,
             montoMalEstado: t.dano,
             estado: "Cobrado",
+            idBoleta: boleta.id,
+            /* solo para mal estado se guarda el comentario y si se cambio el monto */
+            ...(t.dano > 0
+              ? {
+                  comentarioMalEstado: comentario,
+                  malEstadoModificado: precioModificado,
+                  montoMalEstadoPorDefecto: config.malEstado,
+                  empleado: TG.empleadoNombre(),
+                }
+              : {}),
           });
         }
         /* devolucion normal lavanderia con danos restauracion */

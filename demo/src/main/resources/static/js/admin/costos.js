@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", () =>
             '">✎ Editar</button>' +
             '<button class="btn-mini danger" type="button" data-suspender="' +
             p.id +
-            '">⏸ Suspender</button></div>';
+            '">⏸ Anular</button></div>';
       return (
         '<tr data-id="' +
         p.id +
@@ -80,7 +80,9 @@ document.addEventListener("DOMContentLoaded", () =>
         "</td><td>" +
         TG.esc(p.talla) +
         "</td><td>" +
-        TG.insigniaEstado(sus ? "Suspendido" : p.estado) +
+        (sus
+          ? '<span class="badge-estado est-suspendido"><i></i>Anulado</span>'
+          : TG.insigniaEstado(p.estado)) +
         "</td><td>" +
         TG.money(p.precioVenta) +
         "</td><td>" +
@@ -198,8 +200,8 @@ document.addEventListener("DOMContentLoaded", () =>
           if (!exacta.length)
             mensaje = prendas.some((p) => p.codigo === q)
               ? sus
-                ? "El producto no está suspendido"
-                : "El producto se encuentra suspendido"
+                ? "El producto no está anulado"
+                : "El producto se encuentra anulado"
               : "El código no existe";
           lista = exacta;
         } else {
@@ -209,7 +211,7 @@ document.addEventListener("DOMContentLoaded", () =>
       }
       if (subtitulo)
         subtitulo.textContent = sus
-          ? lista.length + " suspendidos"
+          ? lista.length + " anulados"
           : "Gestiona precios y fichas de prendas";
       /* con buscador por codigo solo se buscan prendas */
       const extra = !sus && !q ? confecciones : [];
@@ -218,7 +220,7 @@ document.addEventListener("DOMContentLoaded", () =>
         : '<tr><td colspan="10" class="aviso-vacio">' +
           (mensaje ||
             (sus
-              ? "No hay productos suspendidos."
+              ? "No hay productos anulados."
               : "No hay prendas registradas.")) +
           "</td></tr>";
     }
@@ -443,16 +445,16 @@ document.addEventListener("DOMContentLoaded", () =>
           },
         });
       }
-      /* suspender lo da de baja sin borrarlo y lo pasa */
+      /* anular lo da de baja sin borrarlo y lo pasa */
       if (bSu) {
         const p = prendas.find((x) => x.id === Number(bSu.dataset.suspender));
         if (p && p.estado === "Vendido") {
-          TG.toast("Una prenda vendida no se puede suspender");
+          TG.toast("Una prenda vendida no se puede anular");
           return;
         }
         try {
           await TG.put("/api/prendas/suspender/" + bSu.dataset.suspender);
-          TG.toast("Producto suspendido");
+          TG.toast("Producto anulado");
           await pintar();
         } catch (err) {
           TG.toast(err.message);

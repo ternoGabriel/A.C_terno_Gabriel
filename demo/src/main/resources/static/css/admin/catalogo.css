@@ -24,7 +24,7 @@
 }
 
 .filters-title {
-  font-size: 13px;
+  font-size: calc(13px * var(--fs, 1.08));
   font-weight: 700;
   color: #374151;
   text-transform: uppercase;
@@ -35,7 +35,7 @@
   background: transparent;
   border: none;
   color: #ef4444;
-  font-size: 13px;
+  font-size: calc(13px * var(--fs, 1.08));
   font-weight: 600;
   cursor: pointer;
   padding: 4px 8px;
@@ -60,7 +60,7 @@
 }
 
 .filter-group label {
-  font-size: 11px;
+  font-size: calc(11px * var(--fs, 1.08));
   font-weight: 700;
   color: #6b7280;
   letter-spacing: 0.5px;
@@ -71,7 +71,7 @@
   border: 1px solid #d1d5db;
   border-radius: 8px;
   background-color: #f9fafb;
-  font-size: 14px;
+  font-size: calc(14px * var(--fs, 1.08));
   color: #1f2937;
   outline: none;
   cursor: pointer;
@@ -92,7 +92,7 @@
 }
 
 .components-label {
-  font-size: 13px;
+  font-size: calc(13px * var(--fs, 1.08));
   font-weight: 600;
   color: #374151;
 }
@@ -111,7 +111,7 @@
   border: 1px solid #e5e7eb;
   padding: 6px 12px;
   border-radius: 20px;
-  font-size: 13px;
+  font-size: calc(13px * var(--fs, 1.08));
   cursor: pointer;
   user-select: none;
   transition: all 0.2s;
@@ -134,7 +134,7 @@
   gap: 8px;
   margin-left: auto;
   color: #6b6255;
-  font-size: 0.88rem;
+  font-size: calc(0.88rem * var(--fs, 1.08));
   font-weight: 600;
   white-space: nowrap;
 }

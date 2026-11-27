@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+
+    <Properties>
+        <!-- ruta de logs -->
+        <Property name="RUTA">${sys:LOG_PATH:-logs}</Property>
+        <!-- hora de lima -->
+        <Property name="PATRON">%d{yyyy-MM-dd HH:mm:ss}{America/Lima} %-5level [%t] %c{1.} - %msg%n%xEx</Property>
+    </Properties>
+
+    <Appenders>
+        <!-- consola de render -->
+        <Console name="Consola" target="SYSTEM_OUT">
+            <PatternLayout pattern="${PATRON}"/>
+        </Console>
+
+        <!-- archivo 10mb 30 dias -->
+        <RollingFile name="Archivo" fileName="${RUTA}/terno-gabriel.log"
+                     filePattern="${RUTA}/terno-gabriel.%d{yyyy-MM-dd}.%i.log.gz">
+            <PatternLayout pattern="${PATRON}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="20">
+                <Delete basePath="${RUTA}" maxDepth="1">
+                    <IfFileName glob="terno-gabriel.*.log.gz"/>
+                    <IfLastModified age="30d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <!-- app -->
+        <Logger name="com.example.demo" level="info"/>
+        <!-- base de datos aiven -->
+        <Logger name="com.zaxxer.hikari" level="info"/>
+        <Logger name="org.hibernate.SQL" level="warn"/>
+
+        <Root level="info">
+            <AppenderRef ref="Consola"/>
+            <AppenderRef ref="Archivo"/>
+        </Root>
+    </Loggers>
+
+</Configuration>

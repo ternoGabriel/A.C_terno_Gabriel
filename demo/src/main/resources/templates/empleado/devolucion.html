@@ -168,11 +168,12 @@
                 </label>
 
                 <label class="field field-observaciones">
-                  <span>Observaciones</span>
+                  <span>Motivo del mal estado <small>(obligatorio si cambias el monto)</small></span>
                   <textarea
                     id="inputObservaciones"
                     rows="2"
-                    placeholder="Describe el estado de la prenda"
+                    maxlength="255"
+                    placeholder="Escribe cuál fue el mal estado: se manchó, se rompió levemente o se destrozó totalmente"
                   ></textarea>
                 </label>
               </div>
@@ -196,7 +197,17 @@
                     >Recargo por mal estado / daño</span
                   >
                   <span id="lblCantDaño">0</span>
-                  <span id="lblPrecioDaño">S/ 30.00</span>
+                  <span class="precio-dano-edit">
+                    <input
+                      type="text"
+                      id="inputPrecioDano"
+                      inputmode="decimal"
+                      autocomplete="off"
+                      aria-label="Monto a cobrar por mal estado"
+                      value="0.00"
+                      disabled
+                    />
+                  </span>
                   <span id="txtCargoDaño">S/ 0.00</span>
                 </div>
                 <div class="p-table-row p-row-span">
@@ -341,6 +352,10 @@
                     <td class="num" id="bResumenEstado">
                       Buen estado (S/ 0.00)
                     </td>
+                  </tr>
+                  <tr id="bFilaMotivo" hidden>
+                    <td>Motivo del mal estado</td>
+                    <td class="num" id="bResumenMotivo">—</td>
                   </tr>
                   <tr>
                     <td>Forma de pago</td>

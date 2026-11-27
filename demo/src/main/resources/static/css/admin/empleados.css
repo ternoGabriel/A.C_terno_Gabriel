@@ -17,14 +17,14 @@
 }
 
 .page-admin-empleados .head-title h2 {
-  font-size: 20px;
+  font-size: calc(20px * var(--fs, 1.08));
   font-weight: 600;
   color: #222222;
   margin: 0 0 4px 0;
 }
 
 .page-admin-empleados .head-title p {
-  font-size: 13px;
+  font-size: calc(13px * var(--fs, 1.08));
   color: #8c8c8c;
   margin: 0;
 }
@@ -35,7 +35,7 @@
   border: none;
   padding: 10px 18px;
   border-radius: 10px;
-  font-size: 13px;
+  font-size: calc(13px * var(--fs, 1.08));
   font-weight: 600;
   cursor: pointer;
   display: flex;
@@ -49,7 +49,7 @@
 }
 
 .page-admin-empleados .btn-primary-gold .btn-icon {
-  font-size: 15px;
+  font-size: calc(15px * var(--fs, 1.08));
   font-weight: bold;
   line-height: 1;
 }
@@ -136,7 +136,7 @@
 
 .page-admin-empleados .data-table th {
   padding: 10px 4px;
-  font-size: 10px;
+  font-size: calc(10px * var(--fs, 1.08));
   font-weight: 700;
   color: #888279;
   letter-spacing: 0.2px;
@@ -164,7 +164,7 @@
 
 .page-admin-empleados .data-table td {
   padding: 8px 4px;
-  font-size: 11px;
+  font-size: calc(11px * var(--fs, 1.08));
   color: #444444;
   vertical-align: middle;
   overflow: hidden;
@@ -187,7 +187,7 @@
   gap: 3px;
   padding: 3px 6px;
   border-radius: 20px;
-  font-size: 10px;
+  font-size: calc(10px * var(--fs, 1.08));
   font-weight: 500;
 }
 
@@ -252,7 +252,7 @@
   background: #f4f2ee;
   border: 1px solid #e6e2db;
   color: #555555;
-  font-size: 10px;
+  font-size: calc(10px * var(--fs, 1.08));
   font-weight: 600;
   padding: 4px 6px;
   border-radius: 5px;

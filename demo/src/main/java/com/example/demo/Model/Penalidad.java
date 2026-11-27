@@ -1,6 +1,7 @@
 package com.example.demo.Model;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
@@ -36,4 +37,23 @@ public class Penalidad extends Base {
 
     @NotNull(message = "La fecha de la penalidad es obligatoria")
     private LocalDate fecha = LocalDate.now();
+
+    /* lo que escribio el empleado sobre el mal estado de la prenda */
+    @Size(max = 255, message = "El comentario no debe superar 255 caracteres")
+    private String comentarioMalEstado;
+
+    /* el empleado cambio el monto que puso el administrador */
+    private Boolean malEstadoModificado = false;
+
+    /* monto por mal estado que tenia definido el administrador */
+    @PositiveOrZero(message = "El monto por defecto no puede ser negativo")
+    private Double montoMalEstadoPorDefecto;
+
+    /* boleta de alquiler a la que pertenece esta devolucion */
+    private Long idBoleta;
+
+    @Size(max = 100, message = "El nombre del empleado no debe superar 100 caracteres")
+    private String empleado;
+
+    private LocalDateTime fechaHora = LocalDateTime.now();
 }
